@@ -1,6 +1,5 @@
 package com.evolutiongaming.bootcamp.basics
 
-import java.util.UUID
 import Basics._
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers._
@@ -8,12 +7,7 @@ import org.scalacheck.Arbitrary._
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 
 class BasicsSpec extends AnyFlatSpec with ScalaCheckDrivenPropertyChecks {
-  "hello" should "greet random UUID" in {
-    val name = UUID.randomUUID().toString
-    hello(name) shouldEqual s"Hello, $name!"
-  }
-
-  it should "work for all strings" in {
+  "hello" should "work for all strings" in {
     forAll { x: String =>
       hello(x) shouldEqual s"Hello, $x!"
     }
@@ -27,5 +21,11 @@ class BasicsSpec extends AnyFlatSpec with ScalaCheckDrivenPropertyChecks {
     forAll { (a: Int, b: Int) =>
       add(a, b) shouldEqual a + b
     }
+  }
+
+  "AllBooleans" should "contain all possible boolean values" in {
+    AllBooleans.size shouldEqual 2
+    AllBooleans.reduce(_ && _) shouldEqual false
+    AllBooleans.reduce(_ || _) shouldEqual true
   }
 }
