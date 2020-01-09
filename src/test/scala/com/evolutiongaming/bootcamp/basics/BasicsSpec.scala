@@ -7,9 +7,21 @@ import org.scalacheck.Arbitrary._
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 
 class BasicsSpec extends AnyFlatSpec with ScalaCheckDrivenPropertyChecks {
-  "hello" should "work for all strings" in {
+  "allBooleans" should "contain all possible boolean values" in {
+    allBooleans.size shouldEqual 2
+    allBooleans.reduce(_ && _) shouldEqual false
+    allBooleans.reduce(_ || _) shouldEqual true
+  }
+
+  "helloMethod" should "work for all strings" in {
     forAll { x: String =>
-      hello(x) shouldEqual s"Hello, $x!"
+      helloMethod(x) shouldEqual s"Hello, $x!"
+    }
+  }
+
+  "helloFunction" should "work for all strings" in {
+    forAll { x: String =>
+      helloFunction(x) shouldEqual s"Hello, $x!"
     }
   }
 
@@ -23,9 +35,20 @@ class BasicsSpec extends AnyFlatSpec with ScalaCheckDrivenPropertyChecks {
     }
   }
 
-  "AllBooleans" should "contain all possible boolean values" in {
-    AllBooleans.size shouldEqual 2
-    AllBooleans.reduce(_ && _) shouldEqual false
-    AllBooleans.reduce(_ || _) shouldEqual true
+  "allOptionBooleans" should "be correct" in {
+    allOptionBooleans.size shouldEqual 3
+  }
+
+  "allEitherUnitBooleans" should "be correct" in {
+    allEitherUnitBooleans.size shouldEqual 3
+  }
+
+  "allEitherBooleanBooleans" should "be correct" in {
+    allEitherBooleanBooleans.size shouldEqual 4
+  }
+
+  "allTupleBooleanBooleans" should "be correct" in {
+    allTupleBooleanBooleans.size shouldEqual 4
   }
 }
+
