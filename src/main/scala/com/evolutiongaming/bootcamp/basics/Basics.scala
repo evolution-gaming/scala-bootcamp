@@ -184,9 +184,9 @@ object Basics {
 
   // Functions and Methods
   //
-  // Function and methods are both blocks of code which take arguments and return a return value.
+  // Function and methods are both units of code which take arguments and return a return value.
   //
-  // While there are differences between functions and methods (functions can be thought of as a value, and a
+  // While there are differences between functions and methods (a function can be thought of as a value, and a
   // method always has an associated class for it), these differences are not very relevant at this point
   // and for the time being we will often conflate these terms.
   //
@@ -197,8 +197,8 @@ object Basics {
   //   // code goes here
   // }
   //
-  // We're ignoring methods having multiple parameter lists or type parameters for now and will get to them
-  // later.
+  // For now we are ignoring  the distinction between pure functions (without side effects) vs impure
+  // functions (with side effects), methods having multiple parameter lists or type parameters.
 
   // Exercise. Define a method "helloMethod" which returns a String "Hello, <name>!" where '<name>' is the
   // provided String parameter 'name'.
@@ -271,14 +271,26 @@ object Basics {
   val goodMorningWorld: String = goodMorning("World") // Good morning, World!
 
   // A more convoluted example:
-  def formatNamedDoubleValue(name: String, format: Double => String): Double => String = { x: Double =>
+  def formatNamedDouble(name: String, format: Double => String): Double => String = { x: Double =>
     s"$name = ${format(x)}"
   }
 
   val fourDecimalPlaces: Double => String = (x: Double) => f"$x%.4f"
-  val formattedNamedDouble: String = formatNamedDoubleValue("x", fourDecimalPlaces)(Math.PI) // x = 3.1416
+  val formattedNamedDouble: String = formatNamedDouble("x", fourDecimalPlaces)(Math.PI) // x = 3.1416
 
-  // TODO: Exercise about higher order functions
+  // Polymorphic methods, or methods which take type parameters
+  //
+  // Methods in Scala can be parameterised by types of their arguments and return values. Type parameters are
+  // enclosed in square brackets (in contrast with value parameters which are enclosed in parentheses)
+  //
+  // The function `formatNamedDouble` can be rewritten in a more general way as follows:
+
+  def formatNamedValue[A](name: String, format: A => String): A => String = { x : A =>
+    s"$name = ${format(x)}"
+  }
+
+  val commasForThousands: Long => String = (x: Long) => f"$x%,d"
+  val formattedLong: String = formatNamedValue("y", commasForThousands)(123456) // y = 123,456
 
   // Tuples
   //
