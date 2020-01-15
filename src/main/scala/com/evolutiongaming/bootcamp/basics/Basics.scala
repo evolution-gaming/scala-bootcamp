@@ -79,6 +79,9 @@ object Basics {
   // IEEE 754 standard
   val float1: Float = Float.NaN
 
+  // Question. What is the value of the following line?
+  val floatComparisonResult: Boolean = 0.3 == 0.1 + 0.1 + 0.1
+
   // Double - 64-bit double-precision float
   // 4.94065645841246544e-324d to 1.79769313486231570e+308d (positive or negative)
   val double1: Double = Double.PositiveInfinity
@@ -102,7 +105,7 @@ object Basics {
   val string1: String = "αβγ"
 
   // Strings can be multi-line:
-  val string2 =
+  val string2: String =
     """
        Strings
        can
@@ -111,9 +114,16 @@ object Basics {
     """
   // ... though beware of what this means for whitespace
 
+  val string3: String =
+    """
+      |.stripMargin helps strip
+      |extra whitespace from
+      |multiline strings.
+      |""".stripMargin
+
   // String interpolation can be used to place values into Strings:
-  val string3 = s"Value of string1 is $string1 while (byte1 + short1) is ${byte1 + short1}"
-  val string4 = f"Formatted strings: ${Math.PI}%.4f" // Formatted strings: 3.1416
+  val string4 = s"Value of string1 is $string1 while (byte1 + short1) is ${byte1 + short1}"
+  val string5 = f"Formatted strings: ${Math.PI}%.4f" // Formatted strings: 3.1416
 
   /* Common string operations:
     "test".length                     // 4
@@ -128,11 +138,11 @@ object Basics {
    */
 
   // Equality
-  val string5 = "abcc"
-  val string6 = "ab" + "c" * 2
+  val string6 = "abcc"
+  val string7 = "ab" + "c" * 2
 
-  string5 == string6 // true - equality comparison, uses the `equals` method
-  string5 eq string6 // false - reference equality - are they the same object?
+  string6 == string7 // true - equality comparison, uses the `equals` method
+  string6 eq string7 // false - reference equality - are they the same object?
 
   // Note that this is different than Java.
   // Other ways of comparing values are also common, e.g., https://typelevel.org/cats/typeclasses/eq.html.
@@ -158,13 +168,12 @@ object Basics {
   //
   // Due to the need to be compatible with legacy Java code, a special value `null` can also be assigned
   // to non-primitive values:
-  val nullString: String = null
+  val nullString: String = null // you can also use `_` to assign the default value
 
   // You shouldn't do this and should avoid `null` in Scala code, instead preferring `Option` or other
   // more type-safe ways of indicating an absence of value.
   //
-  // `null`-s are error-prone and lead to
-  // unexpected NullPointerExceptions.
+  // `null`-s are error-prone and lead to unexpected NullPointerExceptions.
 
   // There is a proposal for Scala 3 to improve `null` handling:
   // https://contributors.scala-lang.org/t/sip-public-review-explicit-nulls/3889
