@@ -40,4 +40,10 @@ class ControlStructuresSpec extends AnyFlatSpec with ScalaCheckDrivenPropertyChe
       }
     }
   }
+
+  "makeTransfer" should "work correctly" in {
+    makeTransfer("valid.200", "valid.25", 50) shouldEqual Right((150, 75))
+    makeTransfer("valid.10", "valid.20", 7) shouldEqual Right((3, 27))
+    makeTransfer("invalid", "valid.200", 50) shouldBe a[Left[_, _]]
+  }
 }
