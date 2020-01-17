@@ -124,13 +124,8 @@ object ControlStructures {
   // `map` is a higher order function which - in case of collections - transforms each element of the
   // collection into a different element (and returns the resulting collection)
 
-  // It could be thought of as:
-  class Collection1[A] {
-    def map[B](f: A => B): Collection1[B] = ???
-  }
-
   // For example, for `List` it is defined as
-  object ListMap { // name-spacing to not break other code in this lesson
+  object list_map_example { // name-spacing to not break other code in this lesson
     class List[A] {
       def map[B](f: A => B): List[B] = ???
     }
@@ -147,13 +142,8 @@ object ControlStructures {
   // `flatMap` is a higher order function which - for collections - transforms each element of the collection
   // into a collection, and then `flatten`-s these collections.
 
-  // It can be thought of as:
-  class Collection2[A] {
-    def flatMap[B](f: A => Collection2[B]): Collection2[B] = ???
-  }
-
   // For example, for `List` it could be defined as:
-  object ListFlatMap {
+  object list_flatmap_example { // name-spacing to not break other code in this lesson
     class List[A] {
       def flatMap[B](f: A => List[B]): List[B] = ???
     }
@@ -216,58 +206,24 @@ object ControlStructures {
   // Question. What is the value of `e` above?
 
   // In idiomatic functional Scala, much of the code ends up written in "for comprehensions".
-
-  // Exercise. Implement `makeTransfer` using `for` comprehensions and the other methods already provided.
+  // Exercise. Implement `makeTransfer` using `for` comprehensions and the methods provided in `UserService`.
 
   type UserId = String
   type Amount = BigDecimal
 
-  private def validateUserName(name: String): Either[ErrorMessage, Unit] = {
-    // Test implementation provided, don't change
-    if (name.forall(x => x.isLetterOrDigit || x == '.')) Right(()) else Left(s"User $name is invalid")
-  }
-
-  def findUserId(name: String): Either[ErrorMessage, UserId] = {
-    // Test implementation provided, don't change
-    if (name != "invalid") Right(s"userid.$name") else Left(s"User $name not found")
-  }
-
-  private def validateAmount(amount: Amount): Either[ErrorMessage, Unit] = {
-    // Test implementation provided, don't change
-    if (amount > 0) Right(()) else Left(s"Amount $amount is not positive")
-  }
-
-  private def findBalance(userId: UserId): Either[ErrorMessage, Amount] = {
-    // Test implementation provided, don't change
-    if (userId.startsWith("userid.")) {
-      val lastSegment = userId.split("\\.").lastOption
-      val value = lastSegment.flatMap(x => Try(x.toInt).toOption).getOrElse(0)
-      Right(BigDecimal(value))
-    } else {
-      Left(s"Invalid user ID $userId")
-    }
-  }
-
-  // Upon success, returns the remaining amount
-  private def updateAccount(userId: UserId, previousBalance: Amount, delta: Amount): Either[ErrorMessage, Amount] = {
-    // Test implementation provided, don't change
-    for {
-      balance <- findBalance(userId)
-      result  <- if (balance == previousBalance)
-                   Right[ErrorMessage, Amount](previousBalance + delta)
-                 else
-                   Left(s"previousBalance was expected to be $balance  but was provided as $previousBalance")
-    } yield result
+  trait UserService {
+    def validateUserName(name: String): Either[ErrorMessage, Unit]
+    def findUserId(name: String): Either[ErrorMessage, UserId]
+    def validateAmount(amount: Amount): Either[ErrorMessage, Unit]
+    def findBalance(userId: UserId): Either[ErrorMessage, Amount]
+    def updateAccount(userId: UserId, previousBalance: Amount, delta: Amount): Either[ErrorMessage, Amount]
   }
 
   // Upon success, should return the remaining amounts on both accounts (fromUser, toUser).
-  def makeTransfer(fromUser: String, toUser: String, amount: Amount): Either[ErrorMessage, (Amount, Amount)] = {
+  def makeTransfer(userService: UserService, fromUser: String, toUser: String, amount: Amount): Either[ErrorMessage, (Amount, Amount)] = {
     // Replace with a proper implementation:
-    println(validateUserName(fromUser))
-    println(validateUserName(toUser))
-    println(validateAmount(amount))
-    println(updateAccount(null, null, null))
-    Left("Error")
+    println(s"$userService, $fromUser, $toUser, $amount")
+    ???
   }
 
   // Question. What are the questions would you ask - especially about requirements - before implementing
@@ -304,15 +260,20 @@ object ControlStructures {
   val ASumB: Set[Either[Int, Boolean]] = Set()
 
   // Scala inherits the standard try-catch-finally construct from Java:
-  private val source = Source.fromFile("test.txt")
-  try { // executed until an exception happens
-    source.getLines() foreach println
-  } catch { // exception handlers
-    case e: FileNotFoundException   => println(s"Couldn't find the file: $e")
-    case e: Exception               => println(s"Exception occurred: $e")
-  } finally { // executed even if an exception happens
-    source.close
+  def printFile(fileName: String): Unit = {
+    // This code is only here to illustrate try-catch-finally, it shouldn't be considered as good code
+    val source = Source.fromFile(fileName)
+    try { // executed until an exception happens
+      source.getLines() foreach println
+    } catch { // exception handlers
+      case e: FileNotFoundException   => println(s"Couldn't find the file: $e")
+      case e: Exception               => println(s"Exception occurred: $e")
+    } finally { // executed even if an exception happens
+      source.close
+    }
   }
+
+  // Question. What issues can you find with the above `printFile` method?
 
   // However, in idiomatic functional Scala, other error handling mechanisms are usually used.
   // Throwing exceptions is an anti-pattern - it introduces another exit path from a function and breaks

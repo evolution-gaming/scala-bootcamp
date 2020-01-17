@@ -7,6 +7,8 @@ import org.scalacheck.Gen._
 import org.scalatest.Assertion
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 
+import scala.util.Try
+
 class ControlStructuresSpec extends AnyFlatSpec with ScalaCheckDrivenPropertyChecks {
   private def checkFizzBuzz(f: Int => String): Assertion = {
     val obtained = (0 to 100).toList map f
@@ -42,8 +44,50 @@ class ControlStructuresSpec extends AnyFlatSpec with ScalaCheckDrivenPropertyChe
   }
 
   "makeTransfer" should "work correctly" in {
-    makeTransfer("valid.200", "valid.25", 50) shouldEqual Right((150, 75))
-    makeTransfer("valid.10", "valid.20", 7) shouldEqual Right((3, 27))
-    makeTransfer("invalid", "valid.200", 50) shouldBe a[Left[_, _]]
+    val testUserService = new UserService {
+      // TODO: consider not having the balance encoded in the name
+
+      def validateUserName(name: String): Either[ErrorMessage, Unit] = {
+        // Test implementation provided, don't change
+        if (name.forall(x => x.isLetterOrDigit || x == '.')) Right(()) else Left(s"User $name is invalid")
+      }
+
+      def findUserId(name: String): Either[ErrorMessage, UserId] = {
+        // Test implementation provided, don't change
+        if (name != "invalid") Right(s"userid.$name") else Left(s"User $name not found")
+      }
+
+      def validateAmount(amount: Amount): Either[ErrorMessage, Unit] = {
+        // Test implementation provided, don't change
+        if (amount > 0) Right(()) else Left(s"Amount $amount is not positive")
+      }
+
+      def findBalance(userId: UserId): Either[ErrorMessage, Amount] = {
+        // Test implementation provided, don't change
+        if (userId.startsWith("userid.")) {
+          val lastSegment = userId.split("\\.").lastOption
+          val value = lastSegment.flatMap(x => Try(x.toInt).toOption).getOrElse(0)
+          Right(BigDecimal(value))
+        } else {
+          Left(s"Invalid user ID $userId")
+        }
+      }
+
+      // Upon success, returns the remaining amount
+      def updateAccount(userId: UserId, previousBalance: Amount, delta: Amount): Either[ErrorMessage, Amount] = {
+        // Test implementation provided, don't change
+        for {
+          balance <- findBalance(userId)
+          result  <- if (balance == previousBalance)
+            Right[ErrorMessage, Amount](previousBalance + delta)
+          else
+            Left(s"previousBalance was expected to be $balance  but was provided as $previousBalance")
+        } yield result
+      }
+    }
+
+    makeTransfer(testUserService, "valid.200", "valid.25", 50) shouldEqual Right((150, 75))
+    makeTransfer(testUserService, "valid.10", "valid.20", 7) shouldEqual Right((3, 27))
+    makeTransfer(testUserService, "invalid", "valid.200", 50) shouldBe a[Left[_, _]]
   }
 }

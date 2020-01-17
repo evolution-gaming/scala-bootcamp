@@ -99,7 +99,6 @@ object ClassesAndTraits {
   }
 
   // Pattern matching and exhaustiveness checking
-
   def describe(x: Shape): String = x match {
     case Point(x, y) => s"Point(x = $x, y = $y)"
     case Circle(centerX, centerY, radius) => s"Circle(centerX = $centerX, centerY = $centerY, radius = $radius)"
@@ -113,4 +112,16 @@ object ClassesAndTraits {
 
   // Exercise. The tests for `minimumBoundingRectangle` in `ClassesAndTraitsSpec` are insufficient.
   // Improve the tests.
+
+  // Generic classes and type parameters
+
+  // In a similar way as we saw with polymorphic methods, classes can also take type parameters.
+  // For example, you can define a Stack[A] which works with any type of element A.
+  final case class Stack[A](elements: List[A] = Nil) {
+    def push(x: A): Stack[A] = Stack(x :: elements)
+    def peek: Option[A] = elements.headOption
+    def pop: Option[(A, Stack[A])] = peek map { x =>
+      (x, Stack(elements.tail))
+    }
+  }
 }
