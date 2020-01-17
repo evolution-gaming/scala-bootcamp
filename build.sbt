@@ -47,5 +47,7 @@ scalacOptions ++= Seq(
 scalacOptions in (Compile, console) --= Seq("-Ywarn-unused:imports", "-Xfatal-warnings")
 
 libraryDependencies ++= Seq(
+  "org.typelevel" %% "cats-core" % "2.0.0",
+  "io.chrisdavenport" %% "cats-scalacheck" % "0.2.0",
   "org.scalatestplus" %% "scalatestplus-scalacheck" % "3.1.0.0-RC2" % Test,
 )
