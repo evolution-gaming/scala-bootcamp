@@ -295,10 +295,10 @@ object Basics {
   val fourDecimalPlaces: Double => String = (x: Double) => f"$x%.4f"
   val formattedNamedDouble: String = formatNamedDouble("x", fourDecimalPlaces)(Math.PI) // x = 3.1416
 
-  // Exercise. Implement `power` method which takes an Integer `n` and returns a function from Long to
-  // Long, raising the Long parameter provided to the n-th power using `Math.pow` (for raising to the power),
-  // `Double#round` (for rounding Double-s to Long-s) and `Byte` and `Int` `toDouble` (for converting Byte-s
-  // and Int-s to Double-s).
+  // Exercise. Implement `power` method which takes a Byte `n` and returns a function from Int to
+  // Long, raising the Int parameter provided to the n-th power using `Math.pow`.
+  // For conversions, use `Double#round` (for rounding Double-s to Long-s) as well as `Byte` and `Int`
+  // `toDouble` (for converting Byte-s and Int-s to Double-s).
 
   def power(n: Byte): Int => Long = { x: Int =>
     // implement here
