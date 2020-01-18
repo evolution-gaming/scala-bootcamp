@@ -295,14 +295,14 @@ object Basics {
   val fourDecimalPlaces: Double => String = (x: Double) => f"$x%.4f"
   val formattedNamedDouble: String = formatNamedDouble("x", fourDecimalPlaces)(Math.PI) // x = 3.1416
 
-  // Exercise. Implement `powerer` method which takes an Integer `n` and returns a function from Long to
+  // Exercise. Implement `power` method which takes an Integer `n` and returns a function from Long to
   // Long, raising the Long parameter provided to the n-th power using `Math.pow` (for raising to the power),
-  // `Double#round` (for rounding Double-s to Long-s) and `Int` and `Long` `toDouble` (for converting Int-s
-  // and Long-s to Double-s).
+  // `Double#round` (for rounding Double-s to Long-s) and `Byte` and `Int` `toDouble` (for converting Byte-s
+  // and Int-s to Double-s).
 
-  def powerer(n: Int): Long => Long = { x =>
+  def power(n: Byte): Int => Long = { x: Int =>
     // implement here
-    x + n
+    (x + n).toLong
   }
 
   // Polymorphic methods, or methods which take type parameters

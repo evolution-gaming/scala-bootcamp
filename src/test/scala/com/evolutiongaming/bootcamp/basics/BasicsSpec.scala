@@ -41,13 +41,13 @@ class BasicsSpec extends AnyFlatSpec with ScalaCheckDrivenPropertyChecks {
     }
   }
 
-  "powerer" should "be correct" in {
+  "power" should "be correct" in {
     forAll { n: Int =>
-      powerer(2)(n.toLong) shouldEqual Math.pow(n.toDouble, 2)
+      power(2)(n) shouldEqual Math.pow(n.toDouble, 2)
     }
 
     forAll { n: Byte =>
-      powerer(3)(n.toLong) shouldEqual Math.pow(n.toDouble, 3)
+      power(3)(n.toInt) shouldEqual Math.pow(n.toDouble, 3)
     }
   }
 
