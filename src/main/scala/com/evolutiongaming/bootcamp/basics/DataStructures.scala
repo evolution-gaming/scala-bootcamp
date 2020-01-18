@@ -83,7 +83,7 @@ object DataStructures {
   val vegetableWeights = Map(
     ("pumpkins", 10),
     ("cucumbers", 20),
-    ("olives", 1),
+    ("olives", 2),
   )
 
   val vegetablePrices = Map(
@@ -99,7 +99,27 @@ object DataStructures {
 
   // Question. Why should `questionableMap` be considered questionable?
 
-  // TODO - exercises about `Set` and `Map`-s, e.g. given quantities ordered find total amount payable.
+  val vegetableAmounts = Map(
+    "tomatoes" -> 17,
+    "peppers" -> 234,
+    "olives" -> 32,
+    "cucumbers" -> 323,
+  )
+
+  // Exercise. Calculate the total cost of all vegetables, taking vegetable amounts (in units) from
+  // `vegetableAmounts` and prices per unit from `vegetablePrices`. Assume the price is 10 if not available
+  // in `vegetablePrices`.
+  val totalVegetableCost: Int = {
+    17 // implement here
+  }
+
+  // Exercise. Given the vegetable weights (per 1 unit of vegetable) in `vegetableWeights` and vegetable
+  // amounts (in units) in `vegetableAmounts`, calculate the total weight per type of vegetable, if known.
+  //
+  // For example, the total weight of "olives" is 2 * 32 == 64.
+  val totalVegetableWeights: Map[String, Int] = { // implement here
+    Map()
+  }
 
   // Ranges and Sequences
   val inclusiveRange: Seq[Int] = 2 to 4

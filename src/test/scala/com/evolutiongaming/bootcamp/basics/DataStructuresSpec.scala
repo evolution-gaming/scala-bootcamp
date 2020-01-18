@@ -24,4 +24,15 @@ class DataStructuresSpec extends AnyFlatSpec with ScalaCheckDrivenPropertyChecks
       obtained.forall(_.size == k) shouldEqual true
     }
   }
+
+  "totalVegetableCost" should "be correct" in {
+    totalVegetableCost shouldEqual 5012
+  }
+
+  "totalVegetableWeights" should "be correct" in {
+    totalVegetableWeights shouldEqual Map(
+      "cucumbers" -> 6460,
+      "olives" -> 64,
+    )
+  }
 }

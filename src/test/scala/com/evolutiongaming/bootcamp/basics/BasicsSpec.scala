@@ -25,6 +25,12 @@ class BasicsSpec extends AnyFlatSpec with ScalaCheckDrivenPropertyChecks {
     }
   }
 
+  "stringLength" should "work for all strings" in {
+    forAll { x: String =>
+      stringLength(x) shouldEqual x.length
+    }
+  }
+
   "add" should "add 2 and 3" in {
     add(2, 3) shouldEqual 5
   }
@@ -32,6 +38,16 @@ class BasicsSpec extends AnyFlatSpec with ScalaCheckDrivenPropertyChecks {
   it should "work for all numbers" in {
     forAll { (a: Int, b: Int) =>
       add(a, b) shouldEqual a + b
+    }
+  }
+
+  "powerer" should "be correct" in {
+    forAll { n: Int =>
+      powerer(2)(n.toLong) shouldEqual Math.pow(n.toDouble, 2)
+    }
+
+    forAll { n: Byte =>
+      powerer(3)(n.toLong) shouldEqual Math.pow(n.toDouble, 3)
     }
   }
 

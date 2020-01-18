@@ -12,10 +12,10 @@ object Basics {
   // You declare values (constant or immutable variables) using `val`:
   val int1 = 4
 
+  // Variables
+
   // A variable is a mutable, typed storage unit. A variable can be assigned data when it is defined and can
   // also be reassigned data at any time.
-
-  // Variables
 
   // You declare variables using `var`:
   var int2 = 5
@@ -36,7 +36,7 @@ object Basics {
   // Types help catch errors in compile time. Assigning an `Int` value to `String` value will result in a
   // compile time error. Try it:
   //
-  // val string1: String = b // uncomment this line
+  // val string0: String = int1 // uncomment this line
   //
   // Types can be thought of as defining a set of all possible values that a particular value can be.
   //
@@ -56,21 +56,22 @@ object Basics {
       true || false  // true - logical `or`
    */
 
-  // Byte - 8-bit signed integer (-2^7 to 2^7 - 1, inclusive), -128 to 127
+  // Byte - 8-bit signed integer (-2^7 to 2^7 - 1, inclusive)
+  // -128 to 127
   val byte1: Byte = 4
 
   // Question. How large would a set of all possible Byte values be?
 
   // Short - 16-bit signed integer (-2^15 to 2^15 - 1, inclusive)
-  // 32,768 to 32,767
+  // -32,768 to 32,767
   val short1: Short = 5
 
   // Int - 32-bit integer (-2^31 to 2^31 - 1, inclusive)
-  // 2,147,483,648 to 2,147,483,647
+  // -2,147,483,648 to 2,147,483,647
   val int5: Int = Int.MaxValue
 
   // Long - 64-bit integer (-2^63 to 2^63 - 1, inclusive)
-  // -9,223,372,036,854,775,808 to +9,223,372,036,854,775,807
+  // -9,223,372,036,854,775,808 to 9,223,372,036,854,775,807
   val long1: Long = Long.MinValue
 
   // Float - 32-bit single-precision float
@@ -110,7 +111,7 @@ object Basics {
        Strings
        can
        be
-       multiline.
+       multi-line.
     """
   // ... though beware of what this means for whitespace
 
@@ -118,7 +119,7 @@ object Basics {
     """
       |.stripMargin helps strip
       |extra whitespace from
-      |multiline strings.
+      |multi-line strings.
       |""".stripMargin
 
   // String interpolation can be used to place values into Strings:
@@ -170,8 +171,11 @@ object Basics {
   // to non-primitive values:
   val nullString: String = null // you can also use `_` to assign the default value
 
-  // You shouldn't do this and should avoid `null` in Scala code, instead preferring `Option` or other
-  // more type-safe ways of indicating an absence of value.
+  // There are nine predefined types which are non-nullable (also called primitive): Boolean, Byte, Short,
+  // Int, Long, Float, Double, Char, Unit.
+
+  // You shouldn't do this and should avoid using `null` in Scala code, instead preferring `Option` or other
+  // more type-safe ways of indicating an absence of value. We will learn about these in future lessons.
   //
   // `null`-s are error-prone and lead to unexpected NullPointerExceptions.
 
@@ -193,16 +197,16 @@ object Basics {
 
   // Functions and Methods
   //
-  // Function and methods are both units of code which take arguments and return a return value.
+  // Function and methods are both units of code which take arguments and return a value.
   //
   // While there are differences between functions and methods (a function can be thought of as a value, and a
   // method always has an associated class for it), these differences are not very relevant at this point
   // and for the time being we will often conflate these terms.
   //
   // Methods are defined using the `def` keyword and have a name, value parameters (with types), a return
-  // type (can be skipped so that the compiler infers it) and a function body (implementation).
+  // type (can be skipped so that the compiler infers it) and a method body (implementation).
   //
-  // def functionName(parameter1: Parameter1Type, parameter2: Parameter2Type): ReturnType = {
+  // def methodName(parameter1: Parameter1Type, parameter2: Parameter2Type): ReturnType = {
   //   // code goes here
   // }
   //
@@ -240,7 +244,11 @@ object Basics {
   // Exercise. Implement `helloFunction` using `helloMethod` you implemented above. Why was the type
   // annotation skipped when defining `helloFunction`?
 
-  val helloFunction: String => String = (name: String) => name
+  val helloFunction: String => String = (name: String) => /* implement here */ name
+
+  // Exercise. Using the aforementioned String `length` implement a `stringLength` function which returns
+  // the length of the String passed.
+  val stringLength: String => Int = (s: String) => /* implement here */ s.hashCode()
 
   // If each argument of a function is used exactly once, you can use `_` to refer to them
   val addFunction: (Int, Int) => Int = _ + _
@@ -286,6 +294,16 @@ object Basics {
 
   val fourDecimalPlaces: Double => String = (x: Double) => f"$x%.4f"
   val formattedNamedDouble: String = formatNamedDouble("x", fourDecimalPlaces)(Math.PI) // x = 3.1416
+
+  // Exercise. Implement `powerer` method which takes an Integer `n` and returns a function from Long to
+  // Long, raising the Long parameter provided to the n-th power using `Math.pow` (for raising to the power),
+  // `Double#round` (for rounding Double-s to Long-s) and `Int` and `Long` `toDouble` (for converting Int-s
+  // and Long-s to Double-s).
+
+  def powerer(n: Int): Long => Long = { x =>
+    // implement here
+    x + n
+  }
 
   // Polymorphic methods, or methods which take type parameters
   //
