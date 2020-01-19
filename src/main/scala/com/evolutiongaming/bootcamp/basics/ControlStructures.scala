@@ -22,6 +22,12 @@ object ControlStructures {
   //
   // Note that it returns a result value.
 
+  // Note that curly braces can be omitted
+  //  val result =
+  //    if (boolean1) result1
+  //    else if (boolean2) result2
+  //    else otherResult
+
   // Exercise. Implement a "Fizz-Buzz" https://en.wikipedia.org/wiki/Fizz_buzz function using the if-then-else,
   // returning "fizzbuzz" for numbers which divide with 15, "fizz" for those which divide by 3 and "buzz" for
   // those which divide with 5, and returning the input number as a string for other numbers:
@@ -157,16 +163,15 @@ object ControlStructures {
   // `filter` takes a predicate function returning a boolean and - for collections - returns a collection
   // with only these elements which satisfy this predicate.
 
-  class Collection3[A] {
-    def filter(p: A => Boolean): Collection3[A] = ???
-  }
-
   // For example, for `List` it is defined as:
-  object ListFilter {
+  object list_filter_example {
     class List[A] {
       def filter(p: A => Boolean): List[A] = ???
     }
   }
+
+  // Question. What is the value of this code?
+  val listFilterExample = List(1, 2, 3).filter(_ % 2 == 0)
 
   // For Comprehensions
 
@@ -181,7 +186,6 @@ object ControlStructures {
   // gets translated to
   //
   // val result = a.flatMap(x => b.map(y => x + y))
-
 
   private val a = List(1, 2, 3)
   private val b = List(10, 100)

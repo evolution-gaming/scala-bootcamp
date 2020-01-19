@@ -28,6 +28,8 @@ object DataStructures {
   array(2) // read the 3rd element, it will be 3
   array(3) = 7 // update the 4th element to be 7
 
+  // Note that we can't reassign `val array` to a different array.
+
   // Lists
   //
   // Immutable list represents ordered collections of elements of type A.
@@ -141,7 +143,6 @@ object DataStructures {
   // - exists
   // - filter
   // - filterNot
-  // - find
   // - find
   // - flatMap
   // - flatten

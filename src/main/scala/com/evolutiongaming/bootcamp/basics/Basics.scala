@@ -253,6 +253,13 @@ object Basics {
   // If each argument of a function is used exactly once, you can use `_` to refer to them
   val addFunction: (Int, Int) => Int = _ + _
 
+  // First occurance of _ - it's 1st argument.
+  // Second occurance of _ - it's 2nd argument.
+  // And etc...
+
+  // addFunction can be rewritten as:
+  val addFunctionExpanded: (Int, Int) => Int = (x, y) => x + y
+
   // A static `main` returning `Unit` with a single `Array[String]` parameter is the
   // entry point to a Scala application (similar to Java, as required by the JDK).
   def main(args: Array[String]): Unit = {

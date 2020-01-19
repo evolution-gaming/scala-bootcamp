@@ -52,19 +52,19 @@ class BasicsSpec extends AnyFlatSpec with ScalaCheckDrivenPropertyChecks {
   }
 
   "allOptionBooleans" should "be correct" in {
-    allOptionBooleans.size shouldEqual 3
+    allOptionBooleans should contain theSameElementsAs Set(None, Some(true), Some(false))
   }
 
   "allEitherUnitBooleans" should "be correct" in {
-    allEitherUnitBooleans.size shouldEqual 3
+    allEitherUnitBooleans should contain theSameElementsAs Set(Left(()), Right(true), Right(false))
   }
 
   "allEitherBooleanBooleans" should "be correct" in {
-    allEitherBooleanBooleans.size shouldEqual 4
+    allEitherBooleanBooleans should contain theSameElementsAs Set(Left(false), Left(true), Right(false), Right(true))
   }
 
   "allTupleBooleanBooleans" should "be correct" in {
-    allTupleBooleanBooleans.size shouldEqual 4
+    allTupleBooleanBooleans should contain theSameElementsAs Set((false, false), (true, true), (false, true), (true, false))
   }
 }
 

@@ -115,7 +115,7 @@ object ClassesAndTraits {
 
   // Generic classes and type parameters
 
-  // In a similar way as we saw with polymorphic methods, classes can also take type parameters.
+  // In a similar way as we saw with polymorphic methods, classes and traits can also take type parameters.
   // For example, you can define a Stack[A] which works with any type of element A.
   final case class Stack[A](elements: List[A] = Nil) {
     def push(x: A): Stack[A] = Stack(x :: elements)
