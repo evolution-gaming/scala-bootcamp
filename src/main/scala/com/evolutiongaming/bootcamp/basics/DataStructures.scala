@@ -142,7 +142,6 @@ object DataStructures {
   // - filter
   // - filterNot
   // - find
-  // - find
   // - flatMap
   // - flatten
   // - foldLeft

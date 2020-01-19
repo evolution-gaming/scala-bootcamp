@@ -26,20 +26,15 @@ class ControlStructuresSpec extends AnyFlatSpec with ScalaCheckDrivenPropertyChe
   }
 
   "applyNTimesForInts" should "work correctly" in {
-    forAll(choose(1, 1000)) { a: Int =>
-      forAll(choose(1, 1000)) { b: Int =>
+    forAll(choose(1, 1000), choose(1, 1000)) {
+      case (a: Int, b: Int) =>
         applyNTimesForInts(_ + 1, a)(b) shouldEqual a + b
-      }
     }
   }
 
   "applyNTimes" should "work correctly" in {
-    forAll(choose(1, 1000)) { n: Int =>
-      forAll(choose(1, 10000)) { a: Int =>
-        forAll(choose(1, 500)) { b: Int =>
-          applyNTimes[Int](_ + b, n)(a) shouldEqual a + n * b
-        }
-      }
+    forAll(choose(1, 1000), choose(1, 10000), choose(1, 500)) { case (n, a, b) =>
+      applyNTimes[Int](_ + b, n)(a) shouldEqual a + n * b
     }
   }
 
@@ -78,7 +73,7 @@ class ControlStructuresSpec extends AnyFlatSpec with ScalaCheckDrivenPropertyChe
         // Test implementation provided, don't change
         for {
           balance <- findBalance(userId)
-          result  <- if (balance == previousBalance)
+          result <- if (balance == previousBalance)
             Right[ErrorMessage, Amount](previousBalance + delta)
           else
             Left(s"previousBalance was expected to be $balance  but was provided as $previousBalance")
@@ -90,4 +85,23 @@ class ControlStructuresSpec extends AnyFlatSpec with ScalaCheckDrivenPropertyChe
     makeTransfer(testUserService, "valid.10", "valid.20", 7) shouldEqual Right((3, 27))
     makeTransfer(testUserService, "invalid", "valid.200", 50) shouldBe a[Left[_, _]]
   }
+
+  "AProductB" should "contain all the elements in `A * B`" in {
+    AProductB should contain theSameElementsAs Set(
+      (0, true),
+      (1, true),
+      (2, true),
+      (0, false),
+      (1, false),
+      (2, false),
+    )
+  }
+
+  "ASumB" should "contain all the elements in `A + B`" in {
+    ASumB should contain theSameElementsAs Set(
+      Left(0), Left(1), Left(2),
+      Right(true), Right(false)
+    )
+  }
+
 }
