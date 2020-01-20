@@ -160,7 +160,9 @@ object Basics {
   // Unit is a special type with only one possible value - `()`
   val unit1: Unit = ()
   val allUnitValues: Set[Unit] = Set(())
-  // Unit can be thought of as a Java `void` equivalent.
+
+  // Where `void` is used in Java to indicate that a method doesn't return a value,
+  // in Scala `Unit` is usually used.
 
   // Nothing is a special type with no possible values
   val allNothingValues: Set[Nothing] = Set()
