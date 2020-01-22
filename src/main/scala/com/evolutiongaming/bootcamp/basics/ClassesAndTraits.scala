@@ -50,12 +50,12 @@ object ClassesAndTraits {
   }
 
   final case class Circle(centerX: Double, centerY: Double, radius: Double) extends Shape {
-    override def x: Double = ???
-    override def y: Double = ???
-    override def minX: Double = ???
-    override def maxX: Double = ???
-    override def minY: Double = ???
-    override def maxY: Double = ???
+    override def x: Double = centerX
+    override def y: Double = centerY
+    override def minX: Double = centerX - radius
+    override def maxX: Double = centerX + radius
+    override def minY: Double = centerY - radius
+    override def maxY: Double = centerY + radius
   }
 
   // Case Classes
@@ -102,13 +102,28 @@ object ClassesAndTraits {
   def describe(x: Shape): String = x match {
     case Point(x, y) => s"Point(x = $x, y = $y)"
     case Circle(centerX, centerY, radius) => s"Circle(centerX = $centerX, centerY = $centerY, radius = $radius)"
+    case Rectangle(x1, y1, x2, y2) => s"Rectangle, bottom point: ($x1, $y1), top point: ($x2, $y2)"
   }
 
   // Exercise. Add another Shape class called Rectangle and check that the compiler catches that we are
   // missing code to handle it in `describe`.
 
+  case class Rectangle(xLeftBot: Double, yLeftBot: Double, xRightTop: Double, yRightTop: Double) extends Shape {
+    override def x: Double = xRightTop - xLeftBot
+    override def y: Double = yRightTop - yLeftBot
+    override def minX: Double = xLeftBot
+    override def maxX: Double = xRightTop
+    override def minY: Double = yLeftBot
+    override def maxY: Double = yRightTop
+  }
+
   // Exercise. Change the implementation of `minimumBoundingRectangle` to return a `Rectangle` instance.
   // What are the pros & cons of each implementation?
+
+  def minimumBoundingRectangle(objects: Set[Bounded]): Rectangle = {
+    implicit val doubleOrdering: Ordering[Double] = Ordering.Double.IeeeOrdering
+    Rectangle(objects.map(_.minX).min, objects.map(_.minY).min, objects.map(_.maxX).max, objects.map(_.maxY).max)
+  }
 
   // Exercise. The tests for `minimumBoundingRectangle` in `ClassesAndTraitsSpec` are insufficient.
   // Improve the tests.

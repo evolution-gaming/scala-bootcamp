@@ -27,7 +27,7 @@ class ClassesAndTraitsSpec extends AnyFlatSpec with ScalaCheckDrivenPropertyChec
     val mbr = minimumBoundingRectangle(
       Set(
         Point(-12, -3),
-        Point(-3, 7),
+        Rectangle(-2, -2, 5, 6),
         Circle(0, 0, 5),
       )
     )
@@ -35,6 +35,6 @@ class ClassesAndTraitsSpec extends AnyFlatSpec with ScalaCheckDrivenPropertyChec
     mbr.minX shouldEqual -12
     mbr.maxX shouldEqual 5
     mbr.minY shouldEqual -5
-    mbr.maxY shouldEqual 7
+    mbr.maxY shouldEqual 6
   }
 }
