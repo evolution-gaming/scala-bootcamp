@@ -18,12 +18,28 @@ userf(User("John5", 15))
 
 val myRegex = raw"2,(\d),(\d)".r
 
-val stringPf: String => (String, String) = {
+val stringf: String => (String, String) = {
   case s"1,${x},${y}" => (x, y)
   case myRegex(x, y)  => (x, y)
   case _              => ("", "")
 }
 
-stringPf("1,2,3")
-stringPf("2,3,4")
-stringPf("lalala")
+stringf("1,2,3")
+stringf("2,3,4")
+stringf("lalala")
+
+
+sealed trait Light
+
+case object Red extends Light
+case object Yellow extends Light
+case object Green extends Light
+
+val lightf: Light => Unit = {
+  case Red => ()
+  case Green => ()
+}
+
+//    Warning:(37, 29) match may not be exhaustive.
+//    It would fail on the following input: Yellow
+//    val lightf: Light => Unit = {

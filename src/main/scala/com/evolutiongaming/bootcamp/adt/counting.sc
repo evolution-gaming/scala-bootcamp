@@ -3,7 +3,7 @@ Boolean // how many?
 
 sealed trait Light // how many?
 
-case object Reg extends Light
+case object Red extends Light
 case object Yellow extends Light
 case object Green extends Light
 
@@ -35,3 +35,5 @@ type X = Either[Unit, T]
 type X = Either[Nothing, T]
 type X = (Unit, T)
 type X = (Nothing, T)
+
+def absurd[A]: Nothing => A
