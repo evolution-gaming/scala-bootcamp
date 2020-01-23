@@ -7,8 +7,6 @@ import org.scalacheck.Gen._
 import org.scalatest.Assertion
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 
-import scala.util.Try
-
 class ControlStructuresSpec extends AnyFlatSpec with ScalaCheckDrivenPropertyChecks {
   private def checkFizzBuzz(f: Int => String): Assertion = {
     val obtained = (0 to 100).toList map f
@@ -38,52 +36,77 @@ class ControlStructuresSpec extends AnyFlatSpec with ScalaCheckDrivenPropertyChe
     }
   }
 
-  "makeTransfer" should "work correctly" in {
-    val testUserService = new UserService {
-      // TODO: consider not having the balance encoded in the name
+  private class TestUserService extends UserService { // not thread safe
+    private var balances: Map[UserId, Amount] = Map.empty
 
-      def validateUserName(name: String): Either[ErrorMessage, Unit] = {
-        // Test implementation provided, don't change
-        if (name.forall(x => x.isLetterOrDigit || x == '.')) Right(()) else Left(s"User $name is invalid")
-      }
+    // test update that doesn't care about previous values
+    def updateAccount(name: String, amount: Amount): Either[ErrorMessage, Unit] = {
+      for {
+        userId  <- findUserId(name)
+        balance <- findBalance(userId)
+        _       <- updateAccount(userId, balance, balance + amount)
+      } yield ()
+    }
 
-      def findUserId(name: String): Either[ErrorMessage, UserId] = {
-        // Test implementation provided, don't change
-        if (name != "invalid") Right(s"userid.$name") else Left(s"User $name not found")
-      }
+    def validateUserName(name: String): Either[ErrorMessage, Unit] = {
+      if (name.forall(x => x.isLetter)) Right(()) else Left(s"User $name is invalid")
+    }
 
-      def validateAmount(amount: Amount): Either[ErrorMessage, Unit] = {
-        // Test implementation provided, don't change
-        if (amount > 0) Right(()) else Left(s"Amount $amount is not positive")
-      }
+    def findUserId(name: String): Either[ErrorMessage, UserId] = {
+      if (name != "invalid") Right(s"userid.$name") else Left(s"User $name not found")
+    }
 
-      def findBalance(userId: UserId): Either[ErrorMessage, Amount] = {
-        // Test implementation provided, don't change
-        if (userId.startsWith("userid.")) {
-          val lastSegment = userId.split("\\.").lastOption
-          val value = lastSegment.flatMap(x => Try(x.toInt).toOption).getOrElse(0)
-          Right(BigDecimal(value))
-        } else {
-          Left(s"Invalid user ID $userId")
-        }
-      }
+    def validateAmount(amount: Amount): Either[ErrorMessage, Unit] = {
+      if (amount > 0) Right(()) else Left(s"Amount $amount is not positive")
+    }
 
-      // Upon success, returns the remaining amount
-      def updateAccount(userId: UserId, previousBalance: Amount, delta: Amount): Either[ErrorMessage, Amount] = {
-        // Test implementation provided, don't change
-        for {
-          balance <- findBalance(userId)
-          result <- if (balance == previousBalance)
-            Right[ErrorMessage, Amount](previousBalance + delta)
-          else
-            Left(s"previousBalance was expected to be $balance  but was provided as $previousBalance")
-        } yield result
+    def findBalance(userId: UserId): Either[ErrorMessage, Amount] = {
+      if (userId.startsWith("userid.")) {
+        Right(balances.getOrElse(userId, 0))
+      } else {
+        Left(s"Invalid user ID $userId")
       }
     }
 
-    makeTransfer(testUserService, "valid.200", "valid.25", 50) shouldEqual Right((150, 75))
-    makeTransfer(testUserService, "valid.10", "valid.20", 7) shouldEqual Right((3, 27))
-    makeTransfer(testUserService, "invalid", "valid.200", 50) shouldBe a[Left[_, _]]
+    // Upon success, returns the resulting balance
+    def updateAccount(userId: UserId, previousBalance: Amount, delta: Amount): Either[ErrorMessage, Amount] = {
+      for {
+        balance <- findBalance(userId)
+        result <- if (balance == previousBalance) {
+          val newBalance = previousBalance + delta
+          balances = balances + (userId -> newBalance)
+          Right[ErrorMessage, Amount](newBalance)
+        } else {
+          Left(s"previousBalance was expected to be $balance  but was provided as $previousBalance")
+        }
+      } yield result
+    }
+  }
+
+  "makeTransfer" should "work correctly in 200 - 50 => 25 + 50" in {
+    val service = new TestUserService
+    val obtained = for {
+      _       <- service.updateAccount("a", 200)
+      _       <- service.updateAccount("b", 25)
+      result  <- makeTransfer(service, "a", "b", 50)
+    } yield result
+    obtained shouldEqual Right((150, 75))
+  }
+
+  it should "work correctly in 10 - 7 => 20 + 7" in {
+    val service = new TestUserService
+    val obtained = for {
+      _       <- service.updateAccount("a", 10)
+      _       <- service.updateAccount("b", 20)
+      result  <- makeTransfer(service, "a", "b", 7)
+    } yield result
+    obtained shouldEqual Right((3, 27))
+  }
+
+  it should "detect incorrect userIds" in {
+    val service = new TestUserService
+    val obtained = makeTransfer(service, "invalid", "valid", 50)
+    obtained shouldBe a[Left[_, _]]
   }
 
   "AProductB" should "contain all the elements in `A * B`" in {
@@ -100,7 +123,7 @@ class ControlStructuresSpec extends AnyFlatSpec with ScalaCheckDrivenPropertyChe
   "ASumB" should "contain all the elements in `A + B`" in {
     ASumB should contain theSameElementsAs Set(
       Left(0), Left(1), Left(2),
-      Right(true), Right(false)
+      Right(true), Right(false),
     )
   }
 

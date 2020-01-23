@@ -220,13 +220,15 @@ object ControlStructures {
     def findUserId(name: String): Either[ErrorMessage, UserId]
     def validateAmount(amount: Amount): Either[ErrorMessage, Unit]
     def findBalance(userId: UserId): Either[ErrorMessage, Amount]
+
+    /** Upon success, returns the resulting balance */
     def updateAccount(userId: UserId, previousBalance: Amount, delta: Amount): Either[ErrorMessage, Amount]
   }
 
   // Upon success, should return the remaining amounts on both accounts (fromUser, toUser).
-  def makeTransfer(userService: UserService, fromUser: String, toUser: String, amount: Amount): Either[ErrorMessage, (Amount, Amount)] = {
+  def makeTransfer(service: UserService, fromUser: String, toUser: String, amount: Amount): Either[ErrorMessage, (Amount, Amount)] = {
     // Replace with a proper implementation:
-    println(s"$userService, $fromUser, $toUser, $amount")
+    println(s"$service, $fromUser, $toUser, $amount")
     ???
   }
 
