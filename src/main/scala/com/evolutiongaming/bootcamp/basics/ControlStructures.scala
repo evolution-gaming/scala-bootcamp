@@ -235,7 +235,7 @@ object ControlStructures {
 
   // Exercise. The tests for `makeTransfer` in `ControlStructuresSpec` are insufficient. Improve the tests.
 
-  // Question. Could we have only used `Either` here as the "container"?
+  // Question. Does the implementation of `makeTransfer` depend on `Either` being the "container"?
 
   // Let us return to our "intuition about types" exercises from before.
 
@@ -288,8 +288,8 @@ object ControlStructures {
   def parseInt1(x: String): Try[Int] = Try(x.toInt)
 
   parseInt1("asdf") match {
-    case Success(value)   => println(value)
-    case Failure(error)    => println(error)
+    case Success(value) => println(value)
+    case Failure(error) => println(error)
   }
 
   // Question. What other ways of representing the "parse string to integer" results can you think of?
