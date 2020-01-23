@@ -86,17 +86,17 @@ object ClassesAndTraits {
   // Exercise. Implement an algorithm for finding the minimum bounding rectangle
   // (https://en.wikipedia.org/wiki/Minimum_bounding_rectangle) for a set of `Bounded` objects.
   //
-  def minimumBoundingRectangle(objects: Set[Bounded]): Bounded = {
-    new Bounded {
-      implicit private val doubleOrdering: Ordering[Double] = Ordering.Double.IeeeOrdering
-
-      // if needed, fix the code to be correct
-      override def minX: Double = objects.map(_.minX).min
-      override def maxX: Double = objects.map(_.minX).min
-      override def minY: Double = objects.map(_.minX).min
-      override def maxY: Double = objects.map(_.minX).min
-    }
-  }
+//  def minimumBoundingRectangle(objects: Set[Bounded]): Bounded = {
+//    new Bounded {
+//      implicit private val doubleOrdering: Ordering[Double] = Ordering.Double.IeeeOrdering
+//
+//      // if needed, fix the code to be correct
+//      override def minX: Double = objects.map(_.minX).min
+//      override def maxX: Double = objects.map(_.minX).min
+//      override def minY: Double = objects.map(_.minX).min
+//      override def maxY: Double = objects.map(_.minX).min
+//    }
+//  }
 
   // Pattern matching and exhaustiveness checking
   def describe(x: Shape): String = x match {
@@ -122,7 +122,12 @@ object ClassesAndTraits {
 
   def minimumBoundingRectangle(objects: Set[Bounded]): Rectangle = {
     implicit val doubleOrdering: Ordering[Double] = Ordering.Double.IeeeOrdering
-    Rectangle(objects.map(_.minX).min, objects.map(_.minY).min, objects.map(_.maxX).max, objects.map(_.maxY).max)
+    val minX = objects.map(_.minX).min
+    val minY = objects.map(_.minY).min
+    val maxX = objects.map(_.maxX).max
+    val maxY =objects.map(_.maxY).max
+
+    Rectangle(minX, minY, maxX, maxY)
   }
 
   // Exercise. The tests for `minimumBoundingRectangle` in `ClassesAndTraitsSpec` are insufficient.
