@@ -13,8 +13,11 @@ import io.chrisdavenport.log4cats.slf4j.Slf4jLogger
 import org.http4s.server.middleware.Metrics
 
 // TODO: instructions to launch Prometheus server and Grafana in Docker
-// TODO: Gatling tests to generate load
 // TODO: exercises that require to add logs, metrics, check Grafana, etc.
+/*
+ * You can run a simple load test using:
+ * `ab -n 100 -c 10 http://localhost:8080/normal-distribution-delay/5000/1000`
+ */
 object Main extends IOApp {
   private def application(service: Service, logger: Logger[IO], collectorRegistry: CollectorRegistry[IO], requestsCounter: Counter[IO]) = {
     def asOk(f: IO[Unit]) = {
