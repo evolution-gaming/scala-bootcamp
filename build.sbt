@@ -46,8 +46,16 @@ scalacOptions ++= Seq(
 
 scalacOptions in (Compile, console) --= Seq("-Ywarn-unused:imports", "-Xfatal-warnings")
 
+val http4sVersion = "0.21.0-RC2"
+
 libraryDependencies ++= Seq(
-  "org.typelevel" %% "cats-core" % "2.0.0",
-  "io.chrisdavenport" %% "cats-scalacheck" % "0.2.0",
+  "org.typelevel" %% "cats-core" % "2.1.0",
+  "org.http4s" %% "http4s-dsl" % http4sVersion,
+  "org.http4s" %% "http4s-blaze-server" % http4sVersion,
+  "org.http4s" %% "http4s-blaze-client" % http4sVersion,
+  "io.chrisdavenport" %% "log4cats-slf4j" % "1.0.1",
+  "ch.qos.logback" % "logback-classic" % "1.2.3",
+  "io.chrisdavenport" %% "epimetheus-http4s" % "0.3.0-RC7",
+  "io.chrisdavenport" %% "cats-scalacheck" % "0.2.0" % Test,
   "org.scalatestplus" %% "scalatestplus-scalacheck" % "3.1.0.0-RC2" % Test,
 )
