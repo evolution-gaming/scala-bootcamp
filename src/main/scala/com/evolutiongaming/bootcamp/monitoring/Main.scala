@@ -3,57 +3,75 @@ package com.evolutiongaming.bootcamp.monitoring
 import cats.effect.{ExitCode, IO, IOApp}
 import org.http4s.dsl.impl.Root
 import org.http4s.server.blaze.BlazeServerBuilder
-import cats.implicits._
 import org.http4s.HttpRoutes
 import org.http4s.dsl.io._
 import org.http4s.implicits._
+import io.chrisdavenport.epimetheus._
+import io.chrisdavenport.epimetheus.http4s.EpimetheusOps
 import io.chrisdavenport.log4cats.Logger
-
-import scala.concurrent.duration._
-import Random._
 import io.chrisdavenport.log4cats.slf4j.Slf4jLogger
+import org.http4s.server.middleware.Metrics
 
 // TODO: instructions to launch Prometheus server and Grafana in Docker
 // TODO: Gatling tests to generate load
 // TODO: exercises that require to add logs, metrics, check Grafana, etc.
 object Main extends IOApp {
-  private implicit val logger: Logger[IO] = Slf4jLogger.getLogger[IO]
+  private def application(service: Service, logger: Logger[IO], collectorRegistry: CollectorRegistry[IO], requestsCounter: Counter[IO]) = {
+    def asOk(f: IO[Unit]) = {
+      for {
+        _        <- f
+        result   <- Ok("OK")
+      } yield result
+    }
 
-  private def okAfter(duration: FiniteDuration) = {
-    Logger[IO].info(s"Sleeping $duration") *>
-    IO.sleep(duration) *>
-    Ok("OK")
+    val default = HttpRoutes.of[IO] {
+
+      case GET -> Root / "fixed-delay" / IntVar(milliseconds) =>
+        for {
+          _       <- requestsCounter.inc // Exercise. This is only an example for a counter. Remove, move or improve.
+          result  <- asOk(service.fixedDelay(milliseconds))
+        } yield result
+
+      case GET -> Root / "normal-distribution-delay" / IntVar(meanMilliseconds) / IntVar(standardDeviation) =>
+        asOk(service.normalDistributionDelay(meanMilliseconds, standardDeviation))
+
+      case GET -> Root / "unreliable" / IntVar(percentageSuccessful) =>
+        asOk(service.unreliable(percentageSuccessful / 100.0))
+
+      case GET -> Root / "metrics" =>
+        for {
+          _               <- logger.warn("Invoked") // Exercise. This is only an example for logging. Remove or improve.
+          currentMetrics  <- collectorRegistry.write004
+          response        <- Ok(currentMetrics)
+        } yield response
+
+    }
+
+    default
   }
 
-  private val service = HttpRoutes.of[IO] {
-    case GET -> Root / "fixed-delay" / IntVar(milliseconds) =>
-      okAfter(milliseconds.milliseconds)
+  def run(args: List[String]): IO[ExitCode] = {
+    val logger = Slf4jLogger.getLogger[IO]
+    for {
+      _                 <- logger.info("Starting!!!") // Exercise. This is only an example for logging. Remove or improve.
+      collectorRegistry <- CollectorRegistry.buildWithDefaults[IO]
+      requestsCounter   <- Counter.noLabels(
+                              collectorRegistry,
+                              Name("requests"),
+                              "Requests Counter",
+                           )
 
-    case GET -> Root / "normal-distribution-delay" / IntVar(meanMilliseconds) / IntVar(standardDeviation) =>
-      for {
-        g <- randomGaussian
-        d = Math.max(meanMilliseconds + g * standardDeviation, 0)
-        r <- okAfter(d.milliseconds)
-      } yield r
+      service           =  new Service
+      routes               =  application(service, logger, collectorRegistry, requestsCounter)
 
-    case GET -> Root / "unreliable" / IntVar(percentageSuccessful) =>
-      val threshold = percentageSuccessful / 100.0
-      for {
-        r       <- randomDouble
-        result  <- if (r <= threshold) Ok("OK") else InternalServerError("Error")
-      } yield result
+      meteredRoutes     <- EpimetheusOps.server(collectorRegistry).map(metricOps => Metrics[IO](metricOps)(routes))
 
-    case GET -> Root / "metrics" =>
-      Ok("metrics") // TODO: implement Prometheus pull metrics end-point
-
-  }.orNotFound
-
-  def run(args: List[String]): IO[ExitCode] =
-    BlazeServerBuilder[IO]
-      .bindHttp(8080, "localhost")
-      .withHttpApp(service)
-      .serve
-      .compile
-      .drain
-      .as(ExitCode.Success)
+      _                 <- BlazeServerBuilder[IO]
+        .bindHttp(8080, "localhost")
+        .withHttpApp(meteredRoutes.orNotFound)
+        .serve
+        .compile
+        .drain
+    } yield ExitCode.Success
+  }
 }
