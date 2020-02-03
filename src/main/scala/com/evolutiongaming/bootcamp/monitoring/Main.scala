@@ -16,7 +16,7 @@ import org.http4s.server.middleware.Metrics
 // TODO: exercises that require to add logs, metrics, check Grafana, etc.
 /*
  * You can run a simple load test using:
- * `ab -n 100 -c 10 http://localhost:8080/normal-distribution-delay/5000/1000`
+ * `ab -n 100 -c 10 http://localhost:9000/normal-distribution-delay/5000/1000`
  */
 object Main extends IOApp {
   private def application(service: Service, logger: Logger[IO], collectorRegistry: CollectorRegistry[IO], requestsCounter: Counter[IO]) = {
@@ -70,7 +70,7 @@ object Main extends IOApp {
       meteredRoutes     <- EpimetheusOps.server(collectorRegistry).map(metricOps => Metrics[IO](metricOps)(routes))
 
       _                 <- BlazeServerBuilder[IO]
-        .bindHttp(8080, "localhost")
+        .bindHttp(9000, "localhost")
         .withHttpApp(meteredRoutes.orNotFound)
         .serve
         .compile
