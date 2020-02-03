@@ -60,5 +60,6 @@ libraryDependencies ++= Seq(
   "io.chrisdavenport" %% "cats-scalacheck" % "0.2.0" % Test,
   "org.scalatestplus" %% "scalatestplus-scalacheck" % "3.1.0.0-RC2" % Test,
   "org.typelevel" %% "simulacrum" % "1.0.0",
+  "org.tpolecat" %% "atto-core" % "0.7.2",
 )
 
