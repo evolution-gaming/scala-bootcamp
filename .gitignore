@@ -3,6 +3,10 @@
 
 .idea/
 
+.bloop
+.metals
+metals.sbt
+
 target/
 
 .DS_Store
