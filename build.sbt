@@ -42,6 +42,7 @@ scalacOptions ++= Seq(
   "-Ywarn-unused:patvars",             // Warn if a variable bound in a pattern is unused.
   "-Ywarn-unused:privates",            // Warn if a private member is unused.
   "-Ywarn-value-discard",              // Warn when non-Unit expression results are unused.
+  "-Ymacro-annotations",
 )
 
 scalacOptions in (Compile, console) --= Seq("-Ywarn-unused:imports", "-Xfatal-warnings")
@@ -58,4 +59,6 @@ libraryDependencies ++= Seq(
   "io.chrisdavenport" %% "epimetheus-http4s" % "0.3.0-RC7",
   "io.chrisdavenport" %% "cats-scalacheck" % "0.2.0" % Test,
   "org.scalatestplus" %% "scalatestplus-scalacheck" % "3.1.0.0-RC2" % Test,
+  "org.typelevel" %% "simulacrum" % "1.0.0",
 )
+
