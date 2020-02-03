@@ -44,10 +44,11 @@ scalacOptions ++= Seq(
   "-Ywarn-value-discard",              // Warn when non-Unit expression results are unused.
 )
 
-scalacOptions in (Compile, console) --= Seq("-Ywarn-unused:imports", "-Xfatal-warnings")
+scalacOptions in (Compile, console) --= Seq("-Ywarn-unused:imports", "-Xfatal-warnings", "-Ymacro-annotations")
 
 libraryDependencies ++= Seq(
   "org.typelevel" %% "cats-core" % "2.0.0",
   "io.chrisdavenport" %% "cats-scalacheck" % "0.2.0",
   "org.scalatestplus" %% "scalatestplus-scalacheck" % "3.1.0.0-RC2" % Test,
+  "org.typelevel" %% "simulacrum" % "1.0.0",
 )
