@@ -63,3 +63,4 @@ libraryDependencies ++= Seq(
   "org.tpolecat" %% "atto-core" % "0.7.2",
 )
 
+addCompilerPlugin("org.typelevel" %% "kind-projector" % "0.11.0" cross CrossVersion.full)
