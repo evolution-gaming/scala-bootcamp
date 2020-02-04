@@ -12,11 +12,12 @@ import io.chrisdavenport.log4cats.Logger
 import io.chrisdavenport.log4cats.slf4j.Slf4jLogger
 import org.http4s.server.middleware.Metrics
 
-// TODO: instructions to launch Prometheus server and Grafana in Docker
 // TODO: exercises that require to add logs, metrics, check Grafana, etc.
 /*
+ * Follow ReadMe.md for instructions.
+ *
  * You can run a simple load test using:
- * `ab -n 100 -c 10 http://localhost:9000/normal-distribution-delay/5000/1000`
+ * `ab -n 100 -c 10 http://127.0.0.1:9000/normal-distribution-delay/5000/1000`
  */
 object Main extends IOApp {
   private def application(service: Service, logger: Logger[IO], collectorRegistry: CollectorRegistry[IO], requestsCounter: Counter[IO]) = {
@@ -36,7 +37,10 @@ object Main extends IOApp {
         } yield result
 
       case GET -> Root / "normal-distribution-delay" / IntVar(meanMilliseconds) / IntVar(standardDeviation) =>
-        asOk(service.normalDistributionDelay(meanMilliseconds, standardDeviation))
+        for {
+          _       <- requestsCounter.inc  // Exercise. This is only an example for a counter. Remove, move or improve.
+          result  <- asOk(service.normalDistributionDelay(meanMilliseconds, standardDeviation))
+        } yield result
 
       case GET -> Root / "unreliable" / IntVar(percentageSuccessful) =>
         asOk(service.unreliable(percentageSuccessful / 100.0))
@@ -65,7 +69,7 @@ object Main extends IOApp {
                            )
 
       service           =  new Service
-      routes               =  application(service, logger, collectorRegistry, requestsCounter)
+      routes            =  application(service, logger, collectorRegistry, requestsCounter)
 
       meteredRoutes     <- EpimetheusOps.server(collectorRegistry).map(metricOps => Metrics[IO](metricOps)(routes))
 

@@ -1,18 +1,18 @@
-### Pre:
-- docker
+### Prerequisites
+- [Docker](https://www.docker.com/)
 
 ### Run monitoring service
 - Run `com.evolutiongaming.bootcamp.monitoring.Main`
 
-### Set up prometheus stack
+### Set up Prometheus stack
 
 ```bash
 git clone https://github.com/vegasbrianc/prometheus.git
 ```
 
-- Follow the instruction in `prometheus` repo to make it up and running.
+- Follow [the instructions](https://github.com/vegasbrianc/prometheus/blob/master/README.md) to run it.
 
-You should see following in you console:
+- You should see the following in your console:
 ```bash
 Creating network prom_monitor-net
 Creating service prom_cadvisor
@@ -22,8 +22,7 @@ Creating service prom_node-exporter
 Creating service prom_alertmanager
 ```
 
-Check that all services are up:
-
+- Check that all of the services are up:
 ```bash
 docker ps
 
@@ -35,10 +34,10 @@ ce185659ec76        prom/node-exporter:latest   "/bin/node_exporter …"   About
 681e0eb261fe        google/cadvisor:latest      "/usr/bin/cadvisor -…"   2 minutes ago        Up 2 minutes        8080/tcp            prom_cadvisor.m78vyn14ro2nt1c8tn4h2hoyz.8agtc6zkmv2zanv3yx81uzomp
 ```
 
-### Configuring prometheus datastore
-#### MacOs
+### Configuring Prometheus data store
+#### macOS
 - Open `prometheus/prometheus.yml`
-- Add following job into `scrape_configs` section:
+- Add the following into the `scrape_configs` section:
 ```yaml
 - job_name: 'main-monitoring'
     scrape_interval: 5s
@@ -49,20 +48,24 @@ ce185659ec76        prom/node-exporter:latest   "/bin/node_exporter …"   About
 - Redeploy docker stack.
 ```bash
 docker stack rm prom
-
 HOSTNAME=$(hostname) docker stack deploy -c docker-stack.yml prom
 ```
 
-- Go to [localhost:9090](http://localhost:9090) and login to Grafana `admin/foobar`.
+- Observe metrics in [your app's endpoint](http://localhost:9000/metrics).
 
-- Import Dashboard by pasting JSON from `com/evolutiongaming/bootcamp/monitoring/jvm.json` file.
+- Observe metrics in [Prometheus](http://prometheus.localhost:9090/). 
 
-- Observe metrics
+- Go to [grafana.localhost:3000](http://grafana.localhost:3000) and login to Grafana `admin/foobar`.
 
-- Run `ab -n 100 -c 10 http://localhost:9000/normal-distribution-delay/5000/1000` to observe dynamics.
+- [Import JVM dashboard](http://localhost:3000/dashboard/import) from [`jvm.json`](jvm.json).
 
-- Try stopping the `Main` app and see how memory pools droping to 0. 
+- Observe JVM metrics in Grafana.
 
+- Add a new panel in Grafana of `rate(requests{instance="host.docker.internal:9000",job="main-monitoring"}[1m])`, observe this metric.
+
+- Run `ab -n 100 -c 10 http://127.0.0.1:9000/normal-distribution-delay/5000/1000` to generate load, observe metrics.
+
+- Try stopping the `Main` app and see how the memory pools drop to 0.
 
 #### Troubleshooting
 Q: Dashboard is imported, but it shows "No data points"
