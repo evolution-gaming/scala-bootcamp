@@ -36,6 +36,7 @@ object DataStructures {
 
   val immutableList2 = List(1, 2, 3)
   val immutableList3 = 1 :: 2 :: 3 :: Nil
+  val testList1 = ::(1, ::(2, ::(3, Nil)))
   require(immutableList2 == immutableList3) // the two ways above are the same
 
   val emptyList1 = Nil
@@ -90,6 +91,7 @@ object DataStructures {
     "tomatoes" -> 4,
     "peppers" -> 5,
     "olives" -> 17,
+    "cucumbers" -> 10
   )
 
   val moreVegetablePrices = vegetablePrices + ("pumpkins" -> 3)
@@ -110,7 +112,7 @@ object DataStructures {
   // `vegetableAmounts` and prices per unit from `vegetablePrices`. Assume the price is 10 if not available
   // in `vegetablePrices`.
   val totalVegetableCost: Int = {
-    17 // implement here
+    vegetableAmounts.map( { case (name, amount) => amount * Try(vegetablePrices(name)).getOrElse(0) }).sum
   }
 
   // Exercise. Given the vegetable weights (per 1 unit of vegetable) in `vegetableWeights` and vegetable
@@ -118,7 +120,8 @@ object DataStructures {
   //
   // For example, the total weight of "olives" is 2 * 32 == 64.
   val totalVegetableWeights: Map[String, Int] = { // implement here
-    Map()
+    vegetableAmounts.filter(elem => Try(vegetableWeights(elem._1)).isSuccess)
+      .map( { case (name, amount) => (name, amount * vegetableWeights(name)) })
   }
 
   // Ranges and Sequences
@@ -174,8 +177,7 @@ object DataStructures {
   // For example, `allSubsetsOfSizeN(Set(1, 2, 3), 2) == Set(Set(1, 2), Set(2, 3), Set(1, 3))`.
   def allSubsetsOfSizeN[A](set: Set[A], n: Int): Set[Set[A]] = {
     // replace with correct implementation
-    println(n)
-    Set(set)
+    set.subsets(n).toSet
   }
 
   // Exercise: Implement a special sort which sorts the keys of a map (K) according to their associated
@@ -193,5 +195,8 @@ object DataStructures {
   //
   // Input `Map("a" -> 1, "b" -> 2, "c" -> 4, "d" -> 1, "e" -> 0, "f" -> 2, "g" -> 2)` should result in
   // output `List(Set("e") -> 0, Set("a", "d") -> 1, Set("b", "f", "g") -> 2, Set("c") -> 4)`.
-  def sortConsideringEqualValues[T](map: Map[T, Int]): List[(Set[T], Int)] = ???
+  def sortConsideringEqualValues[T](map: Map[T, Int]): List[(Set[T], Int)] = {
+    val values = map.values.toList.sorted
+    values.distinct.map(num => map.filter(_._2 == num).keys.toSet -> num)
+  }
 }

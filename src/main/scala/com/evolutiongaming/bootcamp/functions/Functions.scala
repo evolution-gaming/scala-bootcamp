@@ -1,6 +1,9 @@
 package com.evolutiongaming.bootcamp.functions
 
 import java.time.Instant
+import java.util.Date
+
+import scala.util.Try
 
 object Functions {
   // Functions is first-class values:
@@ -15,7 +18,7 @@ object Functions {
   def mkUpperCase(message: String): String = message.toUpperCase
 
   // Pass our logic as a parameter `f`
-  def processText(message: String, f: String => String): String = f.apply(message)
+  def processText(message: String, f: String => String): String = f(message)
 
   def clean2(message: String): String = {
     // `s` is a parameter and may be omitted
@@ -30,13 +33,13 @@ object Functions {
 
   // Exercise.
   // Implement `isEven` a function that checks if a number is even
-  def isEven(x: Int): Boolean = ???
+  def isEven(x: Int): Boolean = x % 2 == 0
 
   // Implement `isEvenVal` which behaves exactly like `isEven`.
-  // val isEvenVal: Int => Boolean = ???
+   val isEvenVal: Int => Boolean = _ % 2 == 0
 
   // Implement `isEvenDefToVal` by transforming `isEven` def function into a val
-  // val isEvenDefToVal: Int => Boolean = ???
+   val isEvenDefToVal: Int => Boolean = isEven
 
   // --
 
@@ -95,10 +98,13 @@ object Functions {
 
   // Exercise.
   // Implement `mapOption` a function. Do not use scala option api
-  def mapOption[A, B](option: Option[A], f: A => B): Option[B] = ???
+  def mapOption[A, B](option: Option[A], f: A => B): Option[B] = option match{
+    case None => None
+    case Some(v)=> Some(f(v))
+  }
 
   // Implement `identity` which returns its input unchanged. Do not use scala.Predef.identity
-  def identity[A](x: A): A = ???
+  def identity[A](x: A): A = x
 
   // --
 
@@ -172,7 +178,7 @@ object Functions {
     (to: String, message: Language) => translate(message, "rus", to)
 
   // `=>` has right associative law
-  def translateF: Language => (Language => (String => String)) =
+  def translateF: Language => Language => String => String =
     (from: Language) => (to: Language) => (message: String) => translate(message, from, to)
 
   val fromRu = translateF("ru")
@@ -206,9 +212,9 @@ object Functions {
 
 
   // Exercise. Implement `andThen` and `compose` which pipes the result of one function to the input of another function
-  def compose[A, B, C](f: B => C, g: A => B): A => C = ???
+  def compose[A, B, C](f: B => C, g: A => B): A => C = a => f(g(a))
 
-  def andThen[A, B, C](f: A => B, g: B => C): A => C = ???
+  def andThen[A, B, C](f: A => B, g: B => C): A => C = a => g(f(a))
 
 
   // --
@@ -263,15 +269,18 @@ object Functions {
 
 
   // Exercises. Convert the following function into a pure function.
-  type ??? = Nothing // just to make it compile and indicate that return type should be changed
+//  type Try = Try // just to make it compile and indicate that return type should be changed
 
   //
   def parseDate(s: String): Instant = Instant.parse(s)
-  def parseDatePure(s: String): ??? = ???
+  def parseDatePure(s: String): Try[Instant] = Try(Instant.parse(s))
 
   //
   def divide(a: Int, b: Int): Int = a / b
-  def dividePure(a: Int, b: Int): ??? = ???
+//  def dividePure(a: Int, b: Int) = b match {
+//    case b == 0 => None
+//    case _ => Some(a / b)
+//  }
 
   //
   var count = 0
@@ -280,11 +289,11 @@ object Functions {
     count += 1
     newId
   }
-  def idPure(/* ??? */): (Int, Int) = ???
+  def idPure(id: Int): (Int, Int) = (id, id + 1)
 
   //
   def isAfterNow(date: Instant): Boolean = date.isAfter(Instant.now())
-  def isAfterNowPure(/* ??? */): Boolean = ???
+  def isAfterNowPure(date: Instant, now: Instant): Boolean = date.isAfter(now)
 
   //
   case class Nel[T](head: T, rest: List[T])
@@ -292,7 +301,10 @@ object Functions {
     if (list.isEmpty) println("ERROR: provide non empty list")
     Nel(list.head, list.tail)
   }
-  def nelPure[T](list: List[T]): ??? = ???
+  def nelPure[T](list: List[T]): Option[Nel[T]] = list match {
+    case Nil => None
+    case h :: t => Some(Nel(h, t))
+  }
 
   // --
 
@@ -320,37 +332,60 @@ object Functions {
   // JSON is a recursive data structure
   sealed trait Json
 
-  case class JObject(/* ??? */) extends Json
+  case class JObject(jsonMap: Map[String, Json]) extends Json {
+    override def toString: String = s"""{${jsonMap.map({ case (key, value) => s""""$key":$value"""}).mkString(",")}}"""
+  }
 
-  case class JArray(/* ??? */) extends Json
+  case class JArray(value: Array[Json]) extends Json {
+    override def toString: String = s"[${value.mkString(",")}]"
+  }
 
-  case class JString(/* ??? */) extends Json
+  case class JString(value: String) extends Json {
+    override def toString: String = s""""$value""""
+  }
 
-  case class JNumber(value: BigDecimal) extends Json
+  case class JNumber(value: BigDecimal) extends Json {
+    override def toString: String = s"""$value"""
+  }
 
   case class JBoolean(value: Boolean) extends Json
 
   // Question. What did I miss?
 
-  // --
+ case class JDate(value: Date) extends Json
 
 
 
   // Task 1. Represent `rawJson` string via defined classes
-  val data: Json = JObject(/* ??? */)
+  val data: Json = JObject(Map(
+    "username" -> JString("John"),
+    "address" -> JObject(Map(
+      "country" -> JString("UK"),
+      "postalCode" -> JNumber(45765)
+    )),
+    "eBooks" -> JArray(Array(JString("Scala"), JString("Dotty")))
+  ))
 
   // Task 2. Implement a function `asString` to print given Json data as a json string
 
-  def asString(data: Json): String = ???
+  def asString(data: Json): String = data.toString
 
   // Task 3. Implement a function that validate our data whether it contains JNumber with negative value or not
 
-  def isContainsNegative(data: Json): Boolean = ???
+  def isContainsNegative(data: Json): Boolean = data match {
+    case JNumber(value) => value < 0
+    case JObject(valueMap) => valueMap.exists { case (_, value) => isContainsNegative(value) }
+    case JArray(valueArray) => valueArray.exists(isContainsNegative)
+    case _ => false
+  }
 
   // Task 4. Implement a function that return the nesting level of json objects.
   // Note. top level json has level 1, we can go from top level to bottom only via objects
 
-  def nestingLevel(data: Json): Int = ???
+  def nestingLevel(data: Json): Int = data match {
+    case JObject(valueMap) => 1 + valueMap.map{ case(_, value) => nestingLevel(value) }.max
+    case _ => 0
+  }
 
   // See FunctionsSpec for expected results
 
