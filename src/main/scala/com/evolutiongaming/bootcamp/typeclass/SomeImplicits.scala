@@ -8,6 +8,7 @@ class SomeImplicits {
 
   // Implicit Conversion
   implicit def anyName(int: Int): String = int.toString
+//  implicit val anyName: Int => String = _.toString
 
   // - convert to expected type
   def putLn(s: String): Unit = println(s)
