@@ -75,3 +75,10 @@ object Generated {
   }
 
 }
+
+/*
+  Task: implement your own typeclass for example:
+    - equals
+    - show
+    - ordering
+ */
