@@ -42,6 +42,12 @@ object Json {
   def parse(s: String): Option[Json] =
     Parser.jsonOnly.parseOnly(s).option
 
-  def print(json: Json): String =
-    ???
+  def print(json: Json): String = json match {
+    case JNull => ???
+    case JBoolean(_) => ???
+    case JNumber(_) => ???
+    case JString(_) => ???
+    case JArray(_) => ???
+    case JObject(_) => ???
+  }
 }
