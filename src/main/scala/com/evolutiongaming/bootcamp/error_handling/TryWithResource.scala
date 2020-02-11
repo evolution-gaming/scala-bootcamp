@@ -1,6 +1,6 @@
 package com.evolutiongaming.bootcamp.error_handling
 
-import java.io.{BufferedReader, FileReader}
+import java.io.{BufferedReader, FileInputStream, FileReader}
 
 import scala.util.{Failure, Success, Try}
 
@@ -40,7 +40,32 @@ object TryWithResource extends App {
   // Question: why open is a by-name parameter?
   final class Resource[R](open: => R, close: R => Unit) {
 
-    def use[A](f: R => A): Try[A] = ???
+    def use[A](f: R => A): Try[A] = Try(open).flatMap { resource =>
+      var closed = false
+      try {
+        Try(f(resource)) match {
+          case Success(result) =>
+            closed = true
+            Try(close(resource)).map(_ => result)
+          case Failure(exception)  =>
+            closed = true
+            Try(close(resource)) match {
+              case Success(_)     => Failure(exception)
+              case Failure(error) =>
+                exception.addSuppressed(error)
+                Failure(exception)
+            }
+        }
+      } catch {
+        case fatal: Throwable if !closed =>
+          try {
+            close(resource)
+          } catch {
+            case error: Throwable => fatal.addSuppressed(error)
+          }
+          throw fatal
+      }
+    }
   }
 
 //  val resource = new Resource[BufferedReader](

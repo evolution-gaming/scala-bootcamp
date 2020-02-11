@@ -49,16 +49,34 @@ object Validated extends App {
     }
 
     // Exercise: implement these three methods
-    private def validateAgeEither(n: Int): Either[AgeError, Int] = ???
+    private def validateAgeEither(n: Int): Either[AgeError, Int] = {
+      if (n < 0) Left(AgeError.NegativeAge)
+      else if (n > 100) Left(AgeError.TooBig)
+      else Right(n)
+    }
 
-    private def validateFacultyEither(string: String): Either[ValidationError, Faculty] = ???
+    private def validateFacultyEither(string: String): Either[ValidationError, Faculty] = string match {
+      case "IT"      => Right(IT)
+      case "History" => Right(History)
+      case "Biology" => Right(Biology)
+      case _         => Left(InvalidFaculty)
+    }
 
+
+    // Exercise: implement
     def validateEither(
       firstName: String,
       lastName:  String,
       age:       Int,
       faculty:   String
-    ): Either[ValidationError, Student] = ???
+    ): Either[ValidationError, Student] = for {
+      firstName <- validateNameEither(firstName)
+      lastName  <- validateNameEither(lastName)
+      age       <- validateAgeEither(age)
+      faculty   <- validateFacultyEither(faculty)
+    } yield {
+      new Student(firstName, lastName, age, faculty) {}
+    }
 
 
 
@@ -84,7 +102,7 @@ object Validated extends App {
         } yield (a, b)
       }
 
-      implicit def raiseFuture[E <: Throwable](implicit ec: ExecutionContext): Failable[Future, E] = new Failable[Future, E] {
+      implicit def futureFailable[E <: Throwable](implicit ec: ExecutionContext): Failable[Future, E] = new Failable[Future, E] {
         override def pure[A](value: A): Future[A] = Future.successful(value)
         override def raise[A](error: E): Future[A] = Future.failed(error)
         override def map[A, B](fa: Future[A])(f: A => B): Future[B] = fa.map(f)
@@ -95,7 +113,15 @@ object Validated extends App {
       }
 
       // Exercise: implement
-      implicit def eitherFailable[E]: Failable[Either[E, *], E] = ???
+      implicit def eitherFailable[E]: Failable[Either[E, *], E] = new Failable[Either[E, *], E] {
+        override def pure[A](value: A): Either[E, A] = Right(value)
+        override def raise[A](error: E): Either[E, A] = Left(error)
+        override def map[A, B](fa: Either[E, A])(f: A => B): Either[E, B] = fa.map(f)
+        override def product[A, B](fa: Either[E, A], fb: Either[E, B]): Either[E, (A, B)] = for {
+          a <- fa
+          b <- fb
+        } yield (a, b)
+      }
     }
 
     implicit final class FailableAnySyntax[T](val value: T) extends AnyVal {
@@ -110,7 +136,8 @@ object Validated extends App {
 
 
 
-    private def validateName[F[_]: Failable[*[_], ValidationError]](string: String): F[String] = {
+    private def validateName[F[_]](string: String)(implicit F: Failable[F, ValidationError]): F[String] = {
+      F.raise(NameError.EmptyName)
       if (string.isEmpty) NameError.EmptyName.raise
       else if (string.length > 20) NameError.TooLong.raise
       else if (!string.matches("[a-zA-Z]*")) NameError.IllegalCharacter.raise
@@ -118,16 +145,42 @@ object Validated extends App {
     }
 
     // Exercise: implement the following 3 methods
-    private def validateAge[F[_]: Failable[*[_], ValidationError]](n: Int): F[Int] = ???
+    private def validateAge[F[_]: Failable[*[_], ValidationError]](n: Int): F[Int] = {
+      if (n < 0) AgeError.NegativeAge.raise
+      else if (n > 100) AgeError.TooBig.raise
+      else n.pure
+    }
 
-    private def validateFaculty[F[_]: Failable[*[_], ValidationError]](string: String): F[Faculty] = ???
+    private def validateFaculty[F[_]: Failable[*[_], ValidationError]](string: String): F[Faculty] = string match {
+      case "IT"      => IT.pure
+      case "History" => History.pure
+      case "Biology" => Biology.pure
+      case _         => InvalidFaculty.raise
+    }
 
+
+    // Exercise: implement
     def validateFailable[F[_]: Failable[*[_], ValidationError]](
       firstName: String,
       lastName:  String,
       age:       Int,
       faculty:   String
-    ): F[Student] = ???
+    ): F[Student] = {
+      validateName(firstName)
+        .product(validateName(lastName))
+        .product(validateAge(age))
+        .product(validateFaculty(faculty))
+        .map { case (((firstName, lastName), age), faculty) => new Student(firstName, lastName, age, faculty) {} }
+
+      /* In real code this would be
+       * (
+       *  validateName(firstName),
+       *  validateName(lastName),
+       *  validateAge(age),
+       *  validateFaculty(faculty)
+       * ).mapN(new Student(_, _, _, _) {})
+       */
+    }
 
 
 

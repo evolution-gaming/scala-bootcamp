@@ -1,11 +1,14 @@
 package com.evolutiongaming.bootcamp.error_handling
 
+import scala.concurrent.Future
+import scala.util.{Failure, Success, Try}
 import scala.util.control.NonFatal
 
 // https://www.geeksforgeeks.org/scala-exception-handling/
-object Basics {
+object Basics extends App {
 
-  // An exception is an unwanted or unexpected event, which occurs during the execution of a program i.e at run time
+  // An exception is an unwanted or unexpected event, which occurs during the execution
+  // of a program i.e at run time
 
   def parseInt(string: String): Int = try {
     Integer.parseInt(string)
@@ -31,13 +34,13 @@ object Basics {
     Descendants of RuntimeExceptions are `unchecked` – you don't need to declare them in method signature
     All other subtypes of Exception are 'checked' exceptions in Java:
 
-    class MyCheckedException extends Exception {
+    class MyCheckedException extends RuntimeException {
       public MyCheckedException(String msg) {
         super(msg);
       }
     }
 
-    public int stringToInt(String string) throws MyCheckedException {
+    public int stringToInt(String string) {
       try {
         int n = Integer.parseInt(string);
         if (n > 0) return n;
@@ -70,7 +73,7 @@ object Basics {
   def logic(): Boolean /* throws Exception */ = firstMethod(secondMethod("Hello, World"))
 
   // Don't play nicely with lambdas and FP
-  List("test").map(str => firstMethod(secondMethod(str))) // throws what?
+//  List("test").map(str => firstMethod(secondMethod(str))) // throws what?
 
   // Rarely denote recoverable errors in reality (hi IOException!)
   // Recoverable errors are errors conditions which you can handle with your business logic
@@ -99,12 +102,24 @@ object Basics {
 
   // Data types for recoverable errors:
   // Either[E, A]
-  // Option[A] <~> Either[Unit, A]
+  // Option[A] <~> Either[UserNotFound, User]
 
   // Data types for non-recoverable errors (T[A] <~> Either[Throwable, A])
   // Try[A]
   // Future[A]
   // IO[A] (yet undiscovered)
+
+  import scala.concurrent.ExecutionContext.Implicits.global
+
+  val pf: Function1[Try[Int], Unit] = {
+    case Success(value) => ???
+    case Failure(exception) => ???
+  }
+
+  Future(123).onComplete({
+    case Success(value) => ???
+    case Failure(exception) => ???
+  })
 
   // Often you may see these combined, e.g. Future[Option[User]]
 

@@ -32,5 +32,37 @@ object SmartConstructors extends App {
   // Using algebraic data types and smart constructors, make it impossible to
   // construct a `BankAccount` with an illegal (undefined) state in the
   // business domain. Note any limitations in your solution.
-  final case class BankAccount(ownerId: String, balance: BigDecimal, accountType: String)
+  sealed abstract case class BankAccount private (ownerId: OwnerId, balance: BigDecimal, accountType: AccountType)
+
+  object BankAccount {
+
+    def of(ownerId: String, balance: BigDecimal, accountType: String): Either[String, BankAccount] = for {
+      ownerId     <- OwnerId.of(ownerId).toRight("Invalid OwnerId")
+      accountType <- AccountType.of(accountType).toRight("Invalid account type")
+      balance     <- accountType match {
+        case AccountType.Debit => Either.cond(balance >= 0, balance, "Balance must be positive")
+        case _                 => Right(balance)
+      }
+    } yield new BankAccount(ownerId, balance, accountType) {}
+  }
+
+  sealed abstract case class OwnerId private (value: String)
+
+  object OwnerId {
+    def of(string: String): Option[OwnerId] =
+      if (string.matches("[0-9]{10}")) Some(new OwnerId(string) {}) else None
+  }
+
+  sealed trait AccountType
+
+  object AccountType {
+    case object Debit  extends AccountType
+    case object Credit extends AccountType
+
+    def of(string: String): Option[AccountType] = string match {
+      case "debit"  => Some(Debit)
+      case "credit" => Some(Credit)
+      case _        => None
+    }
+  }
 }
