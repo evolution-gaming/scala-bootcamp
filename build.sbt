@@ -23,7 +23,7 @@ libraryDependencies ++= Seq(
   "org.scalatestplus" %% "scalatestplus-scalacheck" % "3.1.0.0-RC2" % Test,
   "org.typelevel" %% "simulacrum" % "1.0.0",
   "org.tpolecat" %% "atto-core" % "0.7.2",
-  "org.mockito" %% "mockito-scala" % "1.11.2",
+  "org.mockito" %% "mockito-scala" % "1.11.2" % Test,
 )
 
 addCompilerPlugin("org.typelevel" %% "kind-projector" % "0.11.0" cross CrossVersion.full)
