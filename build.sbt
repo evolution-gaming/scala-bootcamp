@@ -23,6 +23,7 @@ libraryDependencies ++= Seq(
   "org.scalatestplus" %% "scalatestplus-scalacheck" % "3.1.0.0-RC2" % Test,
   "org.typelevel" %% "simulacrum" % "1.0.0",
   "org.tpolecat" %% "atto-core" % "0.7.2",
+  "io.circe" % "circe-core_2.13" % "0.13.0",
   "org.mockito" %% "mockito-scala" % "1.11.2" % Test,
 )
 
