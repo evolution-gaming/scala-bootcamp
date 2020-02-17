@@ -3,7 +3,7 @@ package com.evolutiongaming.bootcamp.monitoring
 import cats.effect.{ExitCode, IO, IOApp}
 import org.http4s.dsl.impl.Root
 import org.http4s.server.blaze.BlazeServerBuilder
-import org.http4s.HttpRoutes
+import org.http4s.{HttpRoutes, Response}
 import org.http4s.dsl.io._
 import org.http4s.implicits._
 import io.chrisdavenport.epimetheus._
@@ -11,6 +11,7 @@ import io.chrisdavenport.epimetheus.http4s.EpimetheusOps
 import io.chrisdavenport.log4cats.Logger
 import io.chrisdavenport.log4cats.slf4j.Slf4jLogger
 import org.http4s.server.middleware.Metrics
+import cats.implicits._
 
 // TODO: exercises that require to add logs, metrics, check Grafana, etc.
 /*
@@ -21,15 +22,9 @@ import org.http4s.server.middleware.Metrics
  */
 object Main extends IOApp {
   private def application(service: Service, logger: Logger[IO], collectorRegistry: CollectorRegistry[IO], requestsCounter: Counter[IO]) = {
-    def asOk(f: IO[Unit]) = {
-      for {
-        _        <- f
-        result   <- Ok("OK")
-      } yield result
-    }
+    def asOk(f: IO[Unit]): IO[Response[IO]] = f >> Ok("OK")
 
     val default = HttpRoutes.of[IO] {
-
       case GET -> Root / "fixed-delay" / IntVar(milliseconds) =>
         for {
           _       <- requestsCounter.inc // Exercise. This is only an example for a counter. Remove, move or improve.
