@@ -157,7 +157,6 @@ object CirceExercises {
       What will happen if you comment codecs for `Song`?
     */
     lazy val albumJson: Json = ???
-
   }
 
   /* Encoding/decoding, part II */
@@ -201,10 +200,9 @@ object CirceExercises {
     )
     val timeWindowJson: Json = timeWindow.asJson
 
-    /* Exercise 6: write custom codec for java.time.Year using existing ones */
+    /* Exercise 6: write custom codec for java.time.Year using existing one for Int */
     implicit lazy val encodeYear: Encoder[Year] = ???
     implicit lazy val decodeYear: Decoder[Year] = ???
-
   }
 
   object snake_case {
@@ -215,7 +213,7 @@ object CirceExercises {
 
     @ConfiguredJsonCodec final case class Movie(title: String, year: Year, isRatedR: Boolean)
     val dieHard: Movie = Movie("Die Hard", Year.of(1988), isRatedR = true)
-    val dieHardJson: Json = dieHard.asJson
+    lazy val dieHardJson: Json = dieHard.asJson // {"title":"Die Hard","year":1988,"is_rated_r":true}
   }
 
   object adt {

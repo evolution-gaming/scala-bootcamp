@@ -1,72 +1,106 @@
 package com.evolutiongaming.bootcamp.json
 
-import org.scalatest.wordspec.AnyWordSpec
-import scalaj.http.{Http, HttpResponse}
+import java.time.format.DateTimeFormatter
+import java.time.{LocalDate, ZonedDateTime}
 
-class HomeworkSpec extends AnyWordSpec {
-  "JSON classes" should {
-    "parse response" in {
-      val resp = HomeworkSpec.fetchResponse()
+import cats.instances.either._
+import cats.instances.list._
+import cats.syntax.traverse._
+import io.circe
+import io.circe.parser._
+import io.circe.generic.JsonCodec
+import org.scalatest.EitherValues
+import org.scalatest.matchers.must.Matchers
+import org.scalatest.wordspec.AnyWordSpec
+import scalaj.http.Http
+
+/**
+ * HOMEWORK:
+ *
+ * Some classes and generated JSON codecs are provided for NBA API.
+ * Unfortunately, they don't work as expected out of the box.
+ * The task is to fix (rewrite) some of the codecs to make tests pass.
+ * You are not supposed to change anything in _class_ HomeworkSpec,
+ * instead of it you are supposed to change whatever you want inside _companion object_ for HomeworkSpec.
+ *
+ * It would be nice to avoid using Encoder/Decoder.forProductN where you specify all field names
+ */
+class HomeworkSpec extends AnyWordSpec with Matchers with EitherValues {
+  import HomeworkSpec._
+
+  "NBA JSON API client" should {
+    "get info about today games" in {
+      val date = LocalDate.now()
+      val scoreboardOrError = fetchScoreboard(date)
+      val scoreboard = scoreboardOrError.getOrElse(fail(scoreboardOrError.toString))
+      val allGameIds = scoreboard.games.map(_.gameId)
+      val gameInfosOrError = allGameIds.map(fetchGameInfo(date, _)).sequence
+      gameInfosOrError.getOrElse(fail(gameInfosOrError.toString))
+      succeed
+    }
+
+    "fetch games for 14 Feb 2020" in {
+      val date = LocalDate.of(2020, 2, 14)
+      val scoreboardOrError = fetchScoreboard(date)
+      val scoreboard = scoreboardOrError.getOrElse(fail(scoreboardOrError.toString))
+      val allGameIds = scoreboard.games.map(_.gameId)
+      val gameInfosOrError = allGameIds.map(fetchGameInfo(date, _)).sequence
+      val gameInfos = gameInfosOrError.getOrElse(fail(gameInfosOrError.toString))
+      gameInfos.size must be(1)
     }
   }
+
 }
 
 object HomeworkSpec {
-  sealed trait Gender
-  object Gender {
-    case object M
-    case object F
-    case object N
-  }
-  final case class User(age: String, country: String, gender: Gender)
-  final case class UserInfo(user: User)
+  @JsonCodec final case class TeamTotals(assists: String, fullTimeoutRemaining: String, plusMinus: String)
+  @JsonCodec final case class TeamBoxScore(totals: TeamTotals)
+  @JsonCodec final case class GameStats(hTeam: TeamBoxScore, vTeam: TeamBoxScore)
+  @JsonCodec final case class PrevMatchup(gameDate: LocalDate, gameId: String)
+  @JsonCodec final case class BoxScore(
+    basicGameData: Game,
+    previousMatchup: PrevMatchup,
+    stats: Option[GameStats],
+  )
+  @JsonCodec final case class JustScore(score: String)
+  @JsonCodec final case class TeamStats(
+    linescore: List[JustScore],
+    loss: String,
+    score: String,
+    teamId: String,
+    triCode: String
+  )
+  @JsonCodec final case class GameDuration(hours: String, minutes: String)
+  @JsonCodec final case class Arena(
+    city: String,
+    country: String,
+    isDomestic: Boolean,
+    name: String,
+    stateAbbr: String
+  )
+  @JsonCodec final case class Game(
+    arena: Arena,
+    attendance: String,
+    endTimeUTC: Option[ZonedDateTime],
+    gameDuration: GameDuration,
+    gameId: String,
+    gameUrlCode: String,
+    hTeam: TeamStats,
+    isBuzzerBeater: Boolean,
+    startTimeUTC: ZonedDateTime,
+    vTeam: TeamStats,
+  )
+  @JsonCodec final case class Scoreboard(games: List[Game], numGames: Int)
 
-  def fetchResponse(online: Boolean = true): String = {
-    if (online) {
-      val response: HttpResponse[String] = Http("http://foo.com/search").param("q","monkeys").asString
-      response.body
-    } else {
-      response
-    }
+  private def fetchScoreboard(date: LocalDate): Either[circe.Error, Scoreboard] = {
+    val dateString = date.format(DateTimeFormatter.BASIC_ISO_DATE)
+    val body = Http(s"https://data.nba.net/10s/prod/v1/$dateString/scoreboard.json").asString.body
+    decode[Scoreboard](body)
   }
 
-  private val response: String = """
-                                   |{
-                                   |    "user": {
-                                   |        "age": "0",
-                                   |        "bootstrap": "0",
-                                   |        "country": "United States",
-                                   |        "gender": "n",
-                                   |        "image": [
-                                   |            {
-                                   |                "#text": "https://lastfm.freetls.fastly.net/i/u/34s/22beec8570014d6fcdfb7871a2cc29cf.png",
-                                   |                "size": "small"
-                                   |            },
-                                   |            {
-                                   |                "#text": "https://lastfm.freetls.fastly.net/i/u/64s/22beec8570014d6fcdfb7871a2cc29cf.png",
-                                   |                "size": "medium"
-                                   |            },
-                                   |            {
-                                   |                "#text": "https://lastfm.freetls.fastly.net/i/u/174s/22beec8570014d6fcdfb7871a2cc29cf.png",
-                                   |                "size": "large"
-                                   |            },
-                                   |            {
-                                   |                "#text": "https://lastfm.freetls.fastly.net/i/u/300x300/22beec8570014d6fcdfb7871a2cc29cf.png",
-                                   |                "size": "extralarge"
-                                   |            }
-                                   |        ],
-                                   |        "name": "travisbrown",
-                                   |        "playcount": "76111",
-                                   |        "playlists": "0",
-                                   |        "realname": "Travis Brown",
-                                   |        "registered": {
-                                   |            "#text": 1126389912,
-                                   |            "unixtime": "1126389912"
-                                   |        },
-                                   |        "subscriber": "0",
-                                   |        "type": "user",
-                                   |        "url": "https://www.last.fm/user/travisbrown"
-                                   |    }
-                                   |}
-                                   |""".stripMargin
+  private def fetchGameInfo(date: LocalDate, gameId: String): Either[circe.Error, BoxScore] = {
+    val dateString = date.format(DateTimeFormatter.BASIC_ISO_DATE)
+    val body = Http(s"https://data.nba.net/10s/prod/v1/$dateString/${gameId}_boxscore.json").asString.body
+    decode[BoxScore](body)
+  }
 }
