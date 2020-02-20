@@ -1,5 +1,6 @@
 package com.evolutiongaming.bootcamp.typeclass
 
+import scala.util.{Random, Try}
 
 
 object Manual {
@@ -60,21 +61,21 @@ object Manual {
 
 }
 
-
-object Generated {
-  import simulacrum._
-
-  @typeclass trait Semigroup[A] {
-    def append(x: A, y: A): A
-  }
-
-  def combine[T: Semigroup](list: List[T]): Option[T] = {
-    Some(list)
-      .filter(_.nonEmpty)
-      .map(_.reduce(Semigroup[T].append)) // using syntax
-  }
-
-}
+//
+//object Generated {
+//  import simulacrum._
+//
+//  @typeclass trait Semigroup[A] {
+//    def append(x: A, y: A): A
+//  }
+//
+//  def combine[T: Semigroup](list: List[T]): Option[T] = {
+//    Some(list)
+//      .filter(_.nonEmpty)
+//      .map(_.reduce(Semigroup[T].append)) // using syntax
+//  }
+//
+//}
 
 /*
   Task: implement your own typeclass for example:
@@ -82,3 +83,39 @@ object Generated {
     - show
     - ordering
  */
+
+
+object DuelTypeClass extends App {
+
+  trait Duel[T] {
+    def duel(first: T, second: T): T
+  }
+
+  object Duel {
+
+    implicit class DuelOps[A](val first: A) extends AnyVal {
+      def $_fight_$(second: A)(implicit duel: Duel[A]): A = duel.duel(first, second)
+    }
+
+    implicit val intDuel: Duel[Int] = (first, second) => {
+      val random = Random.between(first.min(second), first.max(second) + 1)
+      if (math.abs(second - random) <  math.abs(first - random)) second else first
+    }
+
+    implicit val stringDuel: Duel[String] = (first, second) => {
+      def res: String = {
+        val firstInt = first.map(_.toInt).sum / first.length
+        val secInt = second.map(_.toInt).sum / second.length
+        if ((firstInt $_fight_$ secInt) == firstInt) first else second
+      }
+      Try(res).getOrElse(first)
+    }
+  }
+
+  import Duel._
+
+  println(s"${12 $_fight_$ 32} wins!")
+  println(("ivan" $_fight_$ "vrag_ivana") + " wins!")
+  println(("" $_fight_$ "") + " wins!")
+  println(5 $_fight_$ 5)
+}

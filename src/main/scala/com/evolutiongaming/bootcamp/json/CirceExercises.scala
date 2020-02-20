@@ -10,6 +10,8 @@ import io.circe.generic.JsonCodec
 import io.circe.parser._
 import io.circe.syntax._
 import Models._
+import com.evolutiongaming.bootcamp.json.CirceExercises.semiauto.Song
+import com.evolutiongaming.bootcamp.testing.Json.JString
 import monocle.Traversal
 
 // Use `sbt testOnly com.evolutiongaming.bootcamp.json.CirceExercisesSpec`
@@ -47,7 +49,15 @@ object CirceExercises {
       "isRatedR" true
     }
     */
-    lazy val jMatrix: Json = ???
+    lazy val jMatrix: Json = Json.obj(
+      "title" -> Json.fromString("The Matrix"),
+      "year" -> Json.fromInt(1999),
+      "actors" -> Json.arr(
+        Json.fromString("Keanu Reeves"),
+        Json.fromString("Carrie-Anne Moss"),
+        Json.fromString("Laurence Fishburne")),
+      "isRatedR" -> Json.fromBoolean(true)
+    )
 
     /* Parsing */
     val twinPeaksRawJson: String =
@@ -98,7 +108,8 @@ object CirceExercises {
         |  }
         |}
         |""".stripMargin
-    lazy val killersOnTourJson: Json = ???
+    lazy val killersOnTourJson: Json = parse(killersRawJson).getOrElse(Json.Null).hcursor.downField("artist")
+      .downField("ontour").withFocus(_ => Json.fromBoolean(true)).top.getOrElse(Json.Null)
   }
 
   /* Optics */
@@ -117,7 +128,7 @@ object CirceExercises {
     val oldGoodTwinPeaks: Json = _oldGoodTwinPeaks(twinPeaksParsed)
 
     /* Exercise 3: same as 2, but using optics */
-    lazy val killersOnTourJson: Json = ???
+    lazy val killersOnTourJson: Json = root.artist.ontour.boolean.modify(_ => true)(parsedKillersJson)
   }
 
   /* Encoding/decoding, part I */
@@ -156,7 +167,11 @@ object CirceExercises {
 
       What will happen if you comment codecs for `Song`?
     */
-    lazy val albumJson: Json = ???
+
+    @JsonCodec final case class Album(title: String, year: Int, songs: Seq[Song])
+    val album: Album = Album("Da hz", 1999, Seq())
+    lazy val albumJson: Json = album.asJson
+
   }
 
   /* Encoding/decoding, part II */
@@ -182,7 +197,15 @@ object CirceExercises {
     val decodedSong: Either[Error, Song] = decode[Song](songJson.noSpaces)
 
     /* Exercise 5: same as 4, but with manual codecs */
-    lazy val albumJson: Json = ???
+    final case class Album(title: String, year: Int, songs: Seq[Song])
+
+    implicit val albumDecoder: Decoder[Album] =
+      Decoder.forProduct3("title", "year", "songs")(Album)
+    implicit val albumEncoder: Encoder[Album] =
+      Encoder.forProduct3("title", "year", "songs")(a => (a.title, a.year, a.songs))
+
+    val album: Album = Album("Da hz", 1999, Seq())
+    lazy val albumJson: Json = album.asJson
   }
 
   /* Encoding/decoding, part III */
@@ -201,8 +224,10 @@ object CirceExercises {
     val timeWindowJson: Json = timeWindow.asJson
 
     /* Exercise 6: write custom codec for java.time.Year using existing one for Int */
-    implicit lazy val encodeYear: Encoder[Year] = ???
-    implicit lazy val decodeYear: Decoder[Year] = ???
+    implicit lazy val encodeYear: Encoder[Year] = Encoder.encodeInt.contramap[Year](_.getValue)
+    implicit lazy val decodeYear: Decoder[Year] = Decoder.decodeInt.emap { int =>
+      Either.catchNonFatal(Year.of(int)).leftMap(err => "Year: " + err.getMessage)
+    }
   }
 
   object snake_case {
@@ -266,7 +291,25 @@ object CirceExercises {
       gigs = Seq.empty
     )
     val artists = Seq(theKillers, ye)
-    lazy val artistsJson: Json = ???
+
+    implicit val musicianKindCodec: Codec[MusicianKind] = deriveEnumerationCodec[MusicianKind]
+    implicit val musicianCodec: Codec[Musician] = deriveConfiguredCodec[Musician]
+    implicit val gigCodec: Codec[Gig] = deriveConfiguredCodec[Gig]
+
+    implicit val bandEncoder: Encoder[Band] = deriveConfiguredEncoder[Band]
+    implicit val bandDecoder: Decoder[Band] = deriveConfiguredDecoder[Band]
+
+    implicit val soloMusicianEncoder: Encoder[SoloMusician] = deriveConfiguredEncoder[SoloMusician]
+    implicit val soloMusicianDecoder: Decoder[SoloMusician] = deriveConfiguredDecoder[SoloMusician]
+
+    implicit val artistsEncoder: Encoder[Artist] = Encoder.instance {
+      case b: Band => b.asJson
+      case solo: SoloMusician => solo.asJson
+    }
+    implicit val artistsDecoder: Decoder[Artist] =
+      List[Decoder[Artist]](bandDecoder.widen, soloMusicianDecoder.widen).reduceLeft(_ or _)
+
+    lazy val artistsJson: Json = artists.asJson
   }
 
   /* Homework
