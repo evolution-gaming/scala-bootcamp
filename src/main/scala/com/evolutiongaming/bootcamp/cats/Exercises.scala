@@ -1,10 +1,13 @@
 package com.evolutiongaming.bootcamp.cats
 
 import cats.effect.IO
-import cats.syntax.all._
-import cats.instances.all._
 
 object Exercises {
+
+  // cats-core import evetything
+  import cats._
+  import cats.data._
+  import cats.implicits._
 
   // API
   type UserId
@@ -42,14 +45,6 @@ object Exercises {
 
   // IO[List[User]]
   val usersFriendsFriendsFriendsAsync: List[IO[Option[List[IO[Option[List[IO[Option[User]]]]]]]]] = ids.map(id => getUserAsync(id).map(_.map(_.friends.map(id => getUserAsync(id)).map(_.map(_.map(_.friends.map(id => getUserAsync(id))))))))
-
-  // IO[List[User]]
-  val ex52: IO[List[User]] = {
-    ids
-      .traverseFilter(getUserAsync)
-      .flatMap(_.flatTraverse(_.friends.traverseFilter(getUserAsync)))
-      .flatMap(_.flatTraverse(_.friends.traverseFilter(getUserAsync)))
-  }
 
   // Nested
 
