@@ -7,8 +7,9 @@ import cats.instances.either._
 import cats.instances.list._
 import cats.syntax.traverse._
 import io.circe
-import io.circe.parser._
+import io.circe.Decoder
 import io.circe.generic.JsonCodec
+import io.circe.parser._
 import org.scalatest.EitherValues
 import org.scalatest.matchers.must.Matchers
 import org.scalatest.wordspec.AnyWordSpec
@@ -26,6 +27,7 @@ import scalaj.http.Http
  * It would be nice to avoid using Encoder/Decoder.forProductN where you specify all field names
  */
 class HomeworkSpec extends AnyWordSpec with Matchers with EitherValues {
+
   import HomeworkSpec._
 
   "NBA JSON API client" should {
@@ -53,43 +55,60 @@ class HomeworkSpec extends AnyWordSpec with Matchers with EitherValues {
 }
 
 object HomeworkSpec {
-  @JsonCodec final case class TeamTotals(assists: String, fullTimeoutRemaining: String, plusMinus: String)
+
+  import io.circe.generic.extras._
+  import io.circe.generic.extras.semiauto._
+
+  implicit val config: Configuration = Configuration.default
+  implicit val prevMatchupDecoder: Decoder[PrevMatchup] = deriveConfiguredDecoder[PrevMatchup].map(pm => PrevMatchup(pm.gameDate.format(DateTimeFormatter.BASIC_ISO_DATE), pm.gameId))
+
+  @ConfiguredJsonCodec final case class TeamTotals(assists: String, @JsonKey("full_timeout_remaining") fullTimeoutRemaining: String, plusMinus: String)
+
   @JsonCodec final case class TeamBoxScore(totals: TeamTotals)
+
   @JsonCodec final case class GameStats(hTeam: TeamBoxScore, vTeam: TeamBoxScore)
-  @JsonCodec final case class PrevMatchup(gameDate: LocalDate, gameId: String)
+
+  @JsonCodec final case class PrevMatchup(gameDate: String, gameId: String)
+
   @JsonCodec final case class BoxScore(
-    basicGameData: Game,
-    previousMatchup: PrevMatchup,
-    stats: Option[GameStats],
-  )
+                                        basicGameData: Game,
+                                        previousMatchup: PrevMatchup,
+                                        stats: Option[GameStats],
+                                      )
+
   @JsonCodec final case class JustScore(score: String)
+
   @JsonCodec final case class TeamStats(
-    linescore: List[JustScore],
-    loss: String,
-    score: String,
-    teamId: String,
-    triCode: String
-  )
+                                         linescore: List[JustScore],
+                                         loss: String,
+                                         score: String,
+                                         teamId: String,
+                                         triCode: String
+                                       )
+
   @JsonCodec final case class GameDuration(hours: String, minutes: String)
+
   @JsonCodec final case class Arena(
-    city: String,
-    country: String,
-    isDomestic: Boolean,
-    name: String,
-    stateAbbr: String
-  )
+                                     city: String,
+                                     country: String,
+                                     isDomestic: Boolean,
+                                     name: String,
+                                     stateAbbr: String
+                                   )
+
   @JsonCodec final case class Game(
-    arena: Arena,
-    attendance: String,
-    endTimeUTC: Option[ZonedDateTime],
-    gameDuration: GameDuration,
-    gameId: String,
-    gameUrlCode: String,
-    hTeam: TeamStats,
-    isBuzzerBeater: Boolean,
-    startTimeUTC: ZonedDateTime,
-    vTeam: TeamStats,
-  )
+                                    arena: Arena,
+                                    attendance: String,
+                                    endTimeUTC: Option[ZonedDateTime],
+                                    gameDuration: GameDuration,
+                                    gameId: String,
+                                    gameUrlCode: String,
+                                    hTeam: TeamStats,
+                                    isBuzzerBeater: Boolean,
+                                    startTimeUTC: ZonedDateTime,
+                                    vTeam: TeamStats,
+                                  )
+
   @JsonCodec final case class Scoreboard(games: List[Game], numGames: Int)
 
   private def fetchScoreboard(date: LocalDate): Either[circe.Error, Scoreboard] = {
