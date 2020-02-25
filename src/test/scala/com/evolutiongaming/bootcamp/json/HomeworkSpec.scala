@@ -1,14 +1,16 @@
 package com.evolutiongaming.bootcamp.json
 
-import java.time.format.DateTimeFormatter
 import java.time.{LocalDate, ZonedDateTime}
+import java.time.format.DateTimeFormatter
 
 import cats.instances.either._
 import cats.instances.list._
+import cats.syntax.either._
 import cats.syntax.traverse._
 import io.circe
-import io.circe.parser._
+import io.circe.Decoder
 import io.circe.generic.JsonCodec
+import io.circe.parser._
 import org.scalatest.EitherValues
 import org.scalatest.matchers.must.Matchers
 import org.scalatest.wordspec.AnyWordSpec
@@ -53,15 +55,34 @@ class HomeworkSpec extends AnyWordSpec with Matchers with EitherValues {
 }
 
 object HomeworkSpec {
-  @JsonCodec final case class TeamTotals(assists: String, fullTimeoutRemaining: String, plusMinus: String)
-  @JsonCodec final case class TeamBoxScore(totals: TeamTotals)
-  @JsonCodec final case class GameStats(hTeam: TeamBoxScore, vTeam: TeamBoxScore)
-  @JsonCodec final case class PrevMatchup(gameDate: LocalDate, gameId: String)
-  @JsonCodec final case class BoxScore(
-    basicGameData: Game,
-    previousMatchup: PrevMatchup,
-    stats: Option[GameStats],
-  )
+  final case class TeamTotals(assists: String, fullTimeoutRemaining: String, plusMinus: String)
+  implicit val teamTotalsDecoder: Decoder[TeamTotals] =
+    Decoder.forProduct3("assists", "full_timeout_remaining", "plusMinus")(TeamTotals.apply)
+
+  final case class TeamBoxScore(totals: TeamTotals)
+  implicit val teamBoxScoreDecoder: Decoder[TeamBoxScore] =
+    Decoder.forProduct1("totals")(TeamBoxScore.apply)
+
+  final case class GameStats(hTeam: TeamBoxScore, vTeam: TeamBoxScore)
+  implicit val gameStatsDecoder: Decoder[GameStats] =
+    Decoder.forProduct2("hTeam", "vTeam")(GameStats.apply)
+
+  implicit val localDateDecoder: Decoder[LocalDate] = Decoder.decodeString.emap { str =>
+    Either.catchNonFatal(LocalDate.parse(str, DateTimeFormatter.ofPattern("yyyyMMdd")))
+      .leftMap(err => s"LocalDate error $err")
+  }
+
+  final case class PrevMatchup(gameDate: LocalDate, gameId: String)
+  implicit val prevMatchupDecoder: Decoder[PrevMatchup] =
+    Decoder.forProduct2("gameDate", "gameId")(PrevMatchup.apply)
+
+  final case class BoxScore(
+     basicGameData: Game,
+     previousMatchup: PrevMatchup,
+     stats: Option[GameStats])
+  implicit val boxScoreDecoder: Decoder[BoxScore] =
+    Decoder.forProduct3("basicGameData", "previousMatchup", "stats")(BoxScore.apply)
+
   @JsonCodec final case class JustScore(score: String)
   @JsonCodec final case class TeamStats(
     linescore: List[JustScore],
@@ -78,6 +99,10 @@ object HomeworkSpec {
     name: String,
     stateAbbr: String
   )
+
+  implicit val zonedDateTimeDecoder: Decoder[ZonedDateTime] = Decoder.decodeString.emap { str =>
+    Either.catchNonFatal(ZonedDateTime.parse(str)).leftMap(err => s"ZonedDateTime error $err")
+  }
   @JsonCodec final case class Game(
     arena: Arena,
     attendance: String,
