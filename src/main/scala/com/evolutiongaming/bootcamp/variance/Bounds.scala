@@ -1,5 +1,7 @@
 package com.evolutiongaming.bootcamp.variance
 
+import com.evolutiongaming.bootcamp.variance.Variance.InvariantBox
+
 // https://docs.scala-lang.org/tour/upper-type-bounds.html
 object Bounds {
 
@@ -24,7 +26,10 @@ object Bounds {
 //  val apples: List[Apple] = box1(RedApple, GreenApple)
 
   def box2[A <: Fruit](head: A, tail: A*): List[A] = head :: tail.toList
+  var fruit2: List[Fruit] = box2(RedApple, GreenApple, Orange)
   val apples: List[Apple] = box2(RedApple, GreenApple)
+  box2(Orange)
+  fruit2 = apples
 
 
 
@@ -54,9 +59,11 @@ object Bounds {
     def plus2(x: Int): Option[Int] = value.map(_ + x)
   }
 
+  def test: InvariantBox[Int] = InvariantBox(List(throw new Exception("test")))
+
   Option(2).plus(3) // Some(5)
   Option(2).plus2(3)
-  None.plus(3)
+  Option.empty[Nothing].plus(3)
 //  Option("string").plus(3)
 //  Option("string").plus(3)
 

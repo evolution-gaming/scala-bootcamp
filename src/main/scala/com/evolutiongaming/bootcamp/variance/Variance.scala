@@ -1,5 +1,8 @@
 package com.evolutiongaming.bootcamp.variance
 
+import cats.Applicative
+import cats.data.OptionT
+
 // https://docs.scala-lang.org/tour/variances.html
 object Variance {
 
@@ -27,7 +30,7 @@ object Variance {
 
   // Covariance is a direct mapping of subtyping relation, i.e. if A extends B then F[A] extends F[B] as well
   final case class CovariantBox[+A](values: List[A]) {
-//    def add(value: A): ContravariantBox[A] = CovariantBox(value :: values) // does not compile
+//    def add(value: A): CovariantBox[A] = CovariantBox(value :: values) // does not compile
   }
 
   val apples2: CovariantBox[Apple] = CovariantBox(List(RedApple, GreenApple))
@@ -49,9 +52,11 @@ object Variance {
     def function(argument: -A): +R
    */
 
-  val showFruit: Fruit => String = _.toString
+  type FunctionOfSomeArg[-A] = Function[A, String]
+
+  val showFruit: FunctionOfSomeArg[Fruit] = _.toString
   // Apple extends Fruit -> Function[Fruit, *] extends Function[Apple, *]
-  val showApple: Apple => String = showFruit
+  val showApple: FunctionOfSomeArg[Apple] = showFruit
 
 
 
@@ -68,7 +73,14 @@ object Variance {
   // Also you can set variance restrictions on nested type parameters
   final case class BoxOfBoxes2[F[_]](value: F[_])
 
-  BoxOfBoxes2(InvariantBox(List(RedApple)))
-  BoxOfBoxes2(CovariantBox(List(RedApple)))
+//  BoxOfBoxes2(InvariantBox(List(RedApple)))
+//  BoxOfBoxes2(CovariantBox(List(RedApple)))
   BoxOfBoxes2[-* => String](showFruit)
+
+
+  def test[F[_]: Applicative](n: Int): OptionT[F, Int] = {
+    import cats.syntax.applicative._
+    if (n < 0) OptionT(Option.empty.pure[F])
+    else OptionT(Option(n).pure[F])
+  }
 }

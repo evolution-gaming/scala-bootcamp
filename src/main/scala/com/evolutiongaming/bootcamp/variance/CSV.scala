@@ -9,12 +9,20 @@ object CSV extends App {
     def encode(value: A): List[String]
   }
 
+  object CSVEncoder {
+    def apply[A: CSVEncoder]: CSVEncoder[A] = implicitly
+  }
+
   implicit final class EncoderSyntax[A: CSVEncoder](private val value: A) {
     def encode: List[String] = implicitly[CSVEncoder[A]].encode(value)
   }
 
   trait CSVDecoder[A] {
     def decode(csv: List[String]): (A, List[String])
+  }
+
+  object CSVDecoder {
+    def apply[A: CSVDecoder]: CSVDecoder[A] = implicitly
   }
 
   implicit final class DecoderSyntax(private val csv: List[String]) {
@@ -34,7 +42,7 @@ object CSV extends App {
     }
   }
 
-  implicit def divide[A]: ContravariantMonoidal[CSVEncoder] = new ContravariantMonoidal[CSVEncoder] {
+  implicit def divisible[A]: ContravariantMonoidal[CSVEncoder] = new ContravariantMonoidal[CSVEncoder] {
 
     override def unit: CSVEncoder[Unit] = _ => Nil
 
@@ -47,17 +55,17 @@ object CSV extends App {
 
 
   implicit val stringEncoder: CSVEncoder[String] = (value: String) => List(value)
-  implicit val intEncoder:    CSVEncoder[Int]    = stringEncoder.contramap(_.toString)
+  implicit val intEncoder:    CSVEncoder[Int]    = CSVEncoder[String].contramap(_.toString)
 
   implicit val stringDecoder: CSVDecoder[String] = (csv: List[String]) => (csv.head, csv.tail)
-  implicit val intDecoder:    CSVDecoder[Int]    = stringDecoder.map(_.toInt)
+  implicit val intDecoder:    CSVDecoder[Int]    = CSVDecoder[String].map(_.toInt)
 
 
 
   final case class Person(name: String, age: Int)
   object Person {
-    implicit val encoder: CSVEncoder[Person] = (stringEncoder, intEncoder).contramapN(person => (person.name, person.age))
-    implicit val decoder: CSVDecoder[Person] = (stringDecoder, intDecoder).mapN(Person.apply)
+    implicit val encoder: CSVEncoder[Person] = (CSVEncoder[String], CSVEncoder[Int]).contramapN(person => (person.name, person.age))
+    implicit val decoder: CSVDecoder[Person] = (CSVDecoder[String], CSVDecoder[Int]).mapN(Person.apply)
   }
 
 
@@ -67,6 +75,6 @@ object CSV extends App {
 
 
 
-  // TODO: implement CSV encpding/decoding
+  // TODO: implement CSV encoding/decoding
   final case class Account(person: Person, active: Boolean, amount: BigDecimal)
 }
