@@ -44,6 +44,8 @@ ce185659ec76        prom/node-exporter:latest   "/bin/node_exporter …"   About
     static_configs:
          - targets: ['host.docker.internal:9000']
 ```
+#### Linux and Windows
+- Instead of `host.docker.internal` paste your host machine IP address.
 
 - Redeploy docker stack.
 ```bash
