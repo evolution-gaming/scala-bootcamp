@@ -45,6 +45,7 @@ object Http4sServer extends IOApp {
   }
 
   // Headers/cookies
+
   val headersRoutes = HttpRoutes.of[IO] {
     // curl -v 'localhost:9000/headers' -H 'Request-Header: request value'
     case req @ GET -> Root / "headers" =>
@@ -62,7 +63,7 @@ object Http4sServer extends IOApp {
   val entityRoutes = {
     final case class Hello(name: String)
 
-    implicit val helloDecoder = EntityDecoder.decodeBy(MediaType.audio.ogg) { m: Media[IO] =>
+    implicit val helloDecoder = EntityDecoder.decodeBy(MediaType.text.plain) { m: Media[IO] =>
       val NameRegex = """\((.*)\)""".r
       EitherT {
         m.as[String].map {
