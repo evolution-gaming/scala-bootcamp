@@ -4,8 +4,10 @@ import akka.actor.ActorSystem
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.model._
 import akka.http.scaladsl.model.headers.{HttpCookie, RawHeader}
+import akka.http.scaladsl.model.ws.{Message, TextMessage}
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.unmarshalling.Unmarshaller
+import akka.stream.scaladsl.Flow
 import scala.concurrent.Await
 import scala.concurrent.duration._
 import scala.io.StdIn
@@ -102,7 +104,18 @@ object AkkaServer {
       }
     }
 
-    val route = helloRoute ~ paramsRoute ~ headersRoute ~ entityRoute ~ jsonRoute
+    // WebSockets
+
+    val wsEchoRoute = path("wsecho") {
+      val flow = Flow[Message].collect {
+        case TextMessage.Strict(msg) => TextMessage.Strict(msg)
+      }
+
+      // websocat 'ws://127.0.0.1:9000/wsecho'
+      handleWebSocketMessages(flow)
+    }
+
+    val route = helloRoute ~ paramsRoute ~ headersRoute ~ entityRoute ~ jsonRoute ~ wsEchoRoute
 
     val binding = Http().bindAndHandle(route, "localhost", 9000)
 
