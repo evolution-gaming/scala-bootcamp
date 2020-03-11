@@ -50,12 +50,12 @@ object Http4sServer extends IOApp {
     // curl -v 'localhost:9000/headers' -H 'Request-Header: request value'
     case req @ GET -> Root / "headers" =>
       val headers = req.headers.toList.map(h => h.name.value + ": " + h.value).mkString("\n")
-      Ok(headers, Header("Custom-Header", "custom value"))
+      Ok(headers, Header("Response-Header", "response value"))
 
     // curl 'localhost:9000/cookies' -b "request-cookie=request_value"
     case req @ GET -> Root / "cookies" =>
       val cookies = req.cookies.map(c => c.name + ": " + c.content).mkString("\n")
-      Ok(cookies).map(_.addCookie(ResponseCookie("custom-cookie", "custom value")))
+      Ok(cookies).map(_.addCookie(ResponseCookie("response-cookie", "response_value")))
   }
 
   // Body encoding/decoding
@@ -91,7 +91,7 @@ object Http4sServer extends IOApp {
     // implicit val helloDecoder = jsonOf[IO, Hello]
 
     HttpRoutes.of[IO] {
-      // curl -XPOST 'localhost:9000/json' -d '{"name": "world"}'
+      // curl -XPOST 'localhost:9000/json' -d '{"name": "world"}' -H "Content-Type: application/json"
       case req @ POST -> Root / "json" =>
         req.as[Hello].flatMap(hello => Ok(s"Hello ${hello.name}!"))
     }

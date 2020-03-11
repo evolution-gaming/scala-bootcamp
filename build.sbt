@@ -21,6 +21,9 @@ libraryDependencies ++= Seq(
   "org.http4s" %% "http4s-blaze-server" % http4sVersion,
   "org.http4s" %% "http4s-blaze-client" % http4sVersion,
   "org.http4s" %% "http4s-circe" % http4sVersion,
+  "com.typesafe.akka" %% "akka-http" % "10.1.11",
+  "de.heikoseeberger" %% "akka-http-circe" % "1.31.0",
+  "com.typesafe.akka" %% "akka-stream" % "2.6.3",
   "io.chrisdavenport" %% "log4cats-slf4j" % "1.0.1",
   "ch.qos.logback" % "logback-classic" % "1.2.3",
   "io.chrisdavenport" %% "epimetheus-http4s" % "0.3.0",
@@ -38,3 +41,5 @@ libraryDependencies ++= Seq(
 )
 
 addCompilerPlugin("org.typelevel" %% "kind-projector" % "0.11.0" cross CrossVersion.full)
+
+fork in run := true
