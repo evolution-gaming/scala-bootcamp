@@ -7,7 +7,7 @@ import akka.http.scaladsl.model.headers.{HttpCookie, RawHeader}
 import akka.http.scaladsl.model.ws.{Message, TextMessage}
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.unmarshalling.Unmarshaller
-import akka.stream.scaladsl.Flow
+import akka.stream.scaladsl.{Flow, Sink}
 import scala.concurrent.Await
 import scala.concurrent.duration._
 import scala.io.StdIn
@@ -35,7 +35,7 @@ object AkkaServer {
     // Query parameters
 
     val paramsRoute =
-      pathPrefix("int") {
+      (get & pathPrefix("int")) {
         path(IntNumber) { n =>
           // curl 'localhost:9000/int/42'
           complete(s"Passed: $n")
@@ -47,20 +47,22 @@ object AkkaServer {
 
     // Headers/cookies
 
-    val headersRoute = path("headers") {
-      headerValuePF {
-        case HttpHeader("request-header", v) => v
-      } { header =>
-        respondWithHeader(RawHeader("Response-Header", "response value")) {
-          // curl -v 'localhost:9000/headers' -H 'Request-Header: request value'
-          complete(header)
+    val headersRoute = get {
+      path("headers") {
+        headerValuePF {
+          case HttpHeader("request-header", v) => v
+        } { header =>
+          respondWithHeader(RawHeader("Response-Header", "response value")) {
+            // curl -v 'localhost:9000/headers' -H 'Request-Header: request value'
+            complete(header)
+          }
         }
-      }
-    } ~ path("cookies") {
-      cookie("request-cookie") { cookie =>
-        setCookie(HttpCookie("response-cookie", value = "response_value")) {
-          // curl 'localhost:9000/cookies' -b "request-cookie=request_value"
-          complete(cookie.value)
+      } ~ path("cookies") {
+        cookie("request-cookie") { cookie =>
+          setCookie(HttpCookie("response-cookie", value = "response_value")) {
+            // curl 'localhost:9000/cookies' -b "request-cookie=request_value"
+            complete(cookie.value)
+          }
         }
       }
     }
@@ -76,11 +78,11 @@ object AkkaServer {
         case s => throw new IllegalArgumentException(s"Invalid value: $s")
       }
 
-      path("entity") {
+      (post & path("entity")) {
         post {
-          entity(as[Hello]) { name =>
+          entity(as[Hello]) { hello =>
             // curl -XPOST 'localhost:9000/hello' -d 'world'
-            complete(s"Hello $name!")
+            complete(s"Hello ${hello.name}!")
           }
         }
       }
@@ -96,7 +98,7 @@ object AkkaServer {
 
       // implicit val helloUnmarshaller = FailFastCirceSupport.unmarshaller[Hello]
 
-      path("json") {
+      (post & path("json")) {
         entity(as[Hello]) { hello =>
           // curl -XPOST 'localhost:9000/json' -d '{"name": "world"}' -H "Content-Type: application/json"
           complete(s"Hello ${hello.name}!")
@@ -115,7 +117,16 @@ object AkkaServer {
       handleWebSocketMessages(flow)
     }
 
-    val route = helloRoute ~ paramsRoute ~ headersRoute ~ entityRoute ~ jsonRoute ~ wsEchoRoute
+    // Multipart
+
+    val multipartRoute = (post & path("multipart")) {
+      entity(as[Multipart.FormData]) { m =>
+        // curl -XPOST 'localhost:9000/multipart' -F 'text=request value' -F file=@file.txt
+        complete(m.parts.map(_.name).runWith(Sink.seq).map(_.mkString("\n")))
+      }
+    }
+
+    val route = helloRoute ~ paramsRoute ~ headersRoute ~ entityRoute ~ jsonRoute ~ multipartRoute ~ wsEchoRoute
 
     val binding = Http().bindAndHandle(route, "localhost", 9000)
 

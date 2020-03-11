@@ -1,10 +1,13 @@
 package com.evolutiongaming.bootcamp.http
 
-import cats.effect.{ExitCode, IO, IOApp}
+import cats.effect.{Blocker, ExitCode, IO, IOApp}
 import cats.implicits._
 import org.http4s._
 import org.http4s.client.blaze.BlazeClientBuilder
+import org.http4s.client.dsl.io._
+import org.http4s.headers.`Content-Type`
 import org.http4s.implicits._
+import org.http4s.multipart.{Multipart, Part}
 import scala.concurrent.ExecutionContext.global
 
 object Http4sClient extends IOApp {
@@ -18,7 +21,7 @@ object Http4sClient extends IOApp {
       for {
         _ <- client.expect[String](uri / "hello" / "world") >>= putStrLn
         _ <- dash
-        _ <- client.expect[String](Request[IO](Method.POST, uri / "hello").withEntity("world")) >>= putStrLn
+        _ <- client.expect[String](Method.POST("world", uri / "hello")) >>= putStrLn
         _ <- dash
 
         // Query parameters
@@ -30,9 +33,9 @@ object Http4sClient extends IOApp {
 
         // Headers/cookies
 
-        _ <- client.expect[String](Request[IO](uri = uri / "headers", headers = Headers.of(Header("Request-Header", "request value")))) >>= putStrLn
+        _ <- client.expect[String](Method.GET(uri / "headers", Header("Request-Header", "request value"))) >>= putStrLn
         _ <- dash
-        _ <- client.expect[String](Request[IO](uri = uri / "cookies").addCookie(RequestCookie("request-cookie", "request_value"))) >>= putStrLn
+        _ <- client.expect[String](Method.GET(uri / "cookies").map(_.addCookie(RequestCookie("request-cookie", "request_value")))) >>= putStrLn
         _ <- dash
 
         // Body encoding/decoding
@@ -44,7 +47,7 @@ object Http4sClient extends IOApp {
             s"(${hello.name})"
           }
 
-          client.expect[String](Request[IO](Method.POST, uri / "entity").withEntity(Hello("world"))) >>= putStrLn
+          client.expect[String](Method.POST(Hello("world"), uri / "entity")) >>= putStrLn
         }
         _ <- dash
 
@@ -58,7 +61,21 @@ object Http4sClient extends IOApp {
 
           // implicit val helloEncoder = jsonEncoderOf[IO, Hello]
 
-          client.expect[String](Request[IO](Method.POST, uri / "json").withEntity(Hello("world"))) >>= putStrLn
+          client.expect[String](Method.POST(Hello("world"), uri / "json")) >>= putStrLn
+        }
+        _ <- dash
+
+        // Multipart
+
+        _ <- {
+          val blocker = Blocker.liftExecutionContext(global)
+          val file = getClass.getResource("/cat.jpg")
+          val multipart = Multipart[IO](Vector(
+            Part.formData("text", "request value"),
+            Part.fileData("file", file, blocker, `Content-Type`(MediaType.image.jpeg))
+          ))
+
+          client.expect[String](Method.POST(multipart, uri / "multipart").map(_.withHeaders(multipart.headers))) >>= putStrLn
         }
         _ <- dash
       } yield ()

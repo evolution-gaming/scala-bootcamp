@@ -8,6 +8,7 @@ import fs2.concurrent.Queue
 import org.http4s._
 import org.http4s.dsl.io._
 import org.http4s.implicits._
+import org.http4s.multipart.Multipart
 import org.http4s.server.blaze.BlazeServerBuilder
 import org.http4s.server.websocket.WebSocketBuilder
 import org.http4s.websocket.WebSocketFrame
@@ -97,6 +98,16 @@ object Http4sServer extends IOApp {
     }
   }
 
+  // Multipart
+
+  val multipartRoutes = HttpRoutes.of[IO] {
+    // curl -XPOST 'localhost:9000/multipart' -F 'text=request value' -F file=@file.txt
+    case req @ POST -> Root / "multipart" =>
+      req.as[Multipart[IO]].flatMap { m =>
+        Ok(m.parts.map(_.name.orEmpty).mkString("\n"))
+      }
+  }
+
   // WebSockets
 
   val wsEchoRoutes = HttpRoutes.of[IO] {
@@ -118,7 +129,7 @@ object Http4sServer extends IOApp {
         }
   }
 
-  val routes = helloRoutes <+> paramsRoutes <+> headersRoutes <+> entityRoutes <+> jsonRoutes <+> wsEchoRoutes
+  val routes = helloRoutes <+> paramsRoutes <+> headersRoutes <+> entityRoutes <+> jsonRoutes <+> multipartRoutes <+> wsEchoRoutes
 
   def run(args: List[String]): IO[ExitCode] =
     BlazeServerBuilder[IO]
