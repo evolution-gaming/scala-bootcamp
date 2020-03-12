@@ -14,6 +14,53 @@ import org.http4s.server.websocket.WebSocketBuilder
 import org.http4s.websocket.WebSocketFrame
 
 object Http4sServer extends IOApp {
+
+  // https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol
+
+  // URI format:
+  //
+  //            userinfo          host        port
+  //        ┌───────┴───────┐ ┌────┴────────┐ ┌┴┐
+  // http://john.doe:password@www.example.com:123/forum/questions/?tag=networking&order=newest#top
+  // └─┬─┘ └───────────┬────────────────────────┘└─┬─────────────┘└────────┬──────────────────┘└┬─┘
+  // scheme         authority                      path                  query             fragment
+
+  // Status codes:
+  //
+  // 1XX Informational
+  // 2XX Successful
+  // 3XX Redirection
+  // 4XX Client Error
+  // 5XX Server Error
+
+  // Request methods:
+  //
+  // GET
+  //  The GET method requests a representation of the specified
+  //  resource. Requests using GET should only retrieve data and
+  //  should have no other effect.
+  // POST
+  //  The POST request method requests that a web server accepts the
+  //  data enclosed in the body of the request message, most likely
+  //  for storing it.
+  // PUT
+  //  The PUT method requests that the enclosed entity be stored under
+  //  the supplied URI.
+  // DELETE
+  //  The DELETE method deletes the specified resource.
+  // PATCH
+  //  The PATCH method applies partial modifications to a resource.
+
+  // Summary table
+  //
+  // | HTTP method | Request has Body | Safe | Idempotent | Cacheable |
+  // |-------------+------------------+------+------------+-----------|
+  // | GET         | Optional         | Yes  | Yes        | Yes       |
+  // | POST        | Yes              | No   | No         | Yes       |
+  // | PUT         | Yes              | No   | Yes        | No        |
+  // | DELETE      | Optional         | No   | Yes        | No        |
+  // | PATCH       | Yes              | No   | No         | No        |
+
   val helloRoutes = HttpRoutes.of[IO] {
     // curl 'localhost:9000/hello/world'
     case GET -> Root / "hello" / name =>
