@@ -29,12 +29,12 @@ https://rockthejvm.com/
 - ActorContext (behavior switch and creating actors)
 - MessageProcessing (state encapsulation, actor mailbox)
 - Lifecycle and Supervisors (actors hierarchy, error handling)
-- Dispatchers and Routing
+- Dispatchers and LongInitializationPattern
 
 ### For self-learning
 - Broadcasting
 - EventStream
-- Stash (LongInitializationPattern)
+- Routing
 - TestKit (inside homework)
 
 ---

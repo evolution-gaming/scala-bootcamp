@@ -32,4 +32,6 @@ Contains should result in a ContainsResult message containing the result of the 
 Instead of implementing the usual binary tree removal, 
 in your solution you should use a flag that is stored in every tree node (removed) indicating whether the element in the node has been removed or not. 
 This will result in a very simple implementation that is concurrent and correct with minimal effort. 
-If you want you may implement `Garbage Collection`
+
+Additional task*
+Implement `Garbage Collection`: clean up all the removed elements, while additional operations might arrive from the external world.
