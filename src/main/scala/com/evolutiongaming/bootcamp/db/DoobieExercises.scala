@@ -76,10 +76,10 @@ object DoobieExercises extends IOApp with DbCommon {
   def fetchBookByYearRange(yearFrom: Int, yearTo: Int): Transactor[IO] => IO[ExitCode] = ???
 
   def insertAuthor(name: String, birthday: LocalDate): Transactor[IO] => IO[ExitCode] = xa => {
-    val id = UUID.randomUUID()
-    val insertAuthorQuery = sql"INSERT INTO authors (id, name, birthday) VALUES ($id, $name, $birthday);"
     val queryAuthors = sql"SELECT id, name, birthday FROM authors;"
     for {
+      id <- IO(UUID.randomUUID())
+      insertAuthorQuery = sql"INSERT INTO authors (id, name, birthday) VALUES ($id, $name, $birthday);"
       _ <- initTables(xa)
       _ <- insertAuthorQuery.update.run.transact(xa)
       authors <- queryAuthors.query[Author].to[List].transact(xa)
