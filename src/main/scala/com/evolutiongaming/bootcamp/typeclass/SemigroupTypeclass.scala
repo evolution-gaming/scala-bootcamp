@@ -1,6 +1,6 @@
 package com.evolutiongaming.bootcamp.typeclass
 
-
+import scala.language.implicitConversions
 
 object Manual {
   //  https://scalac.io/typeclasses-in-scala/

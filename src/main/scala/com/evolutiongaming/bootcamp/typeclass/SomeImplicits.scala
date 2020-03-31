@@ -3,6 +3,7 @@ package com.evolutiongaming.bootcamp.typeclass
 import cats.kernel.Monoid
 
 import scala.concurrent.ExecutionContext
+import scala.language.implicitConversions
 
 class SomeImplicits {
 
