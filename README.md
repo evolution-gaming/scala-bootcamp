@@ -10,6 +10,7 @@ The following lectures are currently available:
 - [Data Structures](src/main/scala/com/evolutiongaming/bootcamp/basics/DataStructures.scala) ([tests](src/test/scala/com/evolutiongaming/bootcamp/basics/DataStructuresSpec.scala))
 - [Functions](src/main/scala/com/evolutiongaming/bootcamp/functions/Functions.scala) ([tests](src/test/scala/com/evolutiongaming/bootcamp/functions/FunctionsSpec.scala))
 - [JSON](src/main/scala/com/evolutiongaming/bootcamp/json/CirceExercises.scala) ([tests](src/test/scala/com/evolutiongaming/bootcamp/json/CirceExercisesSpec.scala), [homework](src/test/scala/com/evolutiongaming/bootcamp/json/HomeworkSpec.scala))
+- [Databases](src/main/scala/com/evolutiongaming/bootcamp/db/DoobieExercises.scala)
 
 # Learning resources
 ## Books
