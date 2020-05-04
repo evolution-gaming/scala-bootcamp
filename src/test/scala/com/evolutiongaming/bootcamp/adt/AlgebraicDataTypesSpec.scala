@@ -1,14 +1,14 @@
 package com.evolutiongaming.bootcamp.adt
 
-import com.evolutiongaming.bootcamp.adt.AdtBasics.PaymentMethod._
-import com.evolutiongaming.bootcamp.adt.AdtBasics._
+import com.evolutiongaming.bootcamp.adt.AlgebraicDataTypes.PaymentMethod._
+import com.evolutiongaming.bootcamp.adt.AlgebraicDataTypes._
 import org.scalacheck.Gen._
 import org.scalatest.{EitherValues, OptionValues}
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers._
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 
-class AdtBasicsSpec
+class AlgebraicDataTypesSpec
   extends AnyFlatSpec
     with OptionValues
     with EitherValues
@@ -52,7 +52,7 @@ class AdtBasicsSpec
     }
   }
 
-  "PaymentService" should "process payment via correct method" in {
+  "PaymentService" should "process payments correctly" in {
     val paymentService = new PaymentService(
       new TestBankAccountService,
       new TestCreditCardService,

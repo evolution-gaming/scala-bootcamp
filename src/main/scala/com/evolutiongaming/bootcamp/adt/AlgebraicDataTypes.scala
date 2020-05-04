@@ -1,11 +1,11 @@
 package com.evolutiongaming.bootcamp.adt
 
-object AdtBasics {
+object AlgebraicDataTypes {
 
-  // INTRO
+  // ALGEBRAIC DATA TYPES
 
-  // ADTs stand for Algebraic Data Types. This is a commonly used way of structuring data, used in many
-  // programming languages (so this is not something unique to Scala).
+  // Algebraic Data Types or ADTs is a commonly used way of structuring data, used in many programming
+  // languages (so this is not something unique to Scala).
   //
   // While the definition may sound scientific and complex, in reality we have already been using this
   // concept in `basics` package. For example, see `sealed trait Shape` in `ClassesAndTraits`. We will now
