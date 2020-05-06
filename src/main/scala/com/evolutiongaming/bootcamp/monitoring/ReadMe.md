@@ -75,3 +75,9 @@ A: Adjust time window to smaller period of time. By default it show 90 days.
 
 Q: Windows has been adjusted, still see nothing.
 A: Open [http://localhost:9090/targets](http://localhost:9090/targets), check `main-monitoring` is in `UP` state. 
+
+#### Exercises
+
+Exercise 1. Add reasonable logging to requests, check logs that they contain information you expected.
+
+Exercise 2. Create a "requests per second" graph in Grafana using the request counters.

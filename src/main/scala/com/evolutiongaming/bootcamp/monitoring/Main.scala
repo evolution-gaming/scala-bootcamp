@@ -13,7 +13,6 @@ import io.chrisdavenport.log4cats.slf4j.Slf4jLogger
 import org.http4s.server.middleware.Metrics
 import cats.implicits._
 
-// TODO: exercises that require to add logs, metrics, check Grafana, etc.
 /*
  * Follow ReadMe.md for instructions.
  *
