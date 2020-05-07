@@ -68,7 +68,7 @@ object Main extends IOApp {
       meteredRoutes     <- EpimetheusOps.server(collectorRegistry).map(metricOps => Metrics[IO](metricOps)(routes))
 
       _                 <- BlazeServerBuilder[IO]
-        .bindHttp(9000, "localhost")
+        .bindHttp(9000, "0.0.0.0")
         .withHttpApp(meteredRoutes.orNotFound)
         .serve
         .compile
