@@ -43,6 +43,8 @@ ce185659ec76        prom/node-exporter:latest   "/bin/node_exporter …"   About
 ```
 #### Linux and Windows
 - Instead of `host.docker.internal` paste your host machine IP address.
+- On Linux it also may require for you to bind an monitoring app `com.evolutiongaming.bootcamp.monitoring.Main` to specific IP address, 
+not to just `localhost` 
 
 - Redeploy docker stack.
 ```bash
@@ -55,7 +57,7 @@ HOSTNAME=$(hostname) docker stack deploy -c docker-stack.yml prom
 
 - Observe metrics in [your app's endpoint](http://localhost:9000/metrics).
 
-- Observe metrics in [Prometheus](http://localhost:9090/). 
+- Observe metrics in [Prometheus](http://localhost:9090/targets). 
 
 - Go to [grafana.localhost:3000](http://localhost:3000) and login to Grafana `admin/foobar`.
 
@@ -63,7 +65,7 @@ HOSTNAME=$(hostname) docker stack deploy -c docker-stack.yml prom
 
 - Observe JVM metrics in Grafana.
 
-- Add a new panel in Grafana of `rate(requests{instance="host.docker.internal:9000",job="main-monitoring"}[1m])`, observe this metric.
+- Add a new panel in Grafana of `rate(requests{job="main-monitoring"}[1m])`, observe this metric.
 
 - Run `ab -n 100 -c 10 http://127.0.0.1:9000/normal-distribution-delay/5000/1000` to generate load, observe metrics.
 
