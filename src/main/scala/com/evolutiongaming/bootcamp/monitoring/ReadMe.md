@@ -44,7 +44,10 @@ ce185659ec76        prom/node-exporter:latest   "/bin/node_exporter …"   About
 #### Linux and Windows
 - Instead of `host.docker.internal` paste your host machine IP address.
 - On Linux it also may require for you to bind an monitoring app `com.evolutiongaming.bootcamp.monitoring.Main` to specific IP address, 
-not to just `localhost` 
+not to just `localhost` (*) 
+
+(*) run `ifconfig` and choose `docker0` address.
+It might be `172.17.0.1`, but it's not 100%.
 
 - Redeploy docker stack.
 ```bash
