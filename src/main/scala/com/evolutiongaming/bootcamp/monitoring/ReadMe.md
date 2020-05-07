@@ -1,9 +1,6 @@
 ### Prerequisites
 - [Docker](https://www.docker.com/)
 
-### Run monitoring service
-- Run `com.evolutiongaming.bootcamp.monitoring.Main`
-
 ### Set up Prometheus stack
 
 ```bash
@@ -53,11 +50,14 @@ docker stack rm prom
 HOSTNAME=$(hostname) docker stack deploy -c docker-stack.yml prom
 ```
 
+### Run monitoring service
+- Run `com.evolutiongaming.bootcamp.monitoring.Main`
+
 - Observe metrics in [your app's endpoint](http://localhost:9000/metrics).
 
-- Observe metrics in [Prometheus](http://prometheus.localhost:9090/). 
+- Observe metrics in [Prometheus](http://localhost:9090/). 
 
-- Go to [grafana.localhost:3000](http://grafana.localhost:3000) and login to Grafana `admin/foobar`.
+- Go to [grafana.localhost:3000](http://localhost:3000) and login to Grafana `admin/foobar`.
 
 - [Import JVM dashboard](http://localhost:3000/dashboard/import) from [`jvm.json`](jvm.json).
 
