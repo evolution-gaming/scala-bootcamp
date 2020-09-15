@@ -15,7 +15,7 @@ object ActorContext extends App {
 
     override def receive: Receive = {
       case "inc" => acc += 1
-      case "get" => sender ! acc
+      case "get" => sender() ! acc
     }
   }
 
@@ -28,7 +28,7 @@ object ActorContext extends App {
     // we can change actor behavior for the next message
     def counter(acc: Int): Receive = {
       case "inc" => context.become(counter(acc + 1))
-      case "get" => sender ! acc
+      case "get" => sender() ! acc
     }
 
     override def receive: Receive = counter(0)
@@ -39,7 +39,7 @@ object ActorContext extends App {
   // application as an actor
   class Main extends Actor {
     // an actor is created by exactly one other actor
-    val counter: ActorRef = context.actorOf(Props[CounterContextBecome], "counter")
+    val counter: ActorRef = context.actorOf(Props[CounterContextBecome](), "counter")
 
     (1 to 10).foreach(_ => counter ! "inc")
     counter ! "get"
@@ -52,6 +52,6 @@ object ActorContext extends App {
   }
 
   val evoActorSystem: ActorSystem = ActorSystem("evo-actor-system")
-  evoActorSystem.actorOf(Props[Main])
+  evoActorSystem.actorOf(Props[Main]())
 
 }

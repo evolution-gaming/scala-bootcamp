@@ -20,7 +20,7 @@ object EventStream extends App {
     final case class Alert(source: String, time: Instant = Instant.now())
   }
 
-  val alertListener = evoActorSystem.actorOf(Props[AlertListener])
+  val alertListener = evoActorSystem.actorOf(Props[AlertListener]())
 
   // subscription
   evoActorSystem.eventStream.subscribe(alertListener, classOf[Alert])
@@ -33,7 +33,7 @@ object EventStream extends App {
     }
   }
 
-  val integrationActor = evoActorSystem.actorOf(Props[ProcessingActor])
+  val integrationActor = evoActorSystem.actorOf(Props[ProcessingActor]())
 
   integrationActor ! "asasd"
   integrationActor ! 63

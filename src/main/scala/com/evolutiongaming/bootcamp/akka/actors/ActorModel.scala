@@ -33,7 +33,7 @@ object ActorModel extends App {
       // to make it stateful we need pass answer back to sender
       case HowManyEmailsYouGot =>
         // sender: reference to the last message sender
-        sender ! EmailCount(emailCounter) // ~ sender.tell(EmailCount(emailCounter), self)
+        sender() ! EmailCount(emailCounter) // ~ sender.tell(EmailCount(emailCounter), self)
 
       case other          =>
         println(s"unexpected: $other")
@@ -44,7 +44,7 @@ object ActorModel extends App {
     val Name = "evo-actor"
 
     // configuration object (basically we need actor type and deployment config)
-    def props: Props = Props[EvoActor]
+    def props: Props = Props[EvoActor]()
 
     // another way to specify props
     // Props(classOf[T], constructor params*)
@@ -99,7 +99,7 @@ object ActorModel extends App {
 
   // 4. create actor system (basically we need a name and config)
   val evoActorSystem: ActorSystem = ActorSystem("evo-actor-system")
-  val evoMainRef: ActorRef = evoActorSystem.actorOf(Props[EvoMainActor], "main")
+  val evoMainRef: ActorRef = evoActorSystem.actorOf(Props[EvoMainActor](), "main")
 
   // 5. stop your system
   // evoActorSystem.terminate()

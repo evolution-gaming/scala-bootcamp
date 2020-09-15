@@ -50,7 +50,7 @@ object LongInitializationPattern extends App {
 
 
   val evoActorSystem: ActorSystem = ActorSystem("evo-actor-system")
-  val ref = evoActorSystem.actorOf(Props[LongInit])
+  val ref = evoActorSystem.actorOf(Props[LongInit]())
 
   ref ! LongInit.CommonRequest("a")
   ref ! LongInit.CommonRequest("b")

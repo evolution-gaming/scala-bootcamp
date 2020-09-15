@@ -13,6 +13,8 @@ import io.chrisdavenport.log4cats.slf4j.Slf4jLogger
 import org.http4s.server.middleware.Metrics
 import cats.implicits._
 
+import scala.concurrent.ExecutionContext
+
 /*
  * Follow ReadMe.md for instructions.
  *
@@ -67,7 +69,7 @@ object Main extends IOApp {
 
       meteredRoutes     <- EpimetheusOps.server(collectorRegistry).map(metricOps => Metrics[IO](metricOps)(routes))
 
-      _                 <- BlazeServerBuilder[IO]
+      _                 <- BlazeServerBuilder[IO](ExecutionContext.global)
         .bindHttp(9000, "0.0.0.0")
         .withHttpApp(meteredRoutes.orNotFound)
         .serve
