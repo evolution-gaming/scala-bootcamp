@@ -9,7 +9,7 @@ object Routing extends App {
   class Worker extends Actor {
     import Worker._
     def receive: Receive = {
-      case Request(id) => sender ! Answer(self.path, id)
+      case Request(id) => sender() ! Answer(self.path, id)
     }
   }
   object Worker {
@@ -20,7 +20,7 @@ object Routing extends App {
   class Main extends Actor {
     import Main._
     // a router pool that uses round-robin to select a routee
-    val workerRouter: ActorRef = context.actorOf(Props[Worker].withRouter(RoundRobinPool(5)), "worker-pool")
+    val workerRouter: ActorRef = context.actorOf(Props[Worker]().withRouter(RoundRobinPool(5)), "worker-pool")
 
     override def receive: Receive = {
       case RequestCount(x) =>
@@ -38,7 +38,7 @@ object Routing extends App {
   }
 
   val evoActorSystem: ActorSystem = ActorSystem("evo-actor-system")
-  evoActorSystem.actorOf(Props[Main], "main") ! Main.RequestCount(100)
+  evoActorSystem.actorOf(Props[Main](), "main") ! Main.RequestCount(100)
   // id=2 processed by akka://evo-actor-system/user/main/worker-pool/$b
   // id=1 processed by akka://evo-actor-system/user/main/worker-pool/$a
   // id=5 processed by akka://evo-actor-system/user/main/worker-pool/$e

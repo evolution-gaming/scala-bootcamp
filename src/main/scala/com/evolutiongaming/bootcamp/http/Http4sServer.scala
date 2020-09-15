@@ -13,6 +13,8 @@ import org.http4s.server.blaze.BlazeServerBuilder
 import org.http4s.server.websocket.WebSocketBuilder
 import org.http4s.websocket.WebSocketFrame
 
+import scala.concurrent.ExecutionContext
+
 object Http4sServer extends IOApp {
 
   // https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol
@@ -179,7 +181,7 @@ object Http4sServer extends IOApp {
   val routes = helloRoutes <+> paramsRoutes <+> headersRoutes <+> entityRoutes <+> jsonRoutes <+> multipartRoutes <+> wsEchoRoutes
 
   def run(args: List[String]): IO[ExitCode] =
-    BlazeServerBuilder[IO]
+    BlazeServerBuilder[IO](ExecutionContext.global)
       .bindHttp(9000, "localhost")
       .withHttpApp(routes.orNotFound)
       .serve

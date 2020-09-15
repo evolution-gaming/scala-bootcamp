@@ -50,7 +50,7 @@ class BinaryTreeSpec extends AnyFlatSpec {
     }
 
     def insertsAndSearch(): Unit = {
-      val topNode = system.actorOf(Props[BinaryTreeSet])
+      val topNode = system.actorOf(Props[BinaryTreeSet]())
 
       topNode ! Contains(testActor, id = 1, 1)
       expectMsg(ContainsResult(1, false))
@@ -66,7 +66,7 @@ class BinaryTreeSpec extends AnyFlatSpec {
     def verify(probe: TestProbe,
                ops: Seq[Operation],
                expected: Seq[OperationReply]): Unit = {
-      val topNode = system.actorOf(Props[BinaryTreeSet])
+      val topNode = system.actorOf(Props[BinaryTreeSet]())
 
       ops foreach { op =>
         topNode ! op

@@ -52,12 +52,12 @@ object Dispatchers extends App {
       case Get(key) =>
         if (cache.contains(key)) {
           println(s"getting result for $key")
-          sender ! Answer(cache(key))
+          sender() ! Answer(cache(key))
         } else {
           println(s"computing result for $key")
 
           // correct code
-          val client = sender
+          val client = sender()
           val futureResult = someComputations(key)
             .map(result => Result(key, result, client))
 

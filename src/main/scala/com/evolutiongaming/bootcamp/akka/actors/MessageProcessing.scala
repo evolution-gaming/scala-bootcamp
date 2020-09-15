@@ -36,12 +36,12 @@ object MessageProcessing extends App {
     def bankAccount(balance: Int): Receive = LoggingReceive {
       case Deposit(x) =>
         context.become(bankAccount(balance + x))
-        sender ! Done
+        sender() ! Done
       case Withdraw(x) if x <= balance =>
         context.become(bankAccount(balance - x))
-        sender ! Done
+        sender() ! Done
       case _ =>
-        sender ! Failure
+        sender() ! Failure
     }
   }
 
@@ -58,7 +58,7 @@ object MessageProcessing extends App {
       case Transfer(from, to, amount) =>
         // 1. need to get amount from
         from ! BankAccount.Withdraw(amount)
-        context.become(awaitWithdraw(to, amount, sender))
+        context.become(awaitWithdraw(to, amount, sender()))
     }
 
     def awaitWithdraw(to: ActorRef, amount: Int, client: ActorRef): Receive = LoggingReceive {
@@ -79,7 +79,7 @@ object MessageProcessing extends App {
   }
 
   class TransferMain extends Actor {
-    def spawnAccount(name: String): ActorRef = context.actorOf(Props[BankAccount], name)
+    def spawnAccount(name: String): ActorRef = context.actorOf(Props[BankAccount](), name)
 
     val accA = spawnAccount("acc-A")
     val accB = spawnAccount("acc-B")
@@ -92,7 +92,7 @@ object MessageProcessing extends App {
     }
 
     def makeTransfer(x: Int): Unit = {
-      val transfer = context.actorOf(Props[WireTransfer], "transfer")
+      val transfer = context.actorOf(Props[WireTransfer](), "transfer")
       transfer ! WireTransfer.Transfer(from = accA, to = accB, amount = x)
 
       context.become {
@@ -104,7 +104,7 @@ object MessageProcessing extends App {
   }
 
   val evoActorSystem: ActorSystem = ActorSystem("evo-actor-system")
-  evoActorSystem.actorOf(Props[TransferMain], "main")
+  evoActorSystem.actorOf(Props[TransferMain](), "main")
 
   // Actor collaboration
   // messages delivery guarantees: at most once

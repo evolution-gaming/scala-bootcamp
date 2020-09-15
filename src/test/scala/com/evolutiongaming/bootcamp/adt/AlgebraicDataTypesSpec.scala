@@ -30,7 +30,7 @@ class AlgebraicDataTypesSpec
 
   "Time" should "allow being created with valid hour and minute values" in {
     forAll(choose(min = 0, max = 23), choose(min = 0, max = 59)) { (hour: Int, minute: Int) =>
-      val time = Time.create(hour, minute).right.value
+      val time = Time.create(hour, minute).getOrElse(sys.error("Expected 'Right'"))
       time.hour shouldBe hour
       time.minute shouldBe minute
     }

@@ -10,9 +10,9 @@ object LifecycleAndSupervision extends App {
     import Worker._
 
     // Hooks
-    override def preStart: Unit =
+    override def preStart(): Unit =
       println("pre start")
-    override def postStop: Unit =
+    override def postStop(): Unit =
       println("post stop")
     override def preRestart(reason: Throwable, message: Option[Any]): Unit =
       println(s"pre restart reason: ${reason.getMessage}")
@@ -59,7 +59,7 @@ object LifecycleAndSupervision extends App {
       }
 
     // child
-    val worker: ActorRef = context.actorOf(props = Props[Worker], name = "worker")
+    val worker: ActorRef = context.actorOf(props = Props[Worker](), name = "worker")
     // death watch
     context.watch(worker)
 
@@ -71,7 +71,7 @@ object LifecycleAndSupervision extends App {
 
   // playground
   val evoActorSystem: ActorSystem = ActorSystem("evo-actor-system")
-  val supervisorActor: ActorRef = evoActorSystem.actorOf(Props[SupervisorActor])
+  val supervisorActor: ActorRef = evoActorSystem.actorOf(Props[SupervisorActor]())
   import Worker._
 
   // 1
