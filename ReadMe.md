@@ -37,20 +37,30 @@ The [2020 Q3-Q4 bootcamp](https://scala-bootcamp.evolutiongaming.com/) has the f
 
 The schedule will be adjusted according to learning progress.
 
-## Prerequisites
+## Preparation for the bootcamp
+
+### Prerequisites
 
 Please install recent versions of the following before the first lecture:
 - [intelliJ IDEA Community Edition](https://www.jetbrains.com/idea/download/)
 - [Scala plug-in](https://www.jetbrains.com/help/idea/discover-intellij-idea-for-scala.html) for IntelliJ IDEA
-- OpenJDK for the relevant platform (e.g., [Windows / Linux](https://jdk.java.net/14/) or [MacOS homebrew](https://formulae.brew.sh/formula/openjdk))
+- OpenJDK, e.g. [AdoptOpenJDK](https://adoptopenjdk.net/), [Oracle OpenJDK](https://jdk.java.net/) or [OpenJDK using homebrew](https://formulae.brew.sh/formula/openjdk) (for MacOS)
 - [Scala](https://www.scala-lang.org/download/)
 - [SBT](https://www.scala-sbt.org/download.html)
 - [Git](https://git-scm.com/downloads)
-- Check out the [Scala Bootcamp](https://github.com/evolution-gaming/scala-bootcamp) project and ensure you can run the tests for the project. The tests will fail (for now), this is normal and expected.
 
 Alternatives that are also expected to work:
-- [VS Code with Metals](https://marketplace.visualstudio.com/items?itemName=scalameta.metals) as an IDE
-- Oracle JDKs
+- [Visual Studio Code with Metals](https://marketplace.visualstudio.com/items?itemName=scalameta.metals) as an IDE
+
+### Prepare the project
+
+- Check out the [Scala Bootcamp](https://github.com/evolution-gaming/scala-bootcamp) project
+- Run tests from the command line using `sbt test`
+- Open the project in IntelliJ IDEA and run tests there (right-click on `scala-bootcamp` project in the left panel and click `Run ScalaTests in ‘scala…’`)
+
+The tests will fail (for now), this is normal and expected.
+
+### Troubleshooting
 
 In case of issues:
 - Read [Getting Started with Scala](https://docs.scala-lang.org/getting-started/index.html)
