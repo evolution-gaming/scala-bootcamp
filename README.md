@@ -1,10 +1,10 @@
 # Scala Bootcamp
 
-This repository contains exercises for the Evolution Gaming Scala Bootcamp.
+This repository contains exercises for the [Evolution Gaming](https://eng.evolutiongaming.com/) Scala Bootcamp.
 
 ## Schedule
 
-The 2020 Q3-Q4 iteration of the bootcamp has the following tentative schedule:
+The [2020 Q3-Q4 iteration](https://scala-bootcamp.evolutiongaming.com/) of the bootcamp has the following tentative schedule:
 
 | Date       | Title                                 | Topics                                                                                                | Responsible                                  |
 |------------|---------------------------------------|-------------------------------------------------------------------------------------------------------|----------------------------------------------|
@@ -17,7 +17,7 @@ The 2020 Q3-Q4 iteration of the bootcamp has the following tentative schedule:
 | 2020-10-13 | Error Handling                        | `Option`, `Either`, `Validated`, `Try`, `Future`, `IO`, encoding errors as ADTs                       | [@apavlovics](https://github.com/apavlovics) |
 | 2020-10-15 | Unit Testing                          | Benefits, testing pyramid, ScalaTest, structuring code to be testable                                 | [@rtar](https://github.com/rtar)             |
 | 2020-10-20 | Processing JSON                       | Processing JSON using Circe, writing custom coders and decoders                                       | [@arixmkii](https://github.com/arixmkii)     |
-| 2020-10-22 | Cats                                  | `cats-core` introduction, Monad Transformers                                                          | TODO - N.B.                                  |
+| 2020-10-22 | Cats                                  | `cats-core` introduction, Monad Transformers                                                          | [@Nbooo](https://github.com/Nbooo)
 | 2020-10-27 | Questions & Answers                   | Covering gaps - Q&A on subjects covered so far, coding practice if not enough questions               | [@jurisk](https://github.com/jurisk)         |   
 | 2020-10-29 | Variances                             | Understanding variances: covariance, contravariance, invariance                                       | [@saraiva132](https://github.com/saraiva132) |
 | 2020-11-03 | Asynchronous Programming              | Classic JVM threading, critical sections using `synchronized` and their perils, `Atomic*`             | [@Demosfen92](https://github.com/Demosfen92) |
@@ -30,11 +30,10 @@ The 2020 Q3-Q4 iteration of the bootcamp has the following tentative schedule:
 | 2020-11-26 | Working with Databases                | Brief overview of using databases from Scala: SQL, JDBC, Slick, Doobie                                | [@mr-git](https://github.com/mr-git)         |
 | 2020-12-01 | Event Sourcing using Akka Persistence | Event Sourcing, implementing it using Akka Persistence, CQRS                                          | [@mikla](https://github.com/mikla)           |
 | ...        | Course Project                        | Participants work on course projects, there are Q&A sessions - joint or with mentors                  |                                              |
-| 2020-12-15 | Presentation of Course Projects       | Participants present course projects to mentors & each other - part 1                                 | [@jurisk](https://github.com/jurisk)         |
+| 2020-12-15 | Presentation of Course Projects - 1   | Participants present course projects to mentors & each other - part 1                                 | [@jurisk](https://github.com/jurisk)         |
 | 2020-12-17 | Presentation of Course Projects - 2   | Participants present course projects to mentors & each other - part 2                                 | [@jurisk](https://github.com/jurisk)         |
 | 2020-12-22 | Development Practices & Processes     | Role of processes, Agile, Code Reviews, Testing, CI/CD                                                | [@jurisk](https://github.com/jurisk)         |
 | 2020-12-29 | Graduation                            | Discussion of course results, free form Q&A session                                                   | [@jurisk](https://github.com/jurisk)         |
-
 
 The schedule will be adjusted according to learning progress.
 
@@ -62,6 +61,10 @@ Please install recent versions of the following before the first lecture:
 - [Git](https://git-scm.com/downloads)
 - Check out the [Scala Bootcamp](https://github.com/evolution-gaming/scala-bootcamp) project and ensure you can run ScalaTests for the project. The tests are all expected to fail (for now), this is normal and expected.
 
+Alternatives that are expected to work:
+- [VS Code with Metals](https://marketplace.visualstudio.com/items?itemName=scalameta.metals) as an IDE
+- Oracle JDKs
+
 In case of issues:
 - Read [Getting Started with Scala](https://docs.scala-lang.org/getting-started/index.html)
 - Read [Discover IntelliJ IDEA for Scala](https://www.jetbrains.com/help/idea/discover-intellij-idea-for-scala.html)
@@ -83,10 +86,15 @@ All resources are listed in no particular order.
 
 ### Other
 
+- [Tour of Scala](https://docs.scala-lang.org/tour/tour-of-scala.html) & [Scala Book](https://docs.scala-lang.org/overviews/scala-book/introduction.html) from [scala-lang.org](https://www.scala-lang.org/)
 - [Scala Exercises](https://www.scala-exercises.org/) 
 - [Coursera Scala Specialization](https://www.coursera.org/specializations/scala)
 
+### Non-Scala
+
+- [Learn Git Branching](https://learngitbranching.js.org/)
+
 ## Status
 
-* The 2020 Q1-Q2 bootcamp has concluded
-* The 2020 Q3-Q4 bootcamp is ongoing
+* The [2020 Q1-Q2 bootcamp](https://evolution-gaming.timepad.ru/event/1106949/) has concluded
+* The [2020 Q3-Q4 bootcamp](https://scala-bootcamp.evolutiongaming.com/) is ongoing
