@@ -1,54 +1,41 @@
 # Scala Bootcamp
 
-This repository contains exercises for the [Evolution Gaming](https://eng.evolutiongaming.com/) Scala Bootcamp.
+This repository contains information on the [Evolution Gaming](https://eng.evolutiongaming.com/) Scala Bootcamp.
 
 ## Schedule
 
 The [2020 Q3-Q4 iteration](https://scala-bootcamp.evolutiongaming.com/) of the bootcamp has the following tentative schedule:
 
-| Date       | Title                                 | Topics                                                                                                | Responsible                                  |
-|------------|---------------------------------------|-------------------------------------------------------------------------------------------------------|----------------------------------------------|
-| 2020-09-22 | Introduction and Basic Syntax         | Introduction to bootcamp, introduction to Scala syntax (e.g. values, functions, traits)               | [@jurisk](https://github.com/jurisk)         |
-| 2020-09-24 | Control Structures                    | `if`-`else`, recursion, `map`, `flatMap`, `filter`, `for` comprehensions                              | [@jurisk](https://github.com/jurisk)         |
-| 2020-09-29 | Data Structures & Functions           | Mutable vs. immutable, `Array`-s, `List`-s, `Map`-s, tuples                                           | [@jurisk](https://github.com/jurisk)         |
-| 2020-10-01 | Algebraic Data Types                  | ADTs, their role in functional design, implementing and using them in Scala                           | [@apavlovics](https://github.com/apavlovics) |
-| 2020-10-06 | Implicits & Type Classes              | Implicits, type classes, defining them in Scala, Higher Kinded Types                                  | [@migesok](https://github.com/migesok)       | 
-| 2020-10-08 | Questions & Answers                   | Covering gaps - Q&A on subjects covered so far, coding practice if not enough questions               | [@jurisk](https://github.com/jurisk)         |  
-| 2020-10-13 | Error Handling                        | `Option`, `Either`, `Validated`, `Try`, `Future`, `IO`, encoding errors as ADTs                       | [@apavlovics](https://github.com/apavlovics) |
-| 2020-10-15 | Unit Testing                          | Benefits, testing pyramid, ScalaTest, structuring code to be testable                                 | [@rtar](https://github.com/rtar)             |
-| 2020-10-20 | Processing JSON                       | Processing JSON using Circe, writing custom coders and decoders                                       | [@arixmkii](https://github.com/arixmkii)     |
-| 2020-10-22 | Cats                                  | `cats-core` introduction, Monad Transformers                                                          | [@Nbooo](https://github.com/Nbooo)
-| 2020-10-27 | Questions & Answers                   | Covering gaps - Q&A on subjects covered so far, coding practice if not enough questions               | [@jurisk](https://github.com/jurisk)         |   
-| 2020-10-29 | Variances                             | Understanding variances: covariance, contravariance, invariance                                       | [@saraiva132](https://github.com/saraiva132) |
-| 2020-11-03 | Asynchronous Programming              | Classic JVM threading, critical sections using `synchronized` and their perils, `Atomic*`             | [@Demosfen92](https://github.com/Demosfen92) |
-| 2020-11-05 | Asynchronous Effects                  | Asynchronous Effects, e.g. Cats Effect IO and/or ZIO                                                  | [@Demosfen92](https://github.com/Demosfen92) |
-| 2020-11-10 | Shared State in FP                    | Using `Ref`-s and `MVar`-s                                                                            | [@Demosfen92](https://github.com/Demosfen92) |
-| 2020-11-12 | HTTP and Web Sockets                  | Akka HTTP and/or http4s for HTTP REST and Web Sockets                                                 | [@apavlovics](https://github.com/apavlovics) |
-| 2020-11-17 | Akka                                  | Akka Actors and other Akka features                                                                   | [@migesok](https://github.com/migesok)       | 
-| 2020-11-19 | Structure of Scala Applications       | How to structure Scala applications: SBT, single- vs multi-module projects, "package-by-feature"      | [@rtar](https://github.com/rtar)             |
-| 2020-11-24 | Containers                            | Docker and Kubernetes                                                                                 | [@arixmkii](https://github.com/arixmkii)     |
-| 2020-11-26 | Working with Databases                | Brief overview of using databases from Scala: SQL, JDBC, Slick, Doobie                                | [@mr-git](https://github.com/mr-git)         |
-| 2020-12-01 | Event Sourcing using Akka Persistence | Event Sourcing, implementing it using Akka Persistence, CQRS                                          | [@mikla](https://github.com/mikla)           |
-| ...        | Course Project                        | Participants work on course projects, there are Q&A sessions - joint or with mentors                  |                                              |
-| 2020-12-15 | Presentation of Course Projects - 1   | Participants present course projects to mentors & each other - part 1                                 | [@jurisk](https://github.com/jurisk)         |
-| 2020-12-17 | Presentation of Course Projects - 2   | Participants present course projects to mentors & each other - part 2                                 | [@jurisk](https://github.com/jurisk)         |
-| 2020-12-22 | Development Practices & Processes     | Role of processes, Agile, Code Reviews, Testing, CI/CD                                                | [@jurisk](https://github.com/jurisk)         |
-| 2020-12-29 | Graduation                            | Discussion of course results, free form Q&A session                                                   | [@jurisk](https://github.com/jurisk)         |
+| Date       | Title                                 | Topics                                                                                                | Responsible                                  | References |
+|------------|---------------------------------------|-------------------------------------------------------------------------------------------------------|----------------------------------------------|------------|
+| 2020-09-22 | Introduction and Basic Syntax         | Introduction to bootcamp, introduction to Scala syntax (e.g. values, functions, traits)               | [@jurisk](https://github.com/jurisk)         | [Basics](src/main/scala/com/evolutiongaming/bootcamp/basics/Basics.scala) ([tests](src/test/scala/com/evolutiongaming/bootcamp/basics/BasicsSpec.scala)), [Classes & Traits](src/main/scala/com/evolutiongaming/bootcamp/basics/ClassesAndTraits.scala) ([tests](src/test/scala/com/evolutiongaming/bootcamp/basics/ClassesAndTraitsSpec.scala)) |
+| 2020-09-24 | Control Structures                    | `if`-`else`, recursion, `map`, `flatMap`, `filter`, `for` comprehensions                              | [@jurisk](https://github.com/jurisk)         | [Control Structures](src/main/scala/com/evolutiongaming/bootcamp/basics/ControlStructures.scala) ([tests](src/test/scala/com/evolutiongaming/bootcamp/basics/ControlStructuresSpec.scala)) |
+| 2020-09-29 | Data Structures & Functions           | Mutable vs. immutable, `Array`-s, `List`-s, `Map`-s, tuples                                           | [@jurisk](https://github.com/jurisk)         | [Data Structures](src/main/scala/com/evolutiongaming/bootcamp/basics/DataStructures.scala) ([tests](src/test/scala/com/evolutiongaming/bootcamp/basics/DataStructuresSpec.scala)), [Functions](src/main/scala/com/evolutiongaming/bootcamp/functions/Functions.scala) ([tests](src/test/scala/com/evolutiongaming/bootcamp/functions/FunctionsSpec.scala)) |
+| 2020-10-01 | Algebraic Data Types                  | ADTs, their role in functional design, implementing and using them in Scala                           | [@apavlovics](https://github.com/apavlovics) | [Algebraic Data Types](src/main/scala/com/evolutiongaming/bootcamp/adt/AlgebraicDataTypes.scala) ([tests](src/test/scala/com/evolutiongaming/bootcamp/adt/AlgebraicDataTypesSpec.scala)) |
+| 2020-10-06 | Implicits & Type Classes              | Implicits, type classes, defining them in Scala, Higher Kinded Types                                  | [@migesok](https://github.com/migesok)       | | 
+| 2020-10-08 | Questions & Answers                   | Covering gaps - Q&A on subjects covered so far, coding practice if not enough questions               | [@jurisk](https://github.com/jurisk)         | | 
+| 2020-10-13 | Error Handling                        | `Option`, `Either`, `Validated`, `Try`, `Future`, `IO`, encoding errors as ADTs                       | [@apavlovics](https://github.com/apavlovics) | |
+| 2020-10-15 | Unit Testing                          | Benefits, testing pyramid, ScalaTest, structuring code to be testable                                 | [@rtar](https://github.com/rtar)             | |
+| 2020-10-20 | Processing JSON                       | Processing JSON using Circe, writing custom coders and decoders                                       | [@arixmkii](https://github.com/arixmkii)     | [JSON](src/main/scala/com/evolutiongaming/bootcamp/json/CirceExercises.scala) ([tests](src/test/scala/com/evolutiongaming/bootcamp/json/CirceExercisesSpec.scala), [homework](src/test/scala/com/evolutiongaming/bootcamp/json/HomeworkSpec.scala)) |
+| 2020-10-22 | Cats                                  | `cats-core` introduction, Monad Transformers                                                          | [@Nbooo](https://github.com/Nbooo)           | |
+| 2020-10-27 | Questions & Answers                   | Covering gaps - Q&A on subjects covered so far, coding practice if not enough questions               | [@jurisk](https://github.com/jurisk)         | | 
+| 2020-10-29 | Variances                             | Understanding variances: covariance, contravariance, invariance                                       | [@saraiva132](https://github.com/saraiva132) | |
+| 2020-11-03 | Asynchronous Programming              | Classic JVM threading, critical sections using `synchronized` and their perils, `Atomic*`             | [@Demosfen92](https://github.com/Demosfen92) | |
+| 2020-11-05 | Asynchronous Effects                  | Asynchronous Effects, e.g. Cats Effect IO and/or ZIO                                                  | [@Demosfen92](https://github.com/Demosfen92) | |
+| 2020-11-10 | Shared State in FP                    | Using `Ref`-s and `MVar`-s                                                                            | [@Demosfen92](https://github.com/Demosfen92) | |
+| 2020-11-12 | HTTP and Web Sockets                  | Akka HTTP and/or http4s for HTTP REST and Web Sockets                                                 | [@apavlovics](https://github.com/apavlovics) | |
+| 2020-11-17 | Akka                                  | Akka Actors and other Akka features                                                                   | [@migesok](https://github.com/migesok)       | |
+| 2020-11-19 | Structure of Scala Applications       | How to structure Scala applications: SBT, single- vs multi-module projects, "package-by-feature"      | [@rtar](https://github.com/rtar)             | |
+| 2020-11-24 | Containers                            | Docker and Kubernetes                                                                                 | [@arixmkii](https://github.com/arixmkii)     | |
+| 2020-11-26 | Working with Databases                | Brief overview of using databases from Scala: SQL, JDBC, Slick, Doobie                                | [@mr-git](https://github.com/mr-git)         | [Databases](src/main/scala/com/evolutiongaming/bootcamp/db/DoobieExercises.scala) |
+| 2020-12-01 | Event Sourcing using Akka Persistence | Event Sourcing, implementing it using Akka Persistence, CQRS                                          | [@mikla](https://github.com/mikla)           | |
+| ...        | Course Project                        | Participants work on course projects, there are Q&A sessions - joint or with mentors                  | N/A                                          | |
+| 2020-12-15 | Presentation of Course Projects - 1   | Participants present course projects to mentors & each other - part 1                                 | [@jurisk](https://github.com/jurisk)         | |
+| 2020-12-17 | Presentation of Course Projects - 2   | Participants present course projects to mentors & each other - part 2                                 | [@jurisk](https://github.com/jurisk)         | |
+| 2020-12-22 | Development Practices & Processes     | Role of processes, Agile, Code Reviews, Testing, CI/CD                                                | [@jurisk](https://github.com/jurisk)         | |
+| 2020-12-29 | Graduation                            | Discussion of course results, free form Q&A session                                                   | [@jurisk](https://github.com/jurisk)         | |
 
 The schedule will be adjusted according to learning progress.
-
-## Topics
-
-The following topics are currently available:
-
-- [Basics](src/main/scala/com/evolutiongaming/bootcamp/basics/Basics.scala) ([tests](src/test/scala/com/evolutiongaming/bootcamp/basics/BasicsSpec.scala))
-- [Classes & Traits](src/main/scala/com/evolutiongaming/bootcamp/basics/ClassesAndTraits.scala) ([tests](src/test/scala/com/evolutiongaming/bootcamp/basics/ClassesAndTraitsSpec.scala))
-- [Control Structures](src/main/scala/com/evolutiongaming/bootcamp/basics/ControlStructures.scala) ([tests](src/test/scala/com/evolutiongaming/bootcamp/basics/ControlStructuresSpec.scala))
-- [Data Structures](src/main/scala/com/evolutiongaming/bootcamp/basics/DataStructures.scala) ([tests](src/test/scala/com/evolutiongaming/bootcamp/basics/DataStructuresSpec.scala))
-- [Algebraic Data Types](src/main/scala/com/evolutiongaming/bootcamp/adt/AlgebraicDataTypes.scala) ([tests](src/test/scala/com/evolutiongaming/bootcamp/adt/AlgebraicDataTypesSpec.scala))
-- [Functions](src/main/scala/com/evolutiongaming/bootcamp/functions/Functions.scala) ([tests](src/test/scala/com/evolutiongaming/bootcamp/functions/FunctionsSpec.scala))
-- [JSON](src/main/scala/com/evolutiongaming/bootcamp/json/CirceExercises.scala) ([tests](src/test/scala/com/evolutiongaming/bootcamp/json/CirceExercisesSpec.scala), [homework](src/test/scala/com/evolutiongaming/bootcamp/json/HomeworkSpec.scala))
-- [Databases](src/main/scala/com/evolutiongaming/bootcamp/db/DoobieExercises.scala)
 
 ## Prerequisites
 
