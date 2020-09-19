@@ -1,8 +1,46 @@
 # Scala Bootcamp
 
-This repository contains exercises for the Evolution Gaming Scala Bootcamp. 
+This repository contains exercises for the Evolution Gaming Scala Bootcamp.
 
-The following lectures are currently available:
+## Schedule
+
+The 2020 Q3-Q4 iteration of the bootcamp has the following tentative schedule:
+
+| Date       | Title                                 | Topics                                                                                                | Responsible                                  |
+|------------|---------------------------------------|-------------------------------------------------------------------------------------------------------|----------------------------------------------|
+| 2020-09-22 | Introduction and Basic Syntax         | Introduction to bootcamp, introduction to Scala syntax (e.g. values, functions, traits)               | [@jurisk](https://github.com/jurisk)         |
+| 2020-09-24 | Control Structures                    | `if`-`else`, recursion, `map`, `flatMap`, `filter`, `for` comprehensions                              | [@jurisk](https://github.com/jurisk)         |
+| 2020-09-29 | Data Structures & Functions           | Mutable vs. immutable, `Array`-s, `List`-s, `Map`-s, tuples                                           | [@jurisk](https://github.com/jurisk)         |
+| 2020-10-01 | Algebraic Data Types                  | ADTs, their role in functional design, implementing and using them in Scala                           | [@apavlovics](https://github.com/apavlovics) |
+| 2020-10-06 | Implicits & Type Classes              | Implicits, type classes, defining them in Scala, Higher Kinded Types                                  | [@migesok](https://github.com/migesok)       | 
+| 2020-10-08 | Questions & Answers                   | Covering gaps - Q&A on subjects covered so far, coding practice if not enough questions               | [@jurisk](https://github.com/jurisk)         |  
+| 2020-10-13 | Error Handling                        | `Option`, `Either`, `Validated`, `Try`, `Future`, `IO`, encoding errors as ADTs                       | [@apavlovics](https://github.com/apavlovics) |
+| 2020-10-15 | Unit Testing                          | Benefits, testing pyramid, ScalaTest, structuring code to be testable                                 | [@rtar](https://github.com/rtar)             |
+| 2020-10-20 | Processing JSON                       | Processing JSON using Circe, writing custom coders and decoders                                       | [@arixmkii](https://github.com/arixmkii)     |
+| 2020-10-22 | Cats                                  | `cats-core` introduction, Monad Transformers                                                          | TODO - N.B.                                  |
+| 2020-10-27 | Questions & Answers                   | Covering gaps - Q&A on subjects covered so far, coding practice if not enough questions               | [@jurisk](https://github.com/jurisk)         |   
+| 2020-10-29 | Variances                             | Understanding variances: covariance, contravariance, invariance                                       | [@saraiva132](https://github.com/saraiva132) |
+| 2020-11-03 | Asynchronous Programming              | Classic JVM threading, critical sections using `synchronized` and their perils, `Atomic*`             | [@Demosfen92](https://github.com/Demosfen92) |
+| 2020-11-05 | Asynchronous Effects                  | Asynchronous Effects, e.g. Cats Effect IO and/or ZIO                                                  | [@Demosfen92](https://github.com/Demosfen92) |
+| 2020-11-10 | Shared State in FP                    | Using `Ref`-s and `MVar`-s                                                                            | [@Demosfen92](https://github.com/Demosfen92) |
+| 2020-11-12 | HTTP and Web Sockets                  | Akka HTTP and/or http4s for HTTP REST and Web Sockets                                                 | [@apavlovics](https://github.com/apavlovics) |
+| 2020-11-17 | Akka                                  | Akka Actors and other Akka features                                                                   | [@migesok](https://github.com/migesok)       | 
+| 2020-11-19 | Structure of Scala Applications       | How to structure Scala applications: SBT, single- vs multi-module projects, "package-by-feature"      | [@rtar](https://github.com/rtar)             |
+| 2020-11-24 | Containers                            | Docker and Kubernetes                                                                                 | [@arixmkii](https://github.com/arixmkii)     |
+| 2020-11-26 | Working with Databases                | Brief overview of using databases from Scala: SQL, JDBC, Slick, Doobie                                | [@mr-git](https://github.com/mr-git)         |
+| 2020-12-01 | Event Sourcing using Akka Persistence | Event Sourcing, implementing it using Akka Persistence, CQRS                                          | [@mikla](https://github.com/mikla)           |
+| ...        | Course Project                        | Participants work on course projects, there are Q&A sessions - joint or with mentors                  |                                              |
+| 2020-12-15 | Presentation of Course Projects       | Participants present course projects to mentors & each other - part 1                                 | [@jurisk](https://github.com/jurisk)         |
+| 2020-12-17 | Presentation of Course Projects - 2   | Participants present course projects to mentors & each other - part 2                                 | [@jurisk](https://github.com/jurisk)         |
+| 2020-12-22 | Development Practices & Processes     | Role of processes, Agile, Code Reviews, Testing, CI/CD                                                | [@jurisk](https://github.com/jurisk)         |
+| 2020-12-29 | Graduation                            | Discussion of course results, free form Q&A session                                                   | [@jurisk](https://github.com/jurisk)         |
+
+
+The schedule will be adjusted according to learning progress.
+
+## Topics
+
+The following topics are currently available:
 
 - [Basics](src/main/scala/com/evolutiongaming/bootcamp/basics/Basics.scala) ([tests](src/test/scala/com/evolutiongaming/bootcamp/basics/BasicsSpec.scala))
 - [Classes & Traits](src/main/scala/com/evolutiongaming/bootcamp/basics/ClassesAndTraits.scala) ([tests](src/test/scala/com/evolutiongaming/bootcamp/basics/ClassesAndTraitsSpec.scala))
@@ -13,37 +51,42 @@ The following lectures are currently available:
 - [JSON](src/main/scala/com/evolutiongaming/bootcamp/json/CirceExercises.scala) ([tests](src/test/scala/com/evolutiongaming/bootcamp/json/CirceExercisesSpec.scala), [homework](src/test/scala/com/evolutiongaming/bootcamp/json/HomeworkSpec.scala))
 - [Databases](src/main/scala/com/evolutiongaming/bootcamp/db/DoobieExercises.scala)
 
-# Prerequisites
+## Prerequisites
 
 Please install recent versions of the following before the first lecture:
 - [intelliJ IDEA Community Edition](https://www.jetbrains.com/idea/download/)
 - [Scala plug-in](https://www.jetbrains.com/help/idea/discover-intellij-idea-for-scala.html) for IntelliJ IDEA
-- OpenJDK for the relevant platform [Windows / Linux](https://jdk.java.net/14/) or [MacOS](https://formulae.brew.sh/cask/java)
+- OpenJDK for the relevant platform (e.g., [Windows / Linux](https://jdk.java.net/14/) or [MacOS homebrew](https://formulae.brew.sh/formula/openjdk))
 - [Scala](https://www.scala-lang.org/download/)
 - [SBT](https://www.scala-sbt.org/download.html)
 - [Git](https://git-scm.com/downloads)
-- Check out [Scala Bootcamp](https://github.com/evolution-gaming/scala-bootcamp) project and ensure you can run ScalaTests for the project (they are all expected to fail for now, this is normal and expected)
+- Check out the [Scala Bootcamp](https://github.com/evolution-gaming/scala-bootcamp) project and ensure you can run ScalaTests for the project. The tests are all expected to fail (for now), this is normal and expected.
 
-In case of issues, refer to:
-- [Getting Started with Scala](https://docs.scala-lang.org/getting-started/index.html)
-- [Discover IntelliJ IDEA for Scala](https://www.jetbrains.com/help/idea/discover-intellij-idea-for-scala.html)
+In case of issues:
+- Read [Getting Started with Scala](https://docs.scala-lang.org/getting-started/index.html)
+- Read [Discover IntelliJ IDEA for Scala](https://www.jetbrains.com/help/idea/discover-intellij-idea-for-scala.html)
+- Ask in the Bootcamp chat
 
-# Learning resources
+## Learning resources
 
 All resources are listed in no particular order.
 
-## Book Recommendations
+### Books
 
-- [Scala from Scratch: Exploration](https://leanpub.com/scala-from-scratch-exploration)
-- [Practical FP in Scala: A hands-on approach](https://leanpub.com/pfp-scala)
-- [Essential Scala](https://underscore.io/books/essential-scala/)
-- [Scala with Cats](https://underscore.io/books/scala-with-cats/)
-- [Functional Programming in Scala](https://www.manning.com/books/functional-programming-in-scala)
-- [Functional Programming for Mortals](https://leanpub.com/fpmortals-cats)
-- [Programming in Scala](https://booksites.artima.com/programming_in_scala_3ed)
-- [Scala for the Impatient](https://horstmann.com/scala/)
+- [Essential Scala](https://underscore.io/books/essential-scala/) (free)
+- [Scala with Cats 2](https://www.scalawithcats.com/) (free)
+- [Functional Programming in Scala](https://www.manning.com/books/functional-programming-in-scala#toc) (free)
+- [Scala from Scratch: Exploration](https://leanpub.com/scala-from-scratch-exploration) ($15+)
+- [Functional Programming for Mortals](https://leanpub.com/fpmortals-cats) ($15+)
+- [Practical FP in Scala: A hands-on approach](https://leanpub.com/pfp-scala) ($30+)
+- [Programming in Scala](https://booksites.artima.com/programming_in_scala_3ed) ($30+)
 
-## Courses Recommendations
+### Other
 
 - [Scala Exercises](https://www.scala-exercises.org/) 
 - [Coursera Scala Specialization](https://www.coursera.org/specializations/scala)
+
+## Status
+
+* The 2020 Q1-Q2 bootcamp has concluded
+* The 2020 Q3-Q4 bootcamp is ongoing
