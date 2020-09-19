@@ -4,7 +4,7 @@ This repository contains information on the [Evolution Gaming](https://eng.evolu
 
 ## Schedule
 
-The [2020 Q3-Q4 iteration](https://scala-bootcamp.evolutiongaming.com/) of the bootcamp has the following tentative schedule:
+The [2020 Q3-Q4 bootcamp](https://scala-bootcamp.evolutiongaming.com/) has the following tentative schedule:
 
 | Date       | Title                                 | Description                                                                                           | Responsible                                  | Materials  |
 |------------|---------------------------------------|-------------------------------------------------------------------------------------------------------|----------------------------------------------|------------|
@@ -46,9 +46,9 @@ Please install recent versions of the following before the first lecture:
 - [Scala](https://www.scala-lang.org/download/)
 - [SBT](https://www.scala-sbt.org/download.html)
 - [Git](https://git-scm.com/downloads)
-- Check out the [Scala Bootcamp](https://github.com/evolution-gaming/scala-bootcamp) project and ensure you can run ScalaTests for the project. The tests are all expected to fail (for now), this is normal and expected.
+- Check out the [Scala Bootcamp](https://github.com/evolution-gaming/scala-bootcamp) project and ensure you can run the tests for the project. The tests will fail (for now), this is normal and expected.
 
-Alternatives that are expected to work:
+Alternatives that are also expected to work:
 - [VS Code with Metals](https://marketplace.visualstudio.com/items?itemName=scalameta.metals) as an IDE
 - Oracle JDKs
 
