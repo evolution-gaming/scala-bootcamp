@@ -76,6 +76,12 @@ object DataStructures {
   val moreVegetables = vegetables + "avocado"
   val lessVegetables = moreVegetables - "peppers"
 
+  // Exercise. Write a function that checks if all values in a `List` are equal.
+  // Think about what you think your function should return if `list` is empty, and why.
+  def allEqual[T](list: List[T]): Boolean = {
+    false // TODO: implement
+  }
+
   // Maps
   //
   // Maps consist of pairs of keys and values and usually offer fast lookup by key.

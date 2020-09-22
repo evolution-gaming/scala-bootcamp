@@ -2,15 +2,23 @@ package com.evolutiongaming.bootcamp.basics
 
 object Basics {
   // Let's start by quickly going through the basic building blocks of Scala programs.
+
   // You can follow your progress using the tests in `BasicsSpec`.
+  // You can run those tests from the IDE or using `sbt "testOnly com.evolutiongaming.bootcamp.basics.BasicsSpec"`.
+
+  // If you are used to using REPL on other platforms, you can use this file in Scala REPL using
+  // `sbt console` and then `import com.evolutiongaming.bootcamp.basics.Basics._`.
+  // `sbt consoleQuick` will start REPL without compilation.
 
   // Values
 
-  // A value is an immutable, typed storage unit. A value can be assigned data when it is defined, but can
+  // A value is an immutable, typed storage unit. A value is assigned data when it is defined, but can
   // never be reassigned.
 
   // You declare values (constant or immutable variables) using `val`:
   val int1 = 4
+
+  // val int1 = 5 <-- this doesn't work, values are immutable (cannot be reassigned)
 
   // Variables
 
@@ -22,7 +30,9 @@ object Basics {
   int2 = 6 // you can later reassign them (assign a different value to this variable)
 
   // Immutability is a good thing and leads to code which is easier to reason about and thus maintain.
-  // Prefer `val` to `var` except in cases where `var` cannot be avoided.
+
+  // Prefer `val` to `var` except in cases where `var` cannot be avoided. As we progress with this course,
+  // we will learn to avoid using `var`.
 
   // Types define the data that a value can contain.
 
@@ -30,6 +40,8 @@ object Basics {
   val int3: Int = 7
   // ... or inferred by the compiler ...
   val int4 = 3
+
+  // Your IDE has features that "Add type annotation to value definition", show "Type Info" and others.
 
   // The Scala type system is rich and powerful and this section will discuss only the basics of it.
 
@@ -45,15 +57,15 @@ object Basics {
   val bool1: Boolean = true
   val bool2: Boolean = false
 
-  // Exercise. List all boolean values
+  // Exercise. List all boolean values.
   val allBooleans: Set[Boolean] = Set( /* add values here, separated by commas */ )
 
   /* Common boolean operations:
-      !false         // true - `!` is negation
-      !true          // false
-      false == true  // false - boolean comparison
-      true && false  // false - logical `and`
-      true || false  // true - logical `or`
+      !false          // true - `!` is negation
+      !true           // false
+      false == true   // false - boolean comparison
+      true  && false  // false - logical `and`
+      true  || false  // true - logical `or`
    */
 
   // Byte - 8-bit signed integer (-2^7 to 2^7 - 1, inclusive)
@@ -173,16 +185,18 @@ object Basics {
   // to non-primitive values:
   val nullString: String = null // you can also use `_` to assign the default value
 
-  // There are nine predefined types which are non-nullable (also called primitive): Boolean, Byte, Short,
-  // Int, Long, Float, Double, Char, Unit.
-
   // You shouldn't do this and should avoid using `null` in Scala code, instead preferring `Option` or other
   // more type-safe ways of indicating an absence of value. We will learn about these in future lessons.
-  //
+
   // `null`-s are error-prone and lead to unexpected NullPointerExceptions.
+
+  def artificialExample: String = if (System.getenv("test").toLowerCase == "value") "found" else "not found"
 
   // There is a proposal for Scala 3 to improve `null` handling:
   // https://contributors.scala-lang.org/t/sip-public-review-explicit-nulls/3889
+
+  // There are nine predefined types which are non-nullable (also called primitive): Boolean, Byte, Short,
+  // Int, Long, Float, Double, Char, Unit.
 
   // Blocks and Expressions
 
@@ -231,8 +245,8 @@ object Basics {
 
   // Methods can have default parameters
   def addNTimes(x: Int, y: Int, times: Int = 1): Int = x + y * times
-  val sum2 = addNTimes(2, 3) // 5
-  val sum3 = addNTimes(2, 3, 4) // 14
+  val sum2 = addNTimes(2, 3) // 5, because 2 + 3 * 1
+  val sum3 = addNTimes(2, 3, 4) // 14, because 2 + 3 * 4
 
   // Functions are defined with the following syntax:
   //
@@ -255,8 +269,8 @@ object Basics {
   // If each argument of a function is used exactly once, you can use `_` to refer to them
   val addFunction: (Int, Int) => Int = _ + _
 
-  // First occurance of _ - it's 1st argument.
-  // Second occurance of _ - it's 2nd argument.
+  // First occurrence of _ - it's 1st argument.
+  // Second occurrence of _ - it's 2nd argument.
   // And etc...
 
   // addFunction can be rewritten as:
@@ -317,7 +331,7 @@ object Basics {
   // Polymorphic methods, or methods which take type parameters
   //
   // Methods in Scala can be parameterised by types of their arguments and return values. Type parameters are
-  // enclosed in square brackets (in contrast with value parameters which are enclosed in parentheses)
+  // enclosed in square brackets (in contrast with value parameters which are enclosed in parentheses).
   //
   // The function `formatNamedDouble` can be rewritten in a more general way as follows:
 
@@ -327,6 +341,12 @@ object Basics {
 
   val commasForThousands: Long => String = (x: Long) => f"$x%,d"
   val formattedLong: String = formatNamedValue("y", commasForThousands)(123456) // y = 123,456
+
+  // Question: What is `A` for `formatNamedDouble` in this `formattedLong` invocation of it?
+
+  // Exercise. Invoke `formatNamedValue` with a `List[String]` as `A`. You can use `_.mkString(", ")` to
+  // concatenate the list with comma as a delimiter. You can provide the `List[String]` type
+  // explicitly after the method name or for the `format` function.
 
   // Tuples
   //
@@ -340,7 +360,7 @@ object Basics {
   val pepper1 = tuple1._1
   val pepperPrice1 = tuple1._2
 
-  // However this should be done sparingly and instead preferring the following form:
+  // However this should be done sparingly and instead preferring the following destructuring form:
   val (pepper3, pepperPrice3) = tuple1
 
   // If you only need one of these values you can omit the other using `_`:
@@ -379,4 +399,12 @@ object Basics {
   val allTupleBooleanBooleans: Set[(Boolean, Boolean)] = Set()
 
   // Question. Can we make a `Set` with all possible `Byte` values? `Double` values? `String` values?
+
+  // Homework. Implement functions that calculate https://en.wikipedia.org/wiki/Lowest_common_denominator and
+  // https://en.wikipedia.org/wiki/Greatest_common_divisor for integers.
+
+  def lcm(a: Int, b: Int): Int = ???
+  def gcd(a: Int, b: Int): Int = ???
+
+  // Create a new Git public repository for your homework solutions, use `basics` package for this homework.
 }

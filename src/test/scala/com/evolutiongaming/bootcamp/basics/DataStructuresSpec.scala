@@ -36,6 +36,14 @@ class DataStructuresSpec extends AnyFlatSpec with ScalaCheckDrivenPropertyChecks
     )
   }
 
+  "allEqual" should "work for lists which are all equal" in {
+    allEqual(List("a", "a", "a", "a")) shouldBe true
+  }
+
+  "allEqual" should "work for lists which are NOT all equal" in {
+    allEqual(List("a", "a", "b", "a")) shouldBe false
+  }
+
   "sort considering equal values" should "be correct on example 1" in {
     val input = Map("a" -> 1, "b" -> 2, "c" -> 4, "d" -> 1, "e" -> 0, "f" -> 2, "g" -> 2)
     val expected = List(Set("e") -> 0, Set("a", "d") -> 1, Set("b", "f", "g") -> 2, Set("c") -> 4)
