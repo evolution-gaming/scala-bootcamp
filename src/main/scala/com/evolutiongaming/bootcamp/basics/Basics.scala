@@ -339,6 +339,15 @@ object Basics {
     s"$name = ${format(x)}"
   }
 
+  // Using such "parametric polymorphism" helps us do "parametric reasoning" - to reason about implementation
+  // merely by looking at type signatures.
+
+  // Using type parameters hides information from the implementation of the function. Hiding information
+  // reduces the number of possible implementations, which makes code easier to understand and reuse.
+
+  // Thus, while initially parametric polymorphisms seems to make our code more complicated, as you gain
+  // experience with it, it will often help you write simpler, more maintainable code.
+
   val commasForThousands: Long => String = (x: Long) => f"$x%,d"
   val formattedLong: String = formatNamedValue("y", commasForThousands)(123456) // y = 123,456
 
@@ -407,4 +416,5 @@ object Basics {
   def gcd(a: Int, b: Int): Int = ???
 
   // Create a new Git public repository for your homework solutions, use `basics` package for this homework.
+  // You can use `sbt new scala/hello-world.g8` to start a new bare-bones Scala SBT project.
 }
