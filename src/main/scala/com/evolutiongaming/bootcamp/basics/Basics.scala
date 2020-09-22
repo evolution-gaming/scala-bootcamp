@@ -351,7 +351,7 @@ object Basics {
   val commasForThousands: Long => String = (x: Long) => f"$x%,d"
   val formattedLong: String = formatNamedValue("y", commasForThousands)(123456) // y = 123,456
 
-  // Question: What is `A` for `formatNamedDouble` in this `formattedLong` invocation of it?
+  // Question: What is `A` for `formatNamedValue` in this `formattedLong` invocation of it?
 
   // Exercise. Invoke `formatNamedValue` with a `List[String]` as `A`. You can use `_.mkString(", ")` to
   // concatenate the list with comma as a delimiter. You can provide the `List[String]` type
