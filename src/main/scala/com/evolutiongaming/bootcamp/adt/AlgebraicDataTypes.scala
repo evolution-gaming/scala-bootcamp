@@ -74,6 +74,7 @@ object AlgebraicDataTypes {
   // can be used. However, it is rather syntax-heavy and cannot be combined with value classes.
   // Exercise. Implement the smart constructor for `Time` that only permits values from 00:00 to 23:59 and
   // returns "Invalid hour value" or "Invalid minute value" strings in `Left` when appropriate.
+
   // Question. Is using `String` to represent `Left` a good idea?
   sealed abstract case class Time private (hour: Int, minute: Int)
   object Time {
