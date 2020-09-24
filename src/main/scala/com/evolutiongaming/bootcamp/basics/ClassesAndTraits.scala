@@ -1,10 +1,11 @@
 package com.evolutiongaming.bootcamp.basics
 
 object ClassesAndTraits {
-  // You can follow your progress using the tests in `ClassesAndTraitsSpec`.
+  // You can follow your progress using the tests in `ClassesAndTraitsSpec`:
+  //   sbt "testOnly com.evolutiongaming.bootcamp.basics.ClassesAndTraitsSpec"
 
-  // Classes in Scala are blueprints for creating objects. They can contain methods, values, variables,
-  // types, objects, traits, and classes which are collectively called members.
+  // Classes in Scala are blueprints for creating object instances. They can contain methods, values,
+  // variables, types, objects, traits, and classes which are collectively called members.
 
   class MutablePoint(var x: Double, var y: Double) {
     def move(dx: Double, dy: Double): Unit = {
@@ -23,10 +24,18 @@ object ClassesAndTraits {
   // Question. Is MutablePoint a good design? Why or why not?
 
   // Traits define a common interface that classes conform to. They are similar to Java's interfaces.
-  // Classes and objects can extend traits but traits cannot be instantiated and therefore have no parameters.
+
+  // A trait can be thought of as a contract that defines the capabilities and behaviour of a component.
 
   // Subtyping
   // Where a given trait is required, a subtype of the trait can be used instead.
+
+  // Classes and singleton objects can extend traits.
+  //
+  // This allows "programming to the interface" approach where you depend on traits instead of their
+  // specific implementations (classes or objects).
+  //
+  // This makes code more reusable and testable.
 
   sealed trait Shape extends Located with Bounded
 
@@ -62,7 +71,7 @@ object ClassesAndTraits {
   //
   // Case classes are like regular classes, but with extra features which make them good for modelling
   // immutable data. They have all the functionality of regular classes, but the compiler generates additional
-  // code:
+  // code, such as:
   // - Case class constructor parameters are public `val` fields, publicly accessible
   // - `apply` method is created in the companion object, so you don't need to use `new` to create a new
   //   instance of the class
@@ -104,6 +113,24 @@ object ClassesAndTraits {
     case Circle(centerX, centerY, radius) => s"Circle(centerX = $centerX, centerY = $centerY, radius = $radius)"
   }
 
+  // Singleton objects are defined using `object`.
+  // It is a class that has exactly one instance.
+  // They can be thought of as "static classes" in Java.
+  object Origin extends Located {
+    override def x: Double = 0
+    override def y: Double = 0
+  }
+
+  // An `object` defined with the same name as an existing trait or class is called
+  // a "companion object".
+
+  // Use it to contain methods and values related to this trait or class, but that aren't
+  // specific to instances of this trait or class.
+
+  object Bounded {
+    def minimumBoundingRectangle(objects: Set[Bounded]): Bounded = ???
+  }
+
   // Exercise. Add another Shape class called Rectangle and check that the compiler catches that we are
   // missing code to handle it in `describe`.
 
@@ -117,11 +144,11 @@ object ClassesAndTraits {
 
   // In a similar way as we saw with polymorphic methods, classes and traits can also take type parameters.
   // For example, you can define a Stack[A] which works with any type of element A.
+
+  // Question. Do you agree with how the stack is modelled here? What would you do differently?
   final case class Stack[A](elements: List[A] = Nil) {
-    def push(x: A): Stack[A] = Stack(x :: elements)
-    def peek: Option[A] = elements.headOption
-    def pop: Option[(A, Stack[A])] = peek map { x =>
-      (x, Stack(elements.tail))
-    }
+    def push(x: A): Stack[A] = ???
+    def peek: A = ???
+    def pop: (A, Stack[A]) = ???
   }
 }

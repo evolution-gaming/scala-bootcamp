@@ -8,6 +8,7 @@ import scala.util.{Failure, Success, Try}
 
 object ControlStructures {
   // You can follow your progress using the tests in `ControlStructuresSpec`.
+  //   sbt "testOnly com.evolutiongaming.bootcamp.basics.ControlStructuresSpec"
 
   // The if-then-else construct is as follows:
   //
@@ -106,7 +107,9 @@ object ControlStructures {
     else list.reduce((a, b) => a + b)
   }
 
-  // Question. How is List.sum implemented in the standard library?
+  def sum5(list: List[Int]): Int = {
+    list.sum // only for Numeric lists
+  }
 
   // Exercise: Implement a function `applyNTimes` which takes a function `f` and an integer `n` and
   // returns a function which applies the function `f` `n` times.
