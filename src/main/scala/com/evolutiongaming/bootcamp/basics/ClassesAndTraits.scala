@@ -134,11 +134,14 @@ object ClassesAndTraits {
   // Exercise. Add another Shape class called Rectangle and check that the compiler catches that we are
   // missing code to handle it in `describe`.
 
-  // Exercise. Change the implementation of `minimumBoundingRectangle` to return a `Rectangle` instance.
-  // What are the pros & cons of each implementation?
-
-  // Exercise. The tests for `minimumBoundingRectangle` in `ClassesAndTraitsSpec` are insufficient.
-  // Improve the tests.
+  // Let us come back to our `Shape`-s and add a `Movable` trait
+  // which will have a method:
+  //
+  //   def move(dx: Double, dy: Double)
+  //
+  // How should we implement `move` for various types?
+  //
+  // What should be the return type of the `move` method in `Shape`? In `Point` and other sub-types?
 
   // Generic classes and type parameters
 
@@ -151,19 +154,6 @@ object ClassesAndTraits {
     def peek: A = ???
     def pop: (A, Stack[A]) = ???
   }
-
-  // Let us come back to our `Shape`-s and add a `Movable` trait
-  // which will have a method:
-  //
-  //   def move(dx: Double, dy: Double)
-  //
-  // What should be the return type of the `move` method?
-  //
-  // What if we want `Point#move` to return `Point` and
-  // `Circle#move` to return `Circle`?
-  //
-  // What if we want to ensure that all `move` methods only return
-  // other `Movable`-s and not something unrelated like `String`-s?
 
   // Homework
   //

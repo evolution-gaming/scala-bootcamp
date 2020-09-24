@@ -250,11 +250,11 @@ object Basics {
 
   // Functions are defined with the following syntax:
   //
-  // val functionName: (Parameter1Type, Parameter2Type => ReturnType) = (parameter1: Parameter1Type, parameter2: Parameter2Type) => {
+  // val functionName: (Parameter1Type, Parameter2Type) => ReturnType = (parameter1: Parameter1Type, parameter2: Parameter2Type) => {
   //  // implementation code goes here
   // }
   //
-  // Note that the `: (Parameter1Type, Parameter2Type => ReturnType)` part is the type annotation and can
+  // Note that the `: (Parameter1Type, Parameter2Type) => ReturnType` part is the type annotation and can
   // often be skipped as it is inferred by the compiler.
   //
   // Exercise. Implement `helloFunction` using `helloMethod` you implemented above. Why was the type
