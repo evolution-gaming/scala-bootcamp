@@ -143,7 +143,7 @@ object ClassesAndTraits {
   // Generic classes and type parameters
 
   // In a similar way as we saw with polymorphic methods, classes and traits can also take type parameters.
-  // For example, you can define a Stack[A] which works with any type of element A.
+  // For example, you can define a `Stack[A]` which works with any type of element `A`.
 
   // Question. Do you agree with how the stack is modelled here? What would you do differently?
   final case class Stack[A](elements: List[A] = Nil) {
@@ -151,4 +151,33 @@ object ClassesAndTraits {
     def peek: A = ???
     def pop: (A, Stack[A]) = ???
   }
+
+  // Let us come back to our `Shape`-s and add a `Movable` trait
+  // which will have a method:
+  //
+  //   def move(dx: Double, dy: Double)
+  //
+  // What should be the return type of the `move` method?
+  //
+  // What if we want `Point#move` to return `Point` and
+  // `Circle#move` to return `Circle`?
+  //
+  // What if we want to ensure that all `move` methods only return
+  // other `Movable`-s and not something unrelated like `String`-s?
+
+  // Homework
+  //
+  // Add additional 2D shapes such as triangle and square.
+  //
+  // In addition to the 2D shapes classes, add also 3D shapes classes
+  // (origin, point, sphere, cube, cuboid, 3D triangle - you can add
+  // others if you think they are a good fit).
+  //
+  // Add method `area` to 2D shapes.
+  //
+  // Add methods `surfaceArea` and `volume` to 3D shapes.
+  //
+  // If some of the implementation involves advanced math, it is OK
+  // to skip it (leave unimplemented), the primary intent of this
+  // exercise is modelling using case classes and traits, and not math.
 }

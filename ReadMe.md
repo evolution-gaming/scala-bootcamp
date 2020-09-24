@@ -76,9 +76,10 @@ All resources are listed in no particular order.
 
 - [Essential Scala](https://underscore.io/books/essential-scala/) (free)
 - [Scala with Cats 2](https://www.scalawithcats.com/) (free)
+- [Functional Programming for Mortals with Scalaz](https://leanpub.com/fpmortals) (free+)
+- [Functional Programming for Mortals with Cats](https://leanpub.com/fpmortals-cats) ($15+)
 - [Scala from Scratch: Exploration](https://leanpub.com/scala-from-scratch-exploration) ($15+)
 - [Functional Programming in Scala](https://www.manning.com/books/functional-programming-in-scala#toc) ($25+)
-- [Functional Programming for Mortals](https://leanpub.com/fpmortals-cats) ($15+)
 - [Practical FP in Scala: A hands-on approach](https://leanpub.com/pfp-scala) ($30+)
 - [Programming in Scala](https://booksites.artima.com/programming_in_scala_3ed) ($30+)
 
