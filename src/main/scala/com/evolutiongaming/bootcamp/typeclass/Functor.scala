@@ -14,7 +14,7 @@ trait Functor[F[_]] {
 }
 
 object Functor {
-  import com.evolutiongaming.bootcamp.adt.MyList._
+  import MyList._
 
   implicit class FunctorOps[F[_]: Functor, A](fa: F[A]) {
     def map[B](f: A => B): F[B] = {

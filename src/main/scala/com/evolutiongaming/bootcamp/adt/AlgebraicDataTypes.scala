@@ -151,6 +151,11 @@ object AlgebraicDataTypes {
   // and smart constructors as appropriate.
   type Car = Nothing
 
+  // Homework. Define an algebraic data type `PokerHand`, which contains a collection of cards, representing a
+  // hand in a poker game. Make sure the defined model protects against invalid data. Use value classes and
+  // smart constructors as appropriate. Place the solution under `adt` package in your homework repository.
+  type PokerHand = Nothing
+
   // Attributions and useful links:
   // https://nrinaudo.github.io/scala-best-practices/definitions/adt.html
   // https://alvinalexander.com/scala/fp-book/algebraic-data-types-adts-in-scala/

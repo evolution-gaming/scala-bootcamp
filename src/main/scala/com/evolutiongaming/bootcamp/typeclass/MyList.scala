@@ -1,5 +1,4 @@
-package com.evolutiongaming.bootcamp.adt
-
+package com.evolutiongaming.bootcamp.typeclass
 
 object MyList {
 
