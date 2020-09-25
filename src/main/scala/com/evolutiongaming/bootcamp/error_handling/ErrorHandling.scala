@@ -99,6 +99,44 @@ object ErrorHandling extends App {
   // other hand, will be thrown. To distinguish between fatal and non-fatal exceptions, Try follows the same
   // principles as `NonFatal`, covered above.
 
+  // VALIDATED
+
+  final case class Student(username: String, age: Int)
+
+  sealed trait ValidationError
+  object ValidationError {
+    final case object UsernameLengthIsInvalid extends ValidationError {
+      override def toString: String = "Username must be between 3 and 30 characters"
+    }
+    final case object UsernameHasSpecialCharacters extends ValidationError {
+      override def toString: String = "Username cannot contain special characters"
+    }
+    final case object AgeIsInvalid extends ValidationError {
+      override def toString: String = "Student must be of age 18 to 75"
+    }
+  }
+
+  import cats.data.Validated._
+  import cats.data._
+  import cats.syntax.all._
+
+  object StudentValidator {
+
+    import ValidationError._
+
+    type ValidationResult[A] = ValidatedNec[ValidationError, A]
+
+    private def validateUsername(username: String): ValidationResult[String] = ???
+
+    private def validateAge(age: Int): ValidationResult[Int] =
+      if (age >= 18 && age <= 75) age.validNec
+      else AgeIsInvalid.invalidNec
+
+    def validate(username: String, age: Int): ValidationResult[Student] = {
+      (validateUsername(username), validateAge(age)).mapN(Student)
+    }
+  }
+
   // HANDLING ERRORS IN A FUNCTIONAL WAY
 
   // 1. Method signatures should not lie about recoverable errors
@@ -124,9 +162,8 @@ object ErrorHandling extends App {
   // Least powerful to most powerful error handling techniques:
   // 1. Option
   // 2. Either & ADTs
-  // 3. Throwable
-
-  // Question. Why throwables are more powerful than ADTs?
+  // 3. Try
+  // 4. Validated
 
   // 3. Use separate channels for recoverable and non-recoverable errors
 
@@ -134,7 +171,11 @@ object ErrorHandling extends App {
   // non-recoverable errors should remain implicit. After all, they can happen at any point of execution of
   // our application and we can do nothing about them.
 
+  // Question. Does the original `parseInt` method above adhere to this rule? What about `parseIntOption`,
+  // `parseIntEither` and `credit` methods we implemented in scope of this lecture?
+
   // Attributions and useful links:
   // https://www.lihaoyi.com/post/StrategicScalaStylePrincipleofLeastPower.html#error-handling
   // https://www.geeksforgeeks.org/scala-exception-handling/
+  // https://typelevel.org/cats/datatypes/validated.html
 }

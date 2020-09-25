@@ -1,7 +1,10 @@
 package com.evolutiongaming.bootcamp.error_handling
 
+import cats.data.NonEmptyChain
+import cats.syntax.all._
 import com.evolutiongaming.bootcamp.error_handling.ErrorHandling._
 import org.scalacheck.Gen._
+import org.scalatest.Assertion
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
@@ -11,7 +14,7 @@ class ErrorHandlingSpec
     with Matchers
     with ScalaCheckDrivenPropertyChecks {
 
-  "parseIntOption" should "handle valid and invalid strings correctly" in {
+  "parseIntOption" should "handle valid and invalid strings" in {
     forAll { x: Int =>
       parseIntOption(x.toString) shouldBe Some(x)
     }
@@ -20,7 +23,7 @@ class ErrorHandlingSpec
     }
   }
 
-  "parseIntEither" should "handle valid and invalid strings correctly" in {
+  "parseIntEither" should "handle valid and invalid strings" in {
     forAll { x: Int =>
       parseIntEither(x.toString) shouldBe Right(x)
     }
@@ -29,7 +32,7 @@ class ErrorHandlingSpec
     }
   }
 
-  "credit" should "handle valid and invalid amounts correctly" in {
+  "credit" should "handle valid and invalid amounts" in {
     import TransferError._
     forAll(choose(Int.MinValue, -1)) { x: Int =>
       credit(x) shouldBe Left(NegativeAmount)
@@ -44,5 +47,31 @@ class ErrorHandlingSpec
     forAll(choose(1, 999999), choose(1, 99)) { (a: Int, b: Int) =>
       credit(BigDecimal("%d.%02d".format(a, b))) shouldBe Right(())
     }
+  }
+
+  "StudentValidator" should "handle valid and invalid students" in {
+    import ValidationError._
+
+    StudentValidator.validate("username", 20) shouldBe Student("username", 20).validNec
+
+    def checkInvalid(username: String, age: Int, errors: Set[ValidationError]): Assertion = {
+      StudentValidator.validate(username, age).leftMap(_.toList.toSet) shouldBe errors.invalid
+    }
+
+    checkInvalid(
+      username = "a",
+      age = 33,
+      errors = Set(UsernameLengthIsInvalid),
+    )
+    checkInvalid(
+      username = "a",
+      age = 2,
+      errors = Set(UsernameLengthIsInvalid, AgeIsInvalid),
+    )
+    checkInvalid(
+      username = "@",
+      age = 2,
+      errors = Set(UsernameLengthIsInvalid, UsernameHasSpecialCharacters, AgeIsInvalid),
+    )
   }
 }
