@@ -1,6 +1,5 @@
 package com.evolutiongaming.bootcamp.error_handling
 
-import cats.data.NonEmptyChain
 import cats.syntax.all._
 import com.evolutiongaming.bootcamp.error_handling.ErrorHandling._
 import org.scalacheck.Gen._
@@ -52,26 +51,36 @@ class ErrorHandlingSpec
   "StudentValidator" should "handle valid and invalid students" in {
     import ValidationError._
 
-    StudentValidator.validate("username", 20) shouldBe Student("username", 20).validNec
+    StudentValidator.validate(
+      username = "username",
+      age = "33",
+    ) shouldBe Student("username", 33).validNec
 
-    def checkInvalid(username: String, age: Int, errors: Set[ValidationError]): Assertion = {
-      StudentValidator.validate(username, age).leftMap(_.toList.toSet) shouldBe errors.invalid
-    }
+    def checkInvalid(username: String, age: String, errors: Set[ValidationError]): Assertion =
+      StudentValidator.validate(
+        username = username,
+        age = age,
+      ).leftMap(_.toList.toSet) shouldBe errors.invalid
 
     checkInvalid(
       username = "a",
-      age = 33,
+      age = "33",
       errors = Set(UsernameLengthIsInvalid),
     )
     checkInvalid(
+      username = "@",
+      age = "33",
+      errors = Set(UsernameLengthIsInvalid, UsernameHasSpecialCharacters),
+    )
+    checkInvalid(
       username = "a",
-      age = 2,
-      errors = Set(UsernameLengthIsInvalid, AgeIsInvalid),
+      age = "invalid",
+      errors = Set(UsernameLengthIsInvalid, AgeIsNotNumeric),
     )
     checkInvalid(
       username = "@",
-      age = 2,
-      errors = Set(UsernameLengthIsInvalid, UsernameHasSpecialCharacters, AgeIsInvalid),
+      age = "2",
+      errors = Set(UsernameLengthIsInvalid, UsernameHasSpecialCharacters, AgeIsOutOfBounds),
     )
   }
 }

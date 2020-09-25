@@ -111,7 +111,10 @@ object ErrorHandling extends App {
     final case object UsernameHasSpecialCharacters extends ValidationError {
       override def toString: String = "Username cannot contain special characters"
     }
-    final case object AgeIsInvalid extends ValidationError {
+    final case object AgeIsNotNumeric extends ValidationError {
+      override def toString: String = "Age must be a number"
+    }
+    final case object AgeIsOutOfBounds extends ValidationError {
       override def toString: String = "Student must be of age 18 to 75"
     }
   }
@@ -126,13 +129,25 @@ object ErrorHandling extends App {
 
     type ValidationResult[A] = ValidatedNec[ValidationError, A]
 
-    private def validateUsername(username: String): ValidationResult[String] = ???
+    private def validateUsername(username: String): ValidationResult[String] = {
 
-    private def validateAge(age: Int): ValidationResult[Int] =
-      if (age >= 18 && age <= 75) age.validNec
-      else AgeIsInvalid.invalidNec
+      def validateUsernameLength: ValidationResult[String] =
+        if (username.length >= 3 && username.length <= 30) username.validNec
+        else UsernameLengthIsInvalid.invalidNec
 
-    def validate(username: String, age: Int): ValidationResult[Student] = {
+      def validateUsernameContents: ValidationResult[String] =
+        if (username.matches("^[a-zA-Z0-9]+$")) username.validNec
+        else UsernameHasSpecialCharacters.invalidNec
+
+      validateUsernameLength.productR(validateUsernameContents)
+    }
+
+    // Exercise. Implement `validateAge` method, so that it returns `AgeIsNotNumeric` if the age string is not
+    // a number and `AgeIsOutOfBounds` if the age is not between 18 and 75. Otherwise the age should be
+    // considered valid and returned inside `ValidationResult`.
+    private def validateAge(age: String): ValidationResult[Int] = ???
+
+    def validate(username: String, age: String): ValidationResult[Student] = {
       (validateUsername(username), validateAge(age)).mapN(Student)
     }
   }
