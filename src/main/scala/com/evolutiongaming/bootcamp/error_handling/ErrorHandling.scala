@@ -101,6 +101,14 @@ object ErrorHandling extends App {
 
   // VALIDATED
 
+  // One limitation of all previously described approaches is that only the first encountered error is
+  // reported to the caller. Sometimes it is fine. But there are cases, where the caller would want to see all
+  // accumulated failures simultaneously.
+  //
+  // For example, when submitting a web form, a typical user would want to see all invalid fields right away.
+  // Otherwise UX would struggle. The user would have to resubmit the form multiple times and only see one
+  // particular error on each iteration. Here is where Validated from Cats library can help.
+
   final case class Student(username: String, age: Int)
 
   sealed trait ValidationError
@@ -119,37 +127,38 @@ object ErrorHandling extends App {
     }
   }
 
-  import cats.data.Validated._
-  import cats.data._
+  // There is a separate lecture about Cats library, so we will not go into details here. Suffice to say
+  // we need few imports to bring the power of Cats to work with Validated data type.
+  import cats.data.ValidatedNec
   import cats.syntax.all._
 
   object StudentValidator {
 
     import ValidationError._
 
-    type ValidationResult[A] = ValidatedNec[ValidationError, A]
+    type AllErrorsOr[A] = ValidatedNec[ValidationError, A]
 
-    private def validateUsername(username: String): ValidationResult[String] = {
+    private def validateUsername(username: String): AllErrorsOr[String] = {
 
-      def validateUsernameLength: ValidationResult[String] =
+      def validateUsernameLength: AllErrorsOr[String] =
         if (username.length >= 3 && username.length <= 30) username.validNec
         else UsernameLengthIsInvalid.invalidNec
 
-      def validateUsernameContents: ValidationResult[String] =
+      def validateUsernameContents: AllErrorsOr[String] =
         if (username.matches("^[a-zA-Z0-9]+$")) username.validNec
         else UsernameHasSpecialCharacters.invalidNec
 
+      // `productR` method accumulates both username related errors into a single `AllErrorsOr[String]`.
       validateUsernameLength.productR(validateUsernameContents)
     }
 
     // Exercise. Implement `validateAge` method, so that it returns `AgeIsNotNumeric` if the age string is not
     // a number and `AgeIsOutOfBounds` if the age is not between 18 and 75. Otherwise the age should be
-    // considered valid and returned inside `ValidationResult`.
-    private def validateAge(age: String): ValidationResult[Int] = ???
+    // considered valid and returned inside `AllErrorsOr`.
+    private def validateAge(age: String): AllErrorsOr[Int] = ???
 
-    def validate(username: String, age: String): ValidationResult[Student] = {
+    def validate(username: String, age: String): AllErrorsOr[Student] =
       (validateUsername(username), validateAge(age)).mapN(Student)
-    }
   }
 
   // HANDLING ERRORS IN A FUNCTIONAL WAY
@@ -187,10 +196,11 @@ object ErrorHandling extends App {
   // our application and we can do nothing about them.
 
   // Question. Does the original `parseInt` method above adhere to this rule? What about `parseIntOption`,
-  // `parseIntEither` and `credit` methods we implemented in scope of this lecture?
+  // `parseIntEither` and other methods we implemented in scope of this lecture?
 
   // Attributions and useful links:
   // https://www.lihaoyi.com/post/StrategicScalaStylePrincipleofLeastPower.html#error-handling
   // https://www.geeksforgeeks.org/scala-exception-handling/
   // https://typelevel.org/cats/datatypes/validated.html
+  // https://blog.ssanj.net/posts/2019-08-18-using-validated-for-error-accumulation-in-scala-with-cats.html
 }
