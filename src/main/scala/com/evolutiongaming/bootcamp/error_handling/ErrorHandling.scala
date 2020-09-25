@@ -1,5 +1,6 @@
 package com.evolutiongaming.bootcamp.error_handling
 
+import scala.util.Try
 import scala.util.control.NonFatal
 
 object ErrorHandling extends App {
@@ -66,18 +67,37 @@ object ErrorHandling extends App {
   // Either is a more powerful alternative to Option. It not only encodes the fact that something went wrong,
   // but also provides means to carry a particular reason that has caused the issue.
 
-  // Exercise. Implement `parseIntEither` method.
+  // Exercise. Implement `parseIntEither` method, returning the parsed integer as `Right` upon success and
+  // "{{string}} does not contain an integer" as `Left` upon failure.
   def parseIntEither(string: String): Either[String, Int] = ???
 
   // As an alternative to `String`, a proper ADT can be introduced to formalize all error cases. As discussed
   // in `AlgebraicDataTypes` section, this provides a number of benefits, including an exhaustiveness check
   // at compile time, so one can be sure all error cases are handled.
+  //
+  // Note that this is a superficial example. Always think how detailed you want your error cases to be.
   sealed trait TransferError
-  def credit(amount: BigDecimal): Either[TransferError, BigDecimal] = ???
+  object TransferError {
+    /** Returned when amount to credit is negative. */
+    final case object NegativeAmount extends TransferError
+    /** Returned when amount to credit is zero. */
+    final case object ZeroAmount extends TransferError
+    /** Returned when amount to credit is equal or greater than 1 000 000. */
+    final case object AmountIsTooLarge extends TransferError
+    /** Returned when amount to credit is within the valid range, but has more than 2 decimal places. */
+    final case object TooManyDecimals extends TransferError
+  }
+  // Exercise. Implement `credit` method, returning `Unit` as `Right` upon success and the appropriate
+  // `TransferError` as `Left` upon failure.
+  def credit(amount: BigDecimal): Either[TransferError, Unit] = ???
 
   // `Either[Throwable, A]` is similar to `Try[A]`. However, because `Try[A]` has its error channel hardcoded
   // to a specific type and `Either[L, R]` does not, `Try[A]` provides more specific methods to deal with
   // throwables. So it may be easier to use in certain scenarios.
+  //
+  // Note that only non-fatal exceptions are caught by the combinators on Try. Serious system errors, on the
+  // other hand, will be thrown. To distinguish between fatal and non-fatal exceptions, Try follows the same
+  // principles as `NonFatal`, covered above.
 
   // HANDLING ERRORS IN A FUNCTIONAL WAY
 
@@ -92,7 +112,7 @@ object ErrorHandling extends App {
   // Good! The caller can immediately see we do not guarantee a JSON object for every string. Moreover, this
   // contact is embedded in the method signature. So the caller is forced to explicitly deal with the case,
   // where JSON is not produced. The end result: safer, more reliable program.
-  def parseJson(string: String): Option[Json] = ???
+  def parseJsonOption(string: String): Option[Json] = ???
 
   // 2. Use the principle of least power when choosing error handling approach
 
