@@ -91,7 +91,7 @@ object ControlStructures {
     case _ :: xs    => last(xs)
   }
 
-  // In reality, recursion isn't used that often as it can be replaced with `foldLeft`, `foldRight`,
+  // Recursion isn't used that often as it can be replaced with `foldLeft`, `foldRight`,
   // `reduce` or other larger building blocks.
 
   def sum2(list: List[Int]): Int = {
@@ -228,17 +228,18 @@ object ControlStructures {
     def updateAccount(userId: UserId, previousBalance: Amount, delta: Amount): Either[ErrorMessage, Amount]
   }
 
-  // Upon success, should return the remaining amounts on both accounts (fromUser, toUser).
-  def makeTransfer(service: UserService, fromUser: String, toUser: String, amount: Amount): Either[ErrorMessage, (Amount, Amount)] = {
-    // Replace with a proper implementation:
-    println(s"$service, $fromUser, $toUser, $amount")
+  // Upon success, should return the remaining amounts on both accounts as a tuple.
+  def makeTransfer(service: UserService, fromUserWithName: String, toUserWithName: String, amount: Amount): Either[ErrorMessage, (Amount, Amount)] = {
+    // Replace with a proper implementation that uses validateUserName on each name,
+    // findUserId to find UserId, validateAmount on the amount, findBalance to find previous
+    // balances, and then updateAccount for both userId-s (with a positive and negative
+    // amount, respectively):
+    println(s"$service, $fromUserWithName, $toUserWithName, $amount")
     ???
   }
 
   // Question. What are the questions would you ask - especially about requirements - before implementing
-  // this function? What potential issues can you run into?
-
-  // Exercise. The tests for `makeTransfer` in `ControlStructuresSpec` are insufficient. Improve the tests.
+  // this function? What issues does this implementation have?
 
   // Question. Does the implementation of `makeTransfer` depend on `Either` being the "container"?
 
@@ -287,8 +288,9 @@ object ControlStructures {
   // However, in idiomatic functional Scala, other error handling mechanisms are usually used.
   // Throwing exceptions is an anti-pattern - it introduces another exit path from a function and breaks
   // referential transparency.
+  // It can be thought of as a "`goto` to an unknown place up the call stack".
 
-  // One of them is `Try` which can be thought of as an `Either[Throwable, A]`:
+  // One of these other mechanisms is `Try` which can be thought of as an `Either[Throwable, A]`:
 
   def parseInt1(x: String): Try[Int] = Try(x.toInt)
 
@@ -298,4 +300,68 @@ object ControlStructures {
   }
 
   // Question. What other ways of representing the "parse string to integer" results can you think of?
+  // What are the benefits and drawbacks of each?
+
+  // Homework
+
+  // Create a command line application that reads various "commands" from the
+  // stdin, evaluates them, and writes output to stdout.
+
+  // Commands are:
+
+  //   divide 4 5
+  // which should output "4 divided by 5 is 0.8"
+
+  //   sum 5 5 6 8.5
+  // which should output "the sum of 5 5 6 8.5 is 24.5"
+
+  //   average 4 3 8.5 4
+  // which should output "the average of 4 3 8.5 4 is 4.875"
+
+  //   min 4 -3 -17
+  // which should output "the minimum of 4 -3 -17 is -17"
+
+  //   max 4 -3 -17
+  // which should output "the maximum of 4 -3 -17 is 4"
+
+  // In case of commands that cannot be parsed or calculations that cannot be performed,
+  // output a single line starting with "Error: "
+
+  sealed trait Command
+  object Command {
+    final case class Divide(dividend: Double, divisor: Double) extends Command
+    final case class Sum(numbers: List[Double]) extends Command
+    final case class Average(numbers: List[Double]) extends Command
+    final case class Min(numbers: List[Double]) extends Command
+    final case class Max(numbers: List[Double]) extends Command
+  }
+
+  sealed trait Result
+  case class ChangeMe(value: String) extends Result // adjust Result as required to match requirements
+
+  def parseCommand(x: String): Either[ErrorMessage, Command] = {
+    ??? // implement this
+  }
+
+  // should return an error (using `Left` channel) in case of division by zero and other
+  // invalid operations
+  def calculate(x: Command): Either[ErrorMessage, Result] = {
+    ??? // implement this
+  }
+
+  def renderResult(x: Result): String = {
+    ??? // implement this
+  }
+
+  def process(x: String): String = {
+    // this will enable useful operations on Either-s such as `leftMap`
+    // (map over the Left channel) and `merge` (convert `Either[A, A]` into `A`),
+    // but you can also avoid using them using pattern matching.
+    import cats.implicits._
+
+    ??? // implement using a for-comprehension
+  }
+
+  // This `main` method reads lines from stdin, passes each to `process` and outputs the return value to stdout
+  def main(args: Array[String]): Unit = Source.stdin.getLines map process foreach println
 }
