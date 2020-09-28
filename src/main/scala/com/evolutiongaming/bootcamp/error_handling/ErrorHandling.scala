@@ -135,8 +135,12 @@ object ErrorHandling extends App {
 
     import ValidationError._
 
-    // `AllErrorsOr[A]` contains either non-empty chain (list) of validation errors or a value, if validation
-    // has succeeded. It can be thought of as an error-accumulating version of Either.
+    // `AllErrorsOr[A]` contains either non-empty Chain of validation errors or a value, if validation has
+    // succeeded. It can be thought of as an error-accumulating version of Either.
+    //
+    // Chain is another data type from Cats library. It is similar to List, but supports both constant time
+    // append and prepend (Scala's List offers only constant time prepend). Therefore it is a better fit for
+    // usage with Validated, where errors are often accumulated by appending them.
     type AllErrorsOr[A] = ValidatedNec[ValidationError, A]
 
     private def validateUsername(username: String): AllErrorsOr[String] = {
@@ -149,7 +153,9 @@ object ErrorHandling extends App {
         if (username.matches("^[a-zA-Z0-9]+$")) username.validNec
         else UsernameHasSpecialCharacters.invalidNec
 
-      // `productR` method accumulates both username related errors into a single `AllErrorsOr[String]`.
+      // `productR` method (can also be written as *>) accumulates both username related errors into a single
+      // `AllErrorsOr[String]`. However, it ignores the result of the validator on the left and uses only the
+      // result of the validator on the right (hence the `R` suffix).
       validateUsernameLength.productR(validateUsernameContents)
     }
 
@@ -159,7 +165,8 @@ object ErrorHandling extends App {
     private def validateAge(age: String): AllErrorsOr[Int] = ???
 
     // `validate` method takes raw username and age values (for example, as received via POST request),
-    // validates them, transforms as needed and returns `AllErrorsOr[Student]` as a result.
+    // validates them, transforms as needed and returns `AllErrorsOr[Student]` as a result. `mapN` method
+    // allows to map other N Validated instances at the same time.
     def validate(username: String, age: String): AllErrorsOr[Student] =
       (validateUsername(username), validateAge(age)).mapN(Student)
   }
@@ -182,7 +189,7 @@ object ErrorHandling extends App {
   // 2. Use the principle of least power when choosing error handling approach
 
   // "Given a choice of solutions, pick the least powerful solution capable of solving your problem." Scala is
-  // an expressive language, that usually provides multiple ways of solving the same problem. However, if you
+  // an expressive language that usually provides multiple ways of solving the same problem. However, if you
   // decide to use the least powerful approach, you can manage complexity and make your code easier to
   // comprehend by others (and future self).
 
@@ -200,6 +207,16 @@ object ErrorHandling extends App {
 
   // Question. Does the original `parseInt` method above adhere to this rule? What about `parseIntOption`,
   // `parseIntEither` and other methods we implemented in scope of this lecture?
+
+  // The specified error handling rules also apply to Scala asynchronous effects, which are covered in later
+  // lectures (see Asynchronous Programming and Asynchronous Effects). For example, ZIO data type has three
+  // type parameters: `R` for environment, `E` for failure type and `A` for success type.
+  sealed trait ZIO[-R, +E, +A]
+
+  // As for asynchronous effects that do not offer separate channel for recoverable errors out of the box,
+  // (see Future and Cats Effect IO), a common practice is to combine them with Option or Either to achieve
+  // the same result.
+  type FutureEither[E, A] = Future[Either[E, A]]
 
   // Homework. Place the solution under `error_handling` package in your homework repository.
   //

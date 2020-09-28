@@ -82,5 +82,10 @@ class ErrorHandlingSpec
       age = "2",
       errors = Set(UsernameLengthIsInvalid, UsernameHasSpecialCharacters, AgeIsOutOfBounds),
     )
+    checkInvalid(
+      username = "@@@",
+      age = "2",
+      errors = Set(UsernameHasSpecialCharacters, AgeIsOutOfBounds),
+    )
   }
 }
