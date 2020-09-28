@@ -1,6 +1,5 @@
 package com.evolutiongaming.bootcamp.error_handling
 
-import scala.util.Try
 import scala.util.control.NonFatal
 
 object ErrorHandling extends App {
@@ -136,6 +135,8 @@ object ErrorHandling extends App {
 
     import ValidationError._
 
+    // `AllErrorsOr[A]` contains either non-empty chain (list) of validation errors or a value, if validation
+    // has succeeded. It can be thought of as an error-accumulating version of Either.
     type AllErrorsOr[A] = ValidatedNec[ValidationError, A]
 
     private def validateUsername(username: String): AllErrorsOr[String] = {
@@ -157,6 +158,8 @@ object ErrorHandling extends App {
     // considered valid and returned inside `AllErrorsOr`.
     private def validateAge(age: String): AllErrorsOr[Int] = ???
 
+    // `validate` method takes raw username and age values (for example, as received via POST request),
+    // validates them, transforms as needed and returns `AllErrorsOr[Student]` as a result.
     def validate(username: String, age: String): AllErrorsOr[Student] =
       (validateUsername(username), validateAge(age)).mapN(Student)
   }
@@ -197,6 +200,33 @@ object ErrorHandling extends App {
 
   // Question. Does the original `parseInt` method above adhere to this rule? What about `parseIntOption`,
   // `parseIntEither` and other methods we implemented in scope of this lecture?
+
+  // Homework. Place the solution under `error_handling` package in your homework repository.
+  //
+  // 1. Model `CreditCard` class as an ADT (protect against invalid data as much as makes sense).
+  // 2. Add `ValidationError` cases (at least 5, may be more).
+  // 3. Implement `validate` method to construct `CreditCard` instance from the supplied raw data.
+  object Homework {
+
+    case class CreditCard(/* Add parameters as needed */)
+
+    sealed trait ValidationError
+    object ValidationError {
+      ??? // Add errors as needed
+    }
+
+    object CreditCardValidator {
+
+      type AllErrorsOr[A] = ValidatedNec[ValidationError, A]
+
+      def validate(
+        name: String,
+        number: String,
+        expirationDate: String,
+        securityCode: String,
+      ): AllErrorsOr[CreditCard] = ???
+    }
+  }
 
   // Attributions and useful links:
   // https://www.lihaoyi.com/post/StrategicScalaStylePrincipleofLeastPower.html#error-handling
