@@ -1,5 +1,6 @@
 package com.evolutiongaming.bootcamp.error_handling
 
+import scala.concurrent.Future
 import scala.util.control.NonFatal
 
 object ErrorHandling extends App {
