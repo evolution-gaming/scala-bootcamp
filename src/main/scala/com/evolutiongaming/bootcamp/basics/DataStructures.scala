@@ -19,7 +19,8 @@ object DataStructures {
   val immutableList1 = scala.collection.immutable.List(1, 2, 3)
   val updatedImmutableList = immutableList1.updated(1, -1)
 
-  val doTheyHaveEqualContents = (mutableList zip updatedImmutableList) forall { case (a, b) => a == b }
+  val doTheyHaveEqualContents1 = mutableList == updatedImmutableList // true
+  val doTheyHaveEqualContents2 = (mutableList zip updatedImmutableList) forall { case (a, b) => a == b }
 
   // Arrays
   //
@@ -67,6 +68,7 @@ object DataStructures {
   // Sets
   //
   // Sets are data structures that don't contain any duplicate elements.
+  // The default Scala `Set` is unordered and immutable.
 
   val vegetables = Set("tomatoes", "peppers", "pumpkins", "cucumbers", "olives")
   vegetables("tomatoes") // true
@@ -85,6 +87,7 @@ object DataStructures {
   // Maps
   //
   // Maps consist of pairs of keys and values and usually offer fast lookup by key.
+  // The default Scala `Map` is unordered and immutable.
 
   val vegetableWeights = Map(
     ("pumpkins", 10),
@@ -184,7 +187,9 @@ object DataStructures {
     Set(set)
   }
 
-  // Exercise: Implement a special sort which sorts the keys of a map (K) according to their associated
+  // Homework
+  //
+  // Implement a special sort which sorts the keys of a map (K) according to their associated
   // values (V).
   //
   // In case of "ties" (equal values) it should group these keys K into Set-s in the results.

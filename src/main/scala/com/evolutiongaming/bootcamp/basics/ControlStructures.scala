@@ -81,6 +81,8 @@ object ControlStructures {
     else list.head + sum1(list.tail)
   }
 
+  // Question. What are the risks of List#head and List#tail? How can you refactor `sum1` to avoid these invocations?
+
   // Question. What are the risks of recursion when applied without sufficient foresight?
 
   // @tailrec annotation verifies that a method will be compiled with tail call optimisation.
@@ -235,6 +237,7 @@ object ControlStructures {
     // balances, and then updateAccount for both userId-s (with a positive and negative
     // amount, respectively):
     println(s"$service, $fromUserWithName, $toUserWithName, $amount")
+    import service._
     ???
   }
 
@@ -290,7 +293,7 @@ object ControlStructures {
   // referential transparency.
   // It can be thought of as a "`goto` to an unknown place up the call stack".
 
-  // One of these other mechanisms is `Try` which can be thought of as an `Either[Throwable, A]`:
+  // One of these other mechanisms is `Try[A]` which can be thought of as an `Either[Throwable, A]`:
 
   def parseInt1(x: String): Try[Int] = Try(x.toInt)
 
