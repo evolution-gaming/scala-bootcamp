@@ -36,7 +36,7 @@ class BasicsSpec extends AnyFlatSpec with ScalaCheckDrivenPropertyChecks {
   }
 
   it should "work for all numbers" in {
-    forAll { (a: Int, b: Int) =>
+    forAll { (a, b) =>. // No need to write Data type because scala is functional programming and its take itself with the help of tupe interpretor
       add(a, b) shouldEqual a + b
     }
   }
