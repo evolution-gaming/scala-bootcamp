@@ -115,6 +115,10 @@ object DataStructures {
     "cucumbers" -> 323,
   )
 
+  val tomatoAmount: Int = vegetableAmounts("tomatoes")
+  val tomatoAmountOpt: Option[Int] = vegetableAmounts.get("tomatoes")
+  val carrotAmountWithDefault: Int = vegetableAmounts.getOrElse("carrots", 0)
+
   // Exercise. Calculate the total cost of all vegetables, taking vegetable amounts (in units) from
   // `vegetableAmounts` and prices per unit from `vegetablePrices`. Assume the price is 10 if not available
   // in `vegetablePrices`.
@@ -131,8 +135,9 @@ object DataStructures {
   }
 
   // Ranges and Sequences
-  val inclusiveRange: Seq[Int] = 2 to 4
-  val exclusiveRange: Seq[Int] = 2 until 4
+  val inclusiveRange: Seq[Int] = 2 to 4    // 2, 3, 4, or <=
+  val exclusiveRange: Seq[Int] = 2 until 4 // 2, 3, or <
+  val withStep: Seq[Int] = 2 to 40 by 7    // 2, 9, 16, 23, 30, 37
 
   // Seq, IndexedSeq and LinearSeq traits are implemented by many collections and contain various useful
   // methods. See https://docs.scala-lang.org/overviews/collections/seqs.html in case you are interested
@@ -156,6 +161,7 @@ object DataStructures {
   // - foldLeft
   // - foldRight
   // - forall
+  // - groupBy
   // - head
   // - headOption
   // - init
@@ -181,6 +187,10 @@ object DataStructures {
 
   // Exercise: Return a set with all subsets of the provided set `set` with `n` elements
   // For example, `allSubsetsOfSizeN(Set(1, 2, 3), 2) == Set(Set(1, 2), Set(2, 3), Set(1, 3))`.
+  // Hints for implementation:
+  //   - Handle the trivial case where `n == 1`.
+  //   - For other `n`, for each `set` element `elem`, generate all subsets of size `n - 1` from the set
+  //     that don't include `elem`, and add `elem` to them.
   def allSubsetsOfSizeN[A](set: Set[A], n: Int): Set[Set[A]] = {
     // replace with correct implementation
     println(n)
