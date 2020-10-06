@@ -1,6 +1,18 @@
 package com.evolutiongaming.bootcamp.functions
 
 object FunctionsDescoped {
+  //
+  var count = 0
+  def id(): Int = {
+    val newId = count
+    count += 1
+    newId
+  }
+  def idPure(/* ??? */): (Int, Int) = ???
+
+  // Implement `identity` which returns its input unchanged. Do not use scala.Predef.identity
+  def identity[A](x: A): A = ???
+
   // Question. What do you expect?
 
   val f1: PartialFunction[List[String], Boolean] = {

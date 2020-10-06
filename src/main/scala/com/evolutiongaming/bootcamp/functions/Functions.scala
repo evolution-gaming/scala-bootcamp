@@ -101,9 +101,6 @@ object Functions {
   // Implement `mapOption` a function. Do not use scala option api
   def mapOption[A, B](option: Option[A], f: A => B): Option[B] = ???
 
-  // Implement `identity` which returns its input unchanged. Do not use scala.Predef.identity
-  def identity[A](x: A): A = ???
-
   // --
 
 
@@ -141,6 +138,13 @@ object Functions {
     }
   }
 
+  // Example of using partial functions:
+  val eithers: Seq[Either[String, Double]] = List("123", "456", "789o")
+    .map(x => x.toDoubleOption.toRight(s"Failed to parse $x"))
+
+  val errors: Seq[String] = eithers.collect {
+    case Left(x) => x
+  }
 
   // We can make a function that returns another function
   // Example.
@@ -224,15 +228,6 @@ object Functions {
   //
   def divide(a: Int, b: Int): Int = a / b
   def dividePure(a: Int, b: Int): ??? = ???
-
-  //
-  var count = 0
-  def id(): Int = {
-    val newId = count
-    count += 1
-    newId
-  }
-  def idPure(/* ??? */): (Int, Int) = ???
 
   //
   def isAfterNow(date: Instant): Boolean = date.isAfter(Instant.now())
