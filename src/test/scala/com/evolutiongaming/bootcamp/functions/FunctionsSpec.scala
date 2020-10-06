@@ -1,6 +1,7 @@
 package com.evolutiongaming.bootcamp.functions
 
 import Functions._
+import FunctionsDescoped._
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers._
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks

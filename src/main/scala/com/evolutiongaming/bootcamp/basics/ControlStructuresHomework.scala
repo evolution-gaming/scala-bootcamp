@@ -39,8 +39,10 @@ object ControlStructuresHomework {
 
   final case class ErrorMessage(value: String)
 
+  // Adjust `Result` and `ChangeMe` as you wish - you can turn Result into a `case class` and remove the `ChangeMe` if
+  // you think it is the best model for your solution, or just have other `case class`-es implement `Result`
   sealed trait Result
-  final case class ChangeMe(value: String) extends Result // adjust Result as required to match requirements
+  final case class ChangeMe(value: String) extends Result
 
   def parseCommand(x: String): Either[ErrorMessage, Command] = {
     ??? // implement this method

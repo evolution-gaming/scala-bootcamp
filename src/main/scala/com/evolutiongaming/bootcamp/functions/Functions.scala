@@ -3,11 +3,13 @@ package com.evolutiongaming.bootcamp.functions
 import java.time.Instant
 
 object Functions {
-  // Functions is first-class values:
+  // Functions are expressions that have parameters, and take arguments.
+
+  // Functions are first-class values:
   // a functions can be assigned to a value, passed as a parameter and returned as a result
 
-  // first order functions acts with simple data types
-  // higher order functions that takes/returns functions
+  // first order functions take and return ordinary data types
+  // higher order functions take and/or return other functions
 
   // Example.
   def clean(message: String): String = message.replaceAll("fox", "***")
@@ -48,9 +50,11 @@ object Functions {
   // an instance of a function can be treated as object
 
   // The simplified version of the scala.Function1
-  trait MyFunction1[T, R] {
-    // `apply` defines how we transform `T` to `R`
-    def apply(v1: T): R
+  object Functions {
+    trait Function1[T, R] {
+      // `apply` defines how we transform `T` to `R`
+      def apply(v1: T): R
+    }
   }
 
   // More common way to define a function type is just `A => B`
@@ -137,27 +141,6 @@ object Functions {
     }
   }
 
-  // Question. What do you expect?
-
-  val f1: PartialFunction[List[String], Boolean] = {
-    // head :: tail
-    case _ :: _ => true
-  }
-
-  // 1
-  val result1: Boolean = f1.isDefinedAt(List("false", "true"))
-
-  val f2: PartialFunction[List[String], Boolean] = {
-    case Nil => false
-    // head :: 2nd :: tail
-    case _ :: _ :: tail => f1(tail)
-  }
-
-  // 2
-  val result2: Boolean = f2.isDefinedAt(List("false", "true"))
-
-  // --
-
 
   // We can make a function that returns another function
   // Example.
@@ -184,37 +167,6 @@ object Functions {
 
   // --
 
-
-  // Functions can be used as building blocks of our program using the composition of functions
-  // `scala.Function1[A, B]` has `compose` and `andThen` methods that takes a function param and returns a new function
-
-  // Compose - `g` will be applied to input param
-  // def compose[A](g: A => T1): A => R = { x => apply(g(x)) }
-
-  val double: Int => Int = (x: Int) => 2 * x
-  val addString: Int => Language = (a: Int) => "new value " + a
-
-  addString.compose(double)
-
-  // AndThen - `g` will be applied to output result
-  // def andThen[A](g: R => A): T1 => A = { x => g(apply(x)) }
-
-  double.andThen(addString)
-
-  List(1, 2, 3).map(_ + 2).map(_.toString)
-  List(1, 2, 3).map(((x: Int) => x + 2).andThen(x => x.toString))
-
-
-  // Exercise. Implement `andThen` and `compose` which pipes the result of one function to the input of another function
-  def compose[A, B, C](f: B => C, g: A => B): A => C = ???
-
-  def andThen[A, B, C](f: A => B, g: B => C): A => C = ???
-
-
-  // --
-
-
-
   // Pure functions are mappings between two sets
 
   // A function is impure if ..
@@ -227,25 +179,25 @@ object Functions {
 
   // Why is Null bad?
   // null causes NullPointerException
-  // null cannot be removed from language
-  // w/o any compiler check null can be passed anywhere
+  // null cannot be removed from the language (although Scala 3 will help handle it)
+  // `null` can be passed anywhere
 
   // Exercise. Provide an example of an impure functions
 
-  // Is `plus` a pure function? why?
+  // Is `plus` a pure function? Why?
   def plus(a: Int, b: Int): Int = a + b
 
-  // Is `mapLookup` a pure function? why?
+  // Is `mapLookup` a pure function? Why?
   def mapLookup(map: Map[String, Int], key: String): Int =
-    map.apply(key)
+    map(key)
 
   // Pure function should:
-  // - be total (not partial): its return value is the same for the same arguments
-  // - not throw exception
+  // - be total (not partial)
+  // - not throw exceptions
   // - be deterministic
   // - not do any mutation (local, non-local, reference, etc.)
-  // - not have side effect
-  // - not use null
+  // - not have side effects
+  // - not use `null`
 
   // A function without side effects only returns a value
 
@@ -257,7 +209,7 @@ object Functions {
 
   // Fearless refactoring: any value can be replaced by the function that produced it (referential transparency)
   // Documentations based on functions types
-  // Easier to test: no mutation, no randomness, no side effect
+  // Easier to test: no mutation, no randomness, no side effects
   // Potential compiler optimisations
   // Make parallel processing easier
 
@@ -296,66 +248,7 @@ object Functions {
 
   // --
 
-
-
-  // Final task.
-  // Case classes are Scala's preferred way to define complex data
-
-  val rawJson: String =
-    """
-      |{
-      |   "username":"John",
-      |   "address":{
-      |      "country":"UK",
-      |      "postalCode":45765
-      |   },
-      |   "eBooks":[
-      |      "Scala",
-      |      "Dotty"
-      |   ]
-      |}
-  """.stripMargin
-
-  // Representing JSON in Scala as a sealed family of case classes
-  // JSON is a recursive data structure
-  sealed trait Json
-
-  case class JObject(/* ??? */) extends Json
-
-  case class JArray(/* ??? */) extends Json
-
-  case class JString(/* ??? */) extends Json
-
-  case class JNumber(value: BigDecimal) extends Json
-
-  case class JBoolean(value: Boolean) extends Json
-
-  // Question. What did I miss?
-
-  // --
-
-
-
-  // Task 1. Represent `rawJson` string via defined classes
-  val data: Json = JObject(/* ??? */)
-
-  // Task 2. Implement a function `asString` to print given Json data as a json string
-
-  def asString(data: Json): String = ???
-
-  // Task 3. Implement a function that validate our data whether it contains JNumber with negative value or not
-
-  def isContainsNegative(data: Json): Boolean = ???
-
-  // Task 4. Implement a function that return the nesting level of json objects.
-  // Note. top level json has level 1, we can go from top level to bottom only via objects
-
-  def nestingLevel(data: Json): Int = ???
-
-  // See FunctionsSpec for expected results
-
-
-  // Additional
+  // Additional exercises:
   // https://www.scala-exercises.org/std_lib/higher_order_functions
   // https://www.scala-exercises.org/fp_in_scala/getting_started_with_functional_programming
 }
