@@ -72,14 +72,15 @@ object AlgebraicDataTypes {
 
   // To disable creating case classes in any other way besides smart constructor, the following pattern
   // can be used. However, it is rather syntax-heavy and cannot be combined with value classes.
-  // Exercise. Implement the smart constructor for `Time` that only permits values from 00:00 to 23:59 and
-  // returns "Invalid hour value" or "Invalid minute value" strings in `Left` when appropriate.
-
-  // Question. Is using `String` to represent `Left` a good idea?
   sealed abstract case class Time private (hour: Int, minute: Int)
   object Time {
     def create(hour: Int, minute: Int): Either[String, Time] = Right(new Time(hour, minute) {})
   }
+
+  // Exercise. Implement the smart constructor for `Time` that only permits values from 00:00 to 23:59 and
+  // returns "Invalid hour value" or "Invalid minute value" strings in `Left` when appropriate.
+
+  // Question. Is using `String` to represent `Left` a good idea?
 
   // SUM TYPES
 
@@ -156,7 +157,7 @@ object AlgebraicDataTypes {
   // task you completed to join the bootcamp. Use your best judgement about particular data types to include
   // in the solution, you can model concepts like:
   //
-  // 1. Suite
+  // 1. Suit
   // 2. Rank
   // 3. Card
   // 4. Hand (Texas or Omaha)
