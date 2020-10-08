@@ -99,6 +99,7 @@ object ImplicitsHomework {
         override def iterator[T](f: Array[T]): Iterator[T] = f.iterator
       }
       //Provide Iterate2 instances for Map and PackedMultiMap!
+      //if the code doesn't compile while you think it should - sometimes full rebuild helps!
 
       /*
       replace this big guy with proper implicit instances for types:
@@ -107,6 +108,9 @@ object ImplicitsHomework {
       - Array[T], List[T], Vector[T], Map[K,V], PackedMultiMap[K,V]
         - points to karma if you provide those in a generic way
         (Iterate and Iterate2 type-classes might be helpful!)
+
+      If you struggle with writing generic instances for Iterate and Iterate2, start by writing instances for
+      List and other collections and then replace those with generic instances.
        */
       implicit def stubGetSizeScore[T]: GetSizeScore[T] = (_: T) => 42
     }
