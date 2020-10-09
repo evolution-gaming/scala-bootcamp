@@ -52,7 +52,7 @@ class ImplicitsSpec extends AnyFreeSpec with Matchers {
     "average" in {
       average(List.empty[Double]) shouldEqual None
       average(List(BigDecimal("1.0"), BigDecimal("2.0"))) shouldEqual Some(BigDecimal("1.5"))
-      val customAvg = average(Vector(CustomNumber(1F), CustomNumber(1F)))
+      val customAvg = average(Vector(CustomNumber(1F), CustomNumber(2F)))
       assert(customAvg.exists(_.value > 1F))
       assert(customAvg.exists(_.value < 2F))
     }
