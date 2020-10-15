@@ -16,6 +16,7 @@ val circeVersion = "0.13.0"
 val playVersion = "2.8.2"
 val doobieVersion = "0.9.0"
 val catsVersion = "2.2.0"
+val catsEffectVersion = "2.2.0"
 val epimetheusVersion = "0.4.2"
 val catsScalacheckVersion = "0.2.0"
 
@@ -27,6 +28,7 @@ val log4CatsVersion = "1.1.1"
 
 libraryDependencies ++= Seq(
   "org.typelevel" %% "cats-core" % catsVersion,
+  "org.typelevel" %% "cats-effect" % catsEffectVersion,
   "org.http4s" %% "http4s-dsl" % http4sVersion,
   "org.http4s" %% "http4s-blaze-server" % http4sVersion,
   "org.http4s" %% "http4s-blaze-client" % http4sVersion,
@@ -36,6 +38,7 @@ libraryDependencies ++= Seq(
   "com.typesafe.akka" %% "akka-stream" % akkaVersion,
   "io.chrisdavenport" %% "log4cats-slf4j" % log4CatsVersion,
   "ch.qos.logback" % "logback-classic" % "1.2.3",
+  "com.codecommit" %% "cats-effect-testing-scalatest" % "0.4.1" % Test,
   "io.chrisdavenport" %% "epimetheus-http4s" % epimetheusVersion,
   "io.chrisdavenport" %% "cats-scalacheck" % catsScalacheckVersion % Test,
   "org.scalatestplus" %% "scalatestplus-scalacheck" % "3.1.0.0-RC2" % Test,
