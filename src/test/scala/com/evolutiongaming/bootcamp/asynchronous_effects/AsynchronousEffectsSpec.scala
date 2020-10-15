@@ -21,11 +21,11 @@ class AsynchronousEffectsSpec extends AsyncFreeSpec with AsyncIOSpec with Matche
 
     def expectEmpty: IO[Unit] =
       if (providedInput.isEmpty && expectedOutput.isEmpty) IO.unit
-      else IO.raiseError(new RuntimeException(s"Non empty console: $providedInput, $expectedOutput"))
+      else IO.raiseError(sys.error(s"Non empty console: $providedInput, $expectedOutput"))
 
     override def writeString(value: String): IO[Unit] = expectedOutput match {
       case Nil =>
-        IO.raiseError(new RuntimeException(s"Writing `$value` unexpectedly"))
+        IO.raiseError(sys.error(s"Writing `$value` unexpectedly"))
 
       case x :: xs if x == value =>
         expectedOutput = xs
@@ -37,7 +37,7 @@ class AsynchronousEffectsSpec extends AsyncFreeSpec with AsyncIOSpec with Matche
 
     override def readString: IO[String] = providedInput match {
       case Nil =>
-        IO.raiseError(new RuntimeException(s"Cannot read - out of provided input"))
+        IO.raiseError(sys.error(s"Cannot read - out of provided input"))
 
       case x :: xs =>
         providedInput = xs
