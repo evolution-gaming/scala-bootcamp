@@ -118,6 +118,13 @@ import scala.annotation.nowarn
 // Let's try to run the tests related to this workshop only.
 //
 // sbt:scala-bootcamp> testOnly *testing2*
+//
+// There is also a command which only runs the tests failing a previous
+// run or the tests which have their dependencies changed. Try it out.
+// Did you have less tests running this time?
+//
+// sbt:scala-bootcamp> testQuick
+//
 
 // *Excercise 2*
 //
@@ -161,6 +168,16 @@ import scala.annotation.nowarn
 // [info]   fails if incorrect number is pressed
 // [info]   does nothing
 // [info]   - when you just repeat pressing `=`
+//
+// Hint: you can recall the preivously run `sbt` commands by pressing
+// up arrow on a keyboard.
+//
+// Hint: you can make the development process even more convinient by
+// forcing `sbt` to monitor the changes you do to the files and rerun
+// the tests automatically by adding `~` before the command. It also
+// works on other `sbt` commands.
+//
+// sbt:scala-bootcamp> ~testOnly *testing2.Excersise2Spec
 //
 // Now break one of the tests, i.e. change `calculator.enter(1)` to
 // `calculator.enter(2)`. Observe the output. How did Scala manage
