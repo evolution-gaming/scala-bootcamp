@@ -92,11 +92,12 @@ import scala.annotation.nowarn
 // to avoid a startup time. Before that professional Scala developers using
 // `sbt` preferred to run it interactive mode.
 //
-// Let's run `sbt in interactive mode by running `sbt` without any parameters.
+// Let's run `sbt` in interactive mode by running `sbt` without any parameters.
 //
 // > sbt
 //
-// Now type in `test` and press ENTER. Note how long it took run the tests?
+// Now type in `test` and press ENTER. Note how long it took to start runing
+// the tests.
 //
 // sbt:scala-bootcamp> test
 //
@@ -108,7 +109,7 @@ import scala.annotation.nowarn
 // information found during the runtime making it smarter than so called
 // Ahead-Of-Time compilers. That what makes JVM so powerful.
 //
-// Saying that, there are AOT compilers shipping with JVM these days, so
+// Saying that, there is also AOT compiler shipping with JVM these days, so
 // you can actually compile the Java or Scala code into machine code and
 // enjoy the very fast startup time.
 //
