@@ -75,7 +75,7 @@ object Parametricity {
   def f3[A](a: A, b: Int): Int = ???
 
   // How about this one?
-  def f4[A](a: A, b: Int): Int = ???
+  def f4[A](a: A, b: String): String = ???
 
   // Implement the following function in several ways:
   // What is common in all of these implementations?
