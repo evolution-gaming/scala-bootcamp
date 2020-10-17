@@ -83,7 +83,7 @@ import scala.annotation.nowarn
 // > sbt test
 //
 // Some tests fails, some test pass, but it takes quite a time to start them.
-// It takes at least several seconds on my expensive laptops.
+// It takes at least several seconds on my powerful laptop.
 //
 // Why? This is because `sbt` is JVM application and takes considerable time
 // to load. How much the tests took in total on your computer?
