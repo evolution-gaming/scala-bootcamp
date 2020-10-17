@@ -216,7 +216,7 @@ class Excersise3Spec extends AnyWordSpec {
 //
 // Rewrite asserts to `should be` matcher and run it using sbt again:
 //
-// sbt:scala-bootcamp> testOnly *testing2.Excersise3Spec
+// sbt:scala-bootcamp> testOnly *testing2.Excersise4Spec
 //
 // Now break one of the tests, i.e. change `calculator.enter(1)` to
 // `calculator.enter(2)`. Observe the output. Do you like the input?
@@ -254,7 +254,7 @@ class Excersise4Spec extends AnyFreeSpec with Matchers {
 // if you prefer so) to the new way. There is one line already rewritten
 // so you can have an example.
 //
-// sbt:scala-bootcamp> testOnly *testing2.Excersise4Spec
+// sbt:scala-bootcamp> testOnly *testing2.Excersise5Spec
 //
 // Now break one of the tests, i.e. change `calculator.enter(1)` to
 // `calculator.enter(900)`. Observe the output. Do you like the input?
@@ -316,7 +316,7 @@ class Excersise5Spec extends AnyFreeSpec with EitherValues {
 // used by lightweight libraries and also supported by ScalaTest. Run it using
 // sbt again:
 //
-// sbt:scala-bootcamp> testOnly *testing2.Excersise5Spec
+// sbt:scala-bootcamp> testOnly *testing2.Excersise6Spec
 //
 class Excersise6Spec extends AnyFunSuite {
 
@@ -339,12 +339,31 @@ class Excersise6Spec extends AnyFunSuite {
 // there is also another reason for that. Let's find out the reason by
 // making a test for `testing2.hal9000.HAL9000` class.
 //
-// sbt:scala-bootcamp> testOnly *testing2.Excersise6Spec
+// sbt:scala-bootcamp> testOnly *testing2.Excersise7Spec
 //
 class Excersise7Spec extends AnyFunSuite {
 
   test("HAL 9000 multiplies numbers correctly") {
     // assert(HAL9000.twice(7) == 14)
+  }
+
+}
+
+// *Excercise 8*
+//
+// Did you notice another method in HAL 9000? It fails! Can we test it?
+//
+// Write a test using one of the methods found here:
+// https://www.scalatest.org/user_guide/using_assertions#expectedExceptions
+//
+// There is also a special matcher for that, if you want to use them:
+// https://www.scalatest.org/user_guide/using_matchers#expectedExceptions
+//
+// sbt:scala-bootcamp> testOnly *testing2.Excersise8Spec
+//
+class Excersise8Spec extends AnyFunSuite {
+
+  test("HAL 9000 behaves as expected when asked to open the door") {
   }
 
 }
