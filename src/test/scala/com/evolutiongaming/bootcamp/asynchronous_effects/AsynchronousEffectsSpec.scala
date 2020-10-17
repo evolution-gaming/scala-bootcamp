@@ -78,6 +78,7 @@ class AsynchronousEffectsSpec extends AsyncFreeSpec with AsyncIOSpec with Matche
         ExitCode.Success,
       )
     }
+
     "some wrong answers" in {
       check(
         _
