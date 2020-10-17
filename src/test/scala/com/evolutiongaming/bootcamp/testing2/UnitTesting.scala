@@ -118,7 +118,7 @@ import scala.annotation.nowarn
 //
 // sbt:scala-bootcamp> testOnly *testing2*
 
-// *Excercise 1*
+// *Excercise 2*
 //
 // There are several popular testing libraries for Scala in existence. Arugably,
 // the most popular and one of most flexible is called `ScalaTest`. One of the
@@ -149,7 +149,7 @@ import scala.annotation.nowarn
 //
 // Run the following suite using the command below:
 //
-// sbt:scala-bootcamp> testOnly *Excersise1Spec
+// sbt:scala-bootcamp> testOnly *testing2.Excersise2Spec
 //
 // Now change the suite so it outputs the following code instead,
 // while keeping all the asserts.
@@ -164,7 +164,7 @@ import scala.annotation.nowarn
 // Now break one of the tests, i.e. change `calculator.enter(1)` to
 // `calculator.enter(2)`. Observe the output. How did Scala manage
 // to output such a thing?
-class Excersise1Spec extends AnyFreeSpec {
+class Excersise2Spec extends AnyFreeSpec {
 
   "calculator" - {
     "enters the number correctly" in {
@@ -182,7 +182,7 @@ class Excersise1Spec extends AnyFreeSpec {
   }
 
 }
-// *Excercise 2*
+// *Excercise 3*
 //
 // Another popular way to write tests is `WordSpec` as it pushes a very strict
 // BDD style of writing the tests to the team.
@@ -193,9 +193,9 @@ class Excersise1Spec extends AnyFreeSpec {
 //
 // Run it using sbt again:
 //
-// sbt:scala-bootcamp> testOnly *Excersise2Spec
+// sbt:scala-bootcamp> testOnly *testing2.Excersise3Spec
 //
-class Excersise2Spec extends AnyWordSpec {
+class Excersise3Spec extends AnyWordSpec {
 }
 
 // *Note*
@@ -204,7 +204,7 @@ class Excersise2Spec extends AnyWordSpec {
 // for several days over the best style? Scala developers used to fight about
 // it a lot in early days. Not anymore though
 
-// *Excercise 3*
+// *Excercise 4*
 //
 // What does `assert` word actually do? Can you write it differently?
 //
@@ -216,12 +216,12 @@ class Excersise2Spec extends AnyWordSpec {
 //
 // Rewrite asserts to `should be` matcher and run it using sbt again:
 //
-// sbt:scala-bootcamp> testOnly *Excersise3Spec
+// sbt:scala-bootcamp> testOnly *testing2.Excersise3Spec
 //
 // Now break one of the tests, i.e. change `calculator.enter(1)` to
 // `calculator.enter(2)`. Observe the output. Do you like the input?
 // How does it compare to what you seen in `Excersise1`?
-class Excersise3Spec extends AnyFreeSpec with Matchers {
+class Excersise4Spec extends AnyFreeSpec with Matchers {
 
   "calculator" - {
     "enters the number correctly" in {
@@ -240,7 +240,7 @@ class Excersise3Spec extends AnyFreeSpec with Matchers {
 
 }
 
-// *Excercise 4*
+// *Excercise 5*
 //
 // This test, arguably, now looks a bit more readable. Can we get rid
 // of these verbose `Right` and `Left` words?
@@ -254,13 +254,13 @@ class Excersise3Spec extends AnyFreeSpec with Matchers {
 // if you prefer so) to the new way. There is one line already rewritten
 // so you can have an example.
 //
-// sbt:scala-bootcamp> testOnly *Excersise4Spec
+// sbt:scala-bootcamp> testOnly *testing2.Excersise4Spec
 //
 // Now break one of the tests, i.e. change `calculator.enter(1)` to
 // `calculator.enter(900)`. Observe the output. Do you like the input?
-// How does it compare to what you seen in `Excersise1`?
+// How does it compare to what you seen in Excersise 2?
 @nowarn
-class Excersise4Spec extends AnyFreeSpec with EitherValues {
+class Excersise5Spec extends AnyFreeSpec with EitherValues {
 
   "calculator" - {
     "enters the number correctly" in {
@@ -279,7 +279,7 @@ class Excersise4Spec extends AnyFreeSpec with EitherValues {
 
 }
 
-// *Excercise 5*
+// *Excercise 6*
 //
 // To quote (Li Haoyi, author of utest):
 //
@@ -312,13 +312,13 @@ class Excersise4Spec extends AnyFreeSpec with EitherValues {
 // happier if you make the code more readable, so it is good to be familiar with
 // them.
 //
-// Rewrite the suite from first execrsise to `FunSuite` style, the same style
+// Rewrite the suite from Excersise 2 to `FunSuite` style, the same style
 // used by lightweight libraries and also supported by ScalaTest. Run it using
 // sbt again:
 //
-// sbt:scala-bootcamp> testOnly *Excersise5Spec
+// sbt:scala-bootcamp> testOnly *testing2.Excersise5Spec
 //
-class Excersise5Spec extends AnyFunSuite {
+class Excersise6Spec extends AnyFunSuite {
 
   test("name of the test 1") {
     // here goes your test 1
@@ -329,7 +329,7 @@ class Excersise5Spec extends AnyFunSuite {
 
 }
 
-// *Excercise 6*
+// *Excercise 7*
 //
 // As you may have noticed, there is a convention to put the tests for the
 // classes in a package located in `src/main/scala/interesting/package` under
@@ -339,9 +339,9 @@ class Excersise5Spec extends AnyFunSuite {
 // there is also another reason for that. Let's find out the reason by
 // making a test for `testing2.hal9000.HAL9000` class.
 //
-// sbt:scala-bootcamp> testOnly *Excersise6Spec
+// sbt:scala-bootcamp> testOnly *testing2.Excersise6Spec
 //
-class Excersise6Spec extends AnyFunSuite {
+class Excersise7Spec extends AnyFunSuite {
 
   test("HAL 9000 multiplies numbers correctly") {
     // assert(HAL9000.twice(7) == 14)
