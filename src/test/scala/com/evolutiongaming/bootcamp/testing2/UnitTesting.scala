@@ -1,12 +1,15 @@
 package com.evolutiongaming.bootcamp.testing2
 
 import com.evolutiongaming.bootcamp.testing2.hal9000.HAL9000
+import org.scalatest.EitherValues
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.funsuite.AnyFunSuite
+import org.scalatest.funsuite.AsyncFunSuite
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
-import org.scalatest.EitherValues
 import scala.annotation.nowarn
+import scala.concurrent.Future
+import scala.concurrent.Promise
 
 // *Introduction*
 //
@@ -491,6 +494,8 @@ object Excercise10 {
 // You can read more here:
 // https://martinfowler.com/articles/mocksArentStubs.html
 //
+// Bonus question: do we need to test logging?
+//
 class Excercise10Spec extends AnyFunSuite {
 
   import Excercise10._
@@ -521,6 +526,319 @@ class Excercise10Spec extends AnyFunSuite {
 
     // validate the results
     assert(???)
+  }
+
+}
+
+// *Excercise 11*
+//
+// Do you see the copy-pasted code in Excersise 11? We create `repository` etc.
+// twice. Let's create a fixture for that.
+//
+// See also: https://www.scalatest.org/user_guide/sharing_fixtures
+
+// *Excercise 12*
+//
+// What if the code is asynchronous? Let's implement the same service in
+// asynchronous way and write the tests for it.
+//
+// Hint: modern Scala developers rarely use `Future`. They use `IO` or similar
+// construct instead which provides a lot of benefits and is more convinient to
+// use. We are only using `Future` to keep it simple. Do not use it at home.
+//
+// Just replacing `Future` by `IO` will work most of the time (and here!). We
+// will tell you more about `IO` on another lecture. You can also try
+// self-education here: https://typelevel.org/cats-effect/datatypes/io.html.
+//
+// Hint: seriously, forget about `Future` after this excersise.
+//
+object Excercise12 {
+
+  // We do not need to know how to create `Future` to write the implementation,
+  // thanks to dependency injection, but we might want to know how to combine them.
+  // Combining futures only work if you have implicit execution context in scope.
+  // It is not required to combine `IO` objects, and that is one of the reasons
+  // to use them instead.
+  import scala.concurrent.ExecutionContext.Implicits.global
+
+  // 1. The type wrapped by `Future` could be changed by using `map`:
+  def dogs: Future[Int] = ???
+  def message1: Future[String] = dogs map { dogs =>
+    s"We have $dogs of dogs"
+  }
+  // 2. Two `Future` classes could be combined by `flatMap`:
+  def cats: Future[Int] = ???
+  def message2: Future[String] = dogs flatMap { dogs =>
+    cats map { cats =>
+      s"We have $dogs of dogs and $cats of cats"
+    }
+  }
+  // 3. We can use `for...yield` notation to avoid nesting:
+  def message3: Future[String] = for {
+    dogs <- dogs
+    cats <- cats
+  } yield s"We have $dogs of dogs and $cats of cats"
+
+  // Later, for tests, you will need to know how to create the features for your
+  // stubs.
+  //
+  // The simplest is just to wrap your code into `Future { ... }`.
+  // It will start executing in a different thread as soon as the code is called.
+  def future1: Future[Int] = Future { 7 }
+  //
+  // Another way is to create it using a `Promise`.
+  // It will not start executing anything and will complete when the promise is
+  // fulfilled.
+  //
+  val promise: Promise[Int] = Promise()
+  def future2: Future[Int] = promise.future
+  //
+  // Now let complete our Future:
+  promise.success(7)
+
+  case class Player(id: String, name: String, email: String, score: Int)
+  trait PlayerRepository {
+    def byId(id: String): Future[Option[Player]]
+    def all: Future[List[Player]]
+    def update(player: Player): Future[Unit]
+    def delete(id: String): Future[Unit]
+  }
+  trait Logging {
+    def info(message: String): Future[Unit]
+  }
+
+  trait PlayerService {
+
+    /** Deletes all the players with score lower than minimum.
+      *
+      * @param miniumumScore the minimum score the player stays with.
+      */
+    def deleteWorst(minimumScore: Int): Future[Unit]
+
+    /** Adds bonus points to score to all existing players
+      *
+      * @param bonus the bonus points to add to the players.
+      */
+    def celebrate(bonus: Int): Future[Unit]
+
+  }
+  object PlayerService {
+
+    /** Creates a new service working with existing repository */
+    def apply(repository: PlayerRepository, logging: Logging): PlayerService = new PlayerService {
+
+      // NOTE: We do not have a returned type annotation and documentation here, why?
+      def deleteWorst(minimumScore: Int) = ???
+      def celebrate(bonus: Int) = ???
+
+    }
+
+  }
+
+}
+// ScalaTest supports executing asynchronous code out of the box: just replace
+// `AnyFunSuite` with `AsyncFunSuite` and make sure it returns `Future[Assertion]`:
+// https://www.scalatest.org/user_guide/async_testing
+//
+// sbt:scala-bootcamp> testOnly *testing2.Excercise12Spec
+//
+class Excercise12Spec extends AsyncFunSuite {
+
+  import Excercise12._
+
+  test("PlayerService.deleteWorst works correctly") {
+
+    // construct fixture
+    val repository = ???
+    val logging = ???
+    val service = PlayerService(repository, logging)
+
+    // perform the test
+    service.deleteWorst(???) map { _ =>
+      // validate the results
+      assert(???)
+    }
+  }
+
+  test("PlayerService.celebrate works correctly") {
+
+    // construct fixture
+    val repository = ???
+    val logging = ???
+    val service = PlayerService(repository, logging)
+
+    // perform the test
+    service.celebrate(???) map { _ =>
+      // validate the results
+      assert(???)
+    }
+
+  }
+
+}
+// *Excercise 13*
+//
+// What are main problems of asychronous testing? Try to name or guess them
+// without reading further.
+//
+// One of the biggest is that we cannot really say if the test did not complete
+// because of the bug or because it is still working.
+//
+// Modify Excercise 12 code so the test fails with a timeout by forgetting
+// to complete the Promise (a bug), or just doing a long work (by calling
+// `Thread.sleep(...)` in the code).
+//
+// Hint: never use `Thread.sleep` in your production code or test unless you
+// are really sure what are you doing. We can discuss why later if we have
+// the time.
+
+// *Excercise 14*
+//
+// Warning: We did not introduce you to some of the
+// concepts used below, but I really wanted you to show the trick, so you
+// can have something to look forward to. It is fine if you do not understand
+// what is happening below. Feel free to ask questions though.
+//
+// How can we avoid the issues of asynchronous execution? We can abstract
+// over the way we execute!
+//
+object Excercise14 {
+
+  // Remember what other structure allowed to do `map` and `flatMap`? It is
+  // `Option`! What if we could replace `Future` with `Option` in our code
+  // and make it synchronous magically.
+  //
+  // Remember Scala allows you to do pass type parameters to function in
+  // classes like this?
+  def function1[T](list: List[T]): Option[T] = list.headOption
+  // And then call the function like this?
+  val result: Option[Int] = function1(List(1, 2, 3))
+
+  // We will use the same trick now and pass `Option` instead of `Future`
+  // to the code.
+  //
+  // There is one catch. You have to use `T[_]` instead of `T` if you pass
+  // a higher kinded type (see previous lecture).
+  //
+  case class Player(id: String, name: String, email: String, score: Int)
+  trait PlayerRepository[F[_]] {
+    def byId(id: String): F[Option[Player]]
+    def all: F[List[Player]]
+    def update(player: Player): F[Unit]
+    def delete(id: String): F[Unit]
+  }
+  trait Logging[F[_]] {
+    def info(message: String): F[Unit]
+  }
+
+  trait PlayerService[F[_]] {
+
+    /** Deletes all the players with score lower than minimum.
+      *
+      * @param miniumumScore the minimum score the player stays with.
+      */
+    def deleteWorst(minimumScore: Int): F[Unit]
+
+    /** Adds bonus points to score to all existing players
+      *
+      * @param bonus the bonus points to add to the players.
+      */
+    def celebrate(bonus: Int): F[Unit]
+
+  }
+  object PlayerService {
+
+    /** Creates a new service working with existing repository */
+    def apply[F[_]](repository: PlayerRepository[F], logging: Logging[F]): PlayerService[F] = new PlayerService[F] {
+
+      // NOTE: We do not have a returned type annotation and documentation here, why?
+      def deleteWorst(minimumScore: Int) = ???
+      def celebrate(bonus: Int) = ???
+
+    }
+
+  }
+
+}
+// Now let's first copy-paste the code form Excercise 12 and replace all
+// `Future` calls by `F` to prove it actually works.
+//
+// sbt:scala-bootcamp> testOnly *testing2.Excercise14FutureSpec
+//
+class Excercise14FutureSpec extends AsyncFunSuite {
+
+  import Excercise14._
+
+  test("PlayerService.deleteWorst works correctly") {
+
+    // construct fixture
+    val repository = ???
+    val logging = ???
+    val service = PlayerService[Future](repository, logging)
+
+    // perform the test
+    service.deleteWorst(???) map { _ =>
+      // validate the results
+      assert(???)
+    }
+  }
+
+  test("PlayerService.celebrate works correctly") {
+
+    // construct fixture
+    val repository = ???
+    val logging = ???
+    val service = PlayerService[Future](repository, logging)
+
+    // perform the test
+    service.celebrate(???) map { _ =>
+      // validate the results
+      assert(???)
+    }
+
+  }
+
+}
+
+// Now let's copy-paste the code form above and replace all
+// `Future` calls by `Option` to enjoy rock stable tests.
+//
+// sbt:scala-bootcamp> testOnly *testing2.Excercise14FutureSpec
+//
+// Bonus task: try to break the tests with `Thread.sleep(...)` call
+// as above.
+//
+class Excercise14OptionSpec extends AnyFunSuite {
+
+  import Excercise14._
+
+  test("PlayerService.deleteWorst works correctly") {
+
+    // construct fixture
+    val repository = ???
+    val logging = ???
+    val service = PlayerService[Option](repository, logging)
+
+    // perform the test
+    service.deleteWorst(???) map { _ =>
+      // validate the results
+      assert(???)
+    }
+  }
+
+  test("PlayerService.celebrate works correctly") {
+
+    // construct fixture
+    val repository = ???
+    val logging = ???
+    val service = PlayerService[Option](repository, logging)
+
+    // perform the test
+    service.celebrate(???) map { _ =>
+      // validate the results
+      assert(???)
+    }
+
   }
 
 }
