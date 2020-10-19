@@ -407,3 +407,120 @@ class Excercise9Spec extends AnyFunSuite {
   }
 
 }
+
+// *Excercise 10*
+//
+// Let's take a more serious example now. Implement a service and
+// the tests for the service. Make sure you log the important steps using
+// logging service.
+//
+// Note that you do not need too have the actual repository for the
+// implementation. It is enough to have an interface with the methods
+// and _inject_ it into the service.
+//
+// This pattern is sometimes called dependency injection because you inject
+// repository versus calling it directly (in other object) and is able to
+// change the implementation later.
+//
+object Excercise10 {
+
+  case class Player(id: String, name: String, email: String, score: Int)
+  trait PlayerRepository {
+    def byId(id: String): Option[Player]
+    def all: List[Player]
+    def update(player: Player): Unit
+    def delete(id: String): Unit
+  }
+  trait Logging {
+    def info(message: String): Unit
+  }
+
+  trait PlayerService {
+
+    /** Deletes all the players with score lower than minimum.
+      *
+      * @param miniumumScore the minimum score the player stays with.
+      */
+    def deleteWorst(minimumScore: Int): Unit
+
+    /** Adds bonus points to score to all existing players
+      *
+      * @param bonus the bonus points to add to the players.
+      */
+    def celebrate(bonus: Int): Unit
+
+  }
+  object PlayerService {
+
+    /** Creates a new service working with existing repository */
+    def apply(repository: PlayerRepository, logging: Logging): PlayerService = new PlayerService {
+
+      // NOTE: We do not have a returned type annotation and documentation here, why?
+      def deleteWorst(minimumScore: Int) = ???
+      def celebrate(bonus: Int) = ???
+
+    }
+
+  }
+
+}
+// As usual, you can run the folliowing test suite using sbt:
+//
+// sbt:scala-bootcamp> testOnly *testing2.Excercise10Spec
+//
+// You might want to construct a stub or a mock for repository to make
+// the test possible.
+//
+// ScalaTest has a good documentation on how to do mocks with various mocking
+// frameworks. This project has Mockito enabled:
+// https://www.scalatest.org/user_guide/testing_with_mock_objects#mockito
+//
+// In this excersise you are welcome to choose your own strategy, but,
+// in general, the author recommends to avoid mocks altogether.
+//
+// Mocks are very powerful, and often create an urge to cover everything with
+// mocks. The problem is with mockist style tests that they often unit test
+// nothing, but just do the "double accounting" of the existing code.
+//
+// We could, as well, written all the code twice. It is not a useless exercise,
+// because you are noticing various issues with original code while writing it
+// twice, but it has own drawbacks. Real, or stub based tests (in contrast to
+// mocks) tend to test real constraints, you need to think before writing them,
+// and they survive refactoring much better.
+//
+// You can read more here:
+// https://martinfowler.com/articles/mocksArentStubs.html
+//
+class Excercise10Spec extends AnyFunSuite {
+
+  import Excercise10._
+
+  test("PlayerService.deleteWorst works correctly") {
+
+    // construct fixture
+    val repository = ???
+    val logging = ???
+    val service = PlayerService(repository, logging)
+
+    // perform the test
+    service.deleteWorst(???)
+
+    // validate the results
+    assert(???)
+  }
+
+  test("PlayerService.celebrate works correctly") {
+
+    // construct fixture
+    val repository = ???
+    val logging = ???
+    val service = PlayerService(repository, logging)
+
+    // perform the test
+    service.celebrate(???)
+
+    // validate the results
+    assert(???)
+  }
+
+}
