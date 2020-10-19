@@ -70,7 +70,7 @@ import scala.annotation.nowarn
 // and the tests themselves are stored in `src/test/scala/testing2`.
 
 
-// *Excersise 1*
+// *Excercise 1*
 //
 // Your IDE (IntelliJ or Visual Studio Code + Metals) also understands this
 // convention and already knows how to run the tests using popular testing
@@ -157,12 +157,12 @@ import scala.annotation.nowarn
 //
 // Run the following suite using the command below:
 //
-// sbt:scala-bootcamp> testOnly *testing2.Excersise2Spec
+// sbt:scala-bootcamp> testOnly *testing2.Excercise2Spec
 //
 // Now change the suite so it outputs the following code instead,
 // while keeping all the asserts.
 //
-// [info] Excersise1Spec:
+// [info] Excercise1Spec:
 // [info] calculator
 // [info] - enters the number correctly
 // [info]   fails if incorrect number is pressed
@@ -177,12 +177,12 @@ import scala.annotation.nowarn
 // the tests automatically by adding `~` before the command. It also
 // works on other `sbt` commands.
 //
-// sbt:scala-bootcamp> ~testOnly *testing2.Excersise2Spec
+// sbt:scala-bootcamp> ~testOnly *testing2.Excercise2Spec
 //
 // Now break one of the tests, i.e. change `calculator.enter(1)` to
 // `calculator.enter(2)`. Observe the output. How did Scala manage
 // to output such a thing?
-class Excersise2Spec extends AnyFreeSpec {
+class Excercise2Spec extends AnyFreeSpec {
 
   "calculator" - {
     "enters the number correctly" in {
@@ -205,15 +205,15 @@ class Excersise2Spec extends AnyFreeSpec {
 // Another popular way to write tests is `WordSpec` as it pushes a very strict
 // BDD style of writing the tests to the team.
 //
-// Find it in the following page and rewrite the test from Excersise 2 to
+// Find it in the following page and rewrite the test from Excercise 2 to
 // this new style:
 // https://www.scalatest.org/user_guide/selecting_a_style
 //
 // Run it using sbt again:
 //
-// sbt:scala-bootcamp> testOnly *testing2.Excersise3Spec
+// sbt:scala-bootcamp> testOnly *testing2.Excercise3Spec
 //
-class Excersise3Spec extends AnyWordSpec {
+class Excercise3Spec extends AnyWordSpec {
 }
 
 // *Note*
@@ -234,12 +234,12 @@ class Excersise3Spec extends AnyWordSpec {
 //
 // Rewrite asserts to `should be` matcher and run it using sbt again:
 //
-// sbt:scala-bootcamp> testOnly *testing2.Excersise4Spec
+// sbt:scala-bootcamp> testOnly *testing2.Excercise4Spec
 //
 // Now break one of the tests, i.e. change `calculator.enter(1)` to
 // `calculator.enter(2)`. Observe the output. Do you like the input?
-// How does it compare to what you seen in `Excersise1`?
-class Excersise4Spec extends AnyFreeSpec with Matchers {
+// How does it compare to what you seen in `Excercise1`?
+class Excercise4Spec extends AnyFreeSpec with Matchers {
 
   "calculator" - {
     "enters the number correctly" in {
@@ -268,17 +268,17 @@ class Excersise4Spec extends AnyFreeSpec with Matchers {
 //
 // There is also similar construct for `Option`, `PartialFunction` etc.
 //
-// Let's rewrite asserts from the first excersise (or previous excersise
+// Let's rewrite asserts from the first Excercise (or previous Excercise
 // if you prefer so) to the new way. There is one line already rewritten
 // so you can have an example.
 //
-// sbt:scala-bootcamp> testOnly *testing2.Excersise5Spec
+// sbt:scala-bootcamp> testOnly *testing2.Excercise5Spec
 //
 // Now break one of the tests, i.e. change `calculator.enter(1)` to
 // `calculator.enter(900)`. Observe the output. Do you like the input?
-// How does it compare to what you seen in Excersise 2?
+// How does it compare to what you seen in Excercise 2?
 @nowarn
-class Excersise5Spec extends AnyFreeSpec with EitherValues {
+class Excercise5Spec extends AnyFreeSpec with EitherValues {
 
   "calculator" - {
     "enters the number correctly" in {
@@ -330,13 +330,13 @@ class Excersise5Spec extends AnyFreeSpec with EitherValues {
 // happier if you make the code more readable, so it is good to be familiar with
 // them.
 //
-// Rewrite the suite from Excersise 2 to `FunSuite` style, the same style
+// Rewrite the suite from Excercise 2 to `FunSuite` style, the same style
 // used by lightweight libraries and also supported by ScalaTest. Run it using
 // sbt again:
 //
-// sbt:scala-bootcamp> testOnly *testing2.Excersise6Spec
+// sbt:scala-bootcamp> testOnly *testing2.Excercise6Spec
 //
-class Excersise6Spec extends AnyFunSuite {
+class Excercise6Spec extends AnyFunSuite {
 
   test("name of the test 1") {
     // here goes your test 1
@@ -357,9 +357,9 @@ class Excersise6Spec extends AnyFunSuite {
 // there is also another reason for that. Let's find out the reason by
 // making a test for `testing2.hal9000.HAL9000` class.
 //
-// sbt:scala-bootcamp> testOnly *testing2.Excersise7Spec
+// sbt:scala-bootcamp> testOnly *testing2.Excercise7Spec
 //
-class Excersise7Spec extends AnyFunSuite {
+class Excercise7Spec extends AnyFunSuite {
 
   test("HAL 9000 multiplies numbers correctly") {
     // assert(HAL9000.twice(7) == 14)
@@ -377,9 +377,9 @@ class Excersise7Spec extends AnyFunSuite {
 // There is also a special matcher for that, if you want to use them:
 // https://www.scalatest.org/user_guide/using_matchers#expectedExceptions
 //
-// sbt:scala-bootcamp> testOnly *testing2.Excersise8Spec
+// sbt:scala-bootcamp> testOnly *testing2.Excercise8Spec
 //
-class Excersise8Spec extends AnyFunSuite {
+class Excercise8Spec extends AnyFunSuite {
 
   test("HAL 9000 behaves as expected when asked to open the door") {
   }
@@ -398,9 +398,9 @@ class Excersise8Spec extends AnyFunSuite {
 //
 // https://www.scalatest.org/user_guide/using_assertions#gettingAClue
 //
-// sbt:scala-bootcamp> testOnly *testing2.Excersise9Spec
+// sbt:scala-bootcamp> testOnly *testing2.Excercise9Spec
 //
-class Excersise9Spec extends AnyFunSuite {
+class Excercise9Spec extends AnyFunSuite {
 
   test("HAL9000") {
     assert(HAL9000.register1 == HAL9000.register2)
