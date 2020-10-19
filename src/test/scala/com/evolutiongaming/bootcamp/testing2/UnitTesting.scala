@@ -220,7 +220,7 @@ class Excersise3Spec extends AnyWordSpec {
 //
 // Which style do you like more? Are you ready to argue with your colleagues
 // for several days over the best style? Scala developers used to fight about
-// it a lot in early days. Not anymore though
+// it a lot in early days. Not anymore though...
 
 // *Excercise 4*
 //
@@ -382,6 +382,28 @@ class Excersise7Spec extends AnyFunSuite {
 class Excersise8Spec extends AnyFunSuite {
 
   test("HAL 9000 behaves as expected when asked to open the door") {
+  }
+
+}
+
+// *Excercise 9*
+//
+// It is the best to make the code self-documenting and readable. If we cannot,
+// we are trying to make the tests readable. If we cannot achieve test to be
+// readable, we can add the clues into tests.
+//
+// HAL 9000 goes crazy about his mission if two registers do not match.
+// Unfortunately austronauts do not know about it. Save the austronauts
+// by adding a clue to the test below according to the following document:
+//
+// https://www.scalatest.org/user_guide/using_assertions#gettingAClue
+//
+// sbt:scala-bootcamp> testOnly *testing2.Excersise9Spec
+//
+class Excersise9Spec extends AnyFunSuite {
+
+  test("HAL9000") {
+    assert(HAL9000.register1 == HAL9000.register2)
   }
 
 }
