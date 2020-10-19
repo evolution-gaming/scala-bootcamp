@@ -1,6 +1,10 @@
 package com.evolutiongaming.bootcamp.testing2
 
+import cats.Monad
+import cats.data.State
+import cats.syntax.all._
 import com.evolutiongaming.bootcamp.testing2.hal9000.HAL9000
+import java.util.concurrent.atomic.AtomicReference
 import org.scalatest.EitherValues
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.funsuite.AnyFunSuite
@@ -595,6 +599,18 @@ object Excercise12 {
   //
   // Now let complete our Future:
   promise.success(7)
+  //
+  // Besides that, we will have to have a place to store stuff in our stubs as
+  // using `var` from multiple threads is not safe. We will use `AtomicReference`
+  // for that here. It will be explained in next lecture in details, we will just
+  // accept the construct as it is for now.
+  //
+  // Create the storage place with default value:
+  val storage: AtomicReference[List[Int]] = new AtomicReference(List(1, 2, 3))
+  // Set the value to another one:
+  storage.set(List(5, 6, 7))
+  // Get the current value from the storage:
+  val list = storage.get()
 
   case class Player(id: String, name: String, email: String, score: Int)
   trait PlayerRepository {
@@ -627,7 +643,6 @@ object Excercise12 {
     /** Creates a new service working with existing repository */
     def apply(repository: PlayerRepository, logging: Logging): PlayerService = new PlayerService {
 
-      // NOTE: We do not have a returned type annotation and documentation here, why?
       def deleteWorst(minimumScore: Int) = ???
       def celebrate(bonus: Int) = ???
 
@@ -748,10 +763,14 @@ object Excercise14 {
   }
   object PlayerService {
 
-    /** Creates a new service working with existing repository */
-    def apply[F[_]](repository: PlayerRepository[F], logging: Logging[F]): PlayerService[F] = new PlayerService[F] {
+    // Note: we are using special `Monad` type from `cats` library to avoid some boilerplate.
+    // It gives us `map` and `flatMap` methods on our `F`. I.e. it says:
+    // "we have something that have `map` and `flatMap` on it".
+    // You will learn more about `cats` library in next lecture.
 
-      // NOTE: We do not have a returned type annotation and documentation here, why?
+    /** Creates a new service working with existing repository */
+    def apply[F[_]: Monad](repository: PlayerRepository[F], logging: Logging[F]): PlayerService[F] = new PlayerService[F] {
+
       def deleteWorst(minimumScore: Int) = ???
       def celebrate(bonus: Int) = ???
 
@@ -803,7 +822,7 @@ class Excercise14FutureSpec extends AsyncFunSuite {
 // Now let's copy-paste the code form above and replace all
 // `Future` calls by `Option` to enjoy rock stable tests.
 //
-// sbt:scala-bootcamp> testOnly *testing2.Excercise14FutureSpec
+// sbt:scala-bootcamp> testOnly *testing2.Excercise14OptionSpec
 //
 // Bonus task: try to break the tests with `Thread.sleep(...)` call
 // as above.
@@ -832,6 +851,71 @@ class Excercise14OptionSpec extends AnyFunSuite {
     val repository = ???
     val logging = ???
     val service = PlayerService[Option](repository, logging)
+
+    // perform the test
+    service.celebrate(???) map { _ =>
+      // validate the results
+      assert(???)
+    }
+
+  }
+
+}
+
+// What is the big problem with the code we wrote above? We use `var` and
+// `AtomicReference` in our stubs a lot. It is a mutable state. Scala developers
+// hate mutable state a lot.
+//
+// Besides that, we have to go inside of the stub and take data out of it sometimes,
+// which might not always be convienient. Can we use our `Option` trick to somehow
+// avoid it?
+//
+// And yes, we can, there is a special type in `cats` library mentioned above.
+// It is called `State` and also have the `map` and `flatMap` methods we need.
+// Plus it has "state" storage which we can use in our tests!
+//
+// Let's use it to simplify our tests a bit.
+//
+// sbt:scala-bootcamp> testOnly *testing2.Excercise14StateSpec
+//
+// Bonus task: also store logging statements in `State`.
+//
+class Excercise14StateSpec extends AnyFunSuite {
+
+  import Excercise14._
+  type F[T] = State[List[Player], T]
+
+  test("PlayerService.deleteWorst works correctly") {
+
+    // construct fixture
+    val repository = new PlayerRepository[F] {
+      def byId(id: String) = State.pure(None)
+      def all = State.get
+      def update(player: Player) = State.modify { players =>
+        players map { p =>
+          if (p.id == player) player else p
+        }
+      }
+      def delete(id: String) = State.modify { players =>
+        players filterNot (_.id == id)
+      }
+    }
+    val logging = ???
+    val service = PlayerService[F](repository, logging)
+
+    // perform the test
+    service.deleteWorst(???) map { _ =>
+      // validate the results
+      assert(???)
+    }
+  }
+
+  test("PlayerService.celebrate works correctly") {
+
+    // construct fixture
+    val repository = ???
+    val logging = ???
+    val service = PlayerService[F](repository, logging)
 
     // perform the test
     service.celebrate(???) map { _ =>
