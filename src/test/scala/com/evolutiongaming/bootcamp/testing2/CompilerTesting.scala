@@ -121,7 +121,7 @@ object Parametricity {
   trait Reversable[T] { def reverse(a: T): T }
   implicit val listReversable: Reversable[List[Int]] = _.reverse
 
-  // still, even if `Reversable` is implemented by library (Json libraries love doing it)
+  // still, even if `Reversable` is implemented by library (JSON libraries love doing it)
   // it looks quite verbose, can we do less verbose?
   //
   // the approach is so popular tha there is a special syntax for it!
