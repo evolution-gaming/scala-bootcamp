@@ -26,6 +26,9 @@ val akkaHttpCirceVersion = "1.31.0"
 
 val log4CatsVersion = "1.1.1"
 
+val scalaTestVersion = "3.1.0.0-RC2"
+val h2Version = "1.4.200"
+
 libraryDependencies ++= Seq(
   "org.typelevel" %% "cats-core" % catsVersion,
   "org.http4s" %% "http4s-dsl" % http4sVersion,
@@ -39,7 +42,8 @@ libraryDependencies ++= Seq(
   "ch.qos.logback" % "logback-classic" % "1.2.3",
   "io.chrisdavenport" %% "epimetheus-http4s" % epimetheusVersion,
   "io.chrisdavenport" %% "cats-scalacheck" % catsScalacheckVersion % Test,
-  "org.scalatestplus" %% "scalatestplus-scalacheck" % "3.1.0.0-RC2" % Test,
+  "org.scalatestplus" %% "scalatestplus-scalacheck" % scalaTestVersion % Test,
+  "org.scalatestplus" %% "selenium-2-45" % scalaTestVersion % Test,
   "org.typelevel" %% "simulacrum" % "1.0.0",
   "org.tpolecat" %% "atto-core" % "0.8.0",
   "io.circe" %% "circe-core" % circeVersion,
@@ -55,7 +59,8 @@ libraryDependencies ++= Seq(
   "org.mockito" %% "mockito-scala" % "1.15.0" % Test,
   "org.scalaj" %% "scalaj-http" % "2.4.2" % Test,
   "org.tpolecat" %% "doobie-scalatest" % doobieVersion % Test,
-  "org.typelevel" %% "cats-tagless-macros" % catsTaglessVersion
+  "org.typelevel" %% "cats-tagless-macros" % catsTaglessVersion,
+  "com.h2database" % "h2" % "1.4.200"
 )
 
 addCompilerPlugin("org.typelevel" %% "kind-projector" % "0.11.0" cross CrossVersion.full)
