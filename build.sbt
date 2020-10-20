@@ -16,6 +16,7 @@ val circeVersion = "0.13.0"
 val playVersion = "2.8.2"
 val doobieVersion = "0.9.0"
 val catsVersion = "2.2.0"
+val catsTaglessVersion = "0.11"
 val catsEffectVersion = "2.2.0"
 val epimetheusVersion = "0.4.2"
 val catsScalacheckVersion = "0.2.0"
@@ -57,6 +58,7 @@ libraryDependencies ++= Seq(
   "org.mockito" %% "mockito-scala" % "1.15.0" % Test,
   "org.scalaj" %% "scalaj-http" % "2.4.2" % Test,
   "org.tpolecat" %% "doobie-scalatest" % doobieVersion % Test,
+  "org.typelevel" %% "cats-tagless-macros" % catsTaglessVersion
 )
 
 addCompilerPlugin("org.typelevel" %% "kind-projector" % "0.11.0" cross CrossVersion.full)
