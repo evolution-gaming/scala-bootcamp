@@ -123,6 +123,17 @@ object IOBuildingBlocks {
   } yield ()
 
   // TODO: more from https://typelevel.org/cats-effect/datatypes/io.html, including:
+  // IO.async and IO.cancelable
+
+  /* Asynchronous process - a process which continues its execution in a different place or time than the one
+   * that started it.
+   *
+   * Concurrency - a program structuring technique in which there are multiple logical threads of control,
+   * whose effects are interleaved.
+   */
+
+  // ContextShift
+  // Fiber
   // Raising errors & recovering from them
   // Launching parallel IOs and collecting results, sequence, parSequence
   // Cancellation & infinite running
