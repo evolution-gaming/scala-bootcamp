@@ -63,7 +63,8 @@ libraryDependencies ++= Seq(
   "org.scalaj" %% "scalaj-http" % "2.4.2" % Test,
   "org.tpolecat" %% "doobie-scalatest" % doobieVersion % Test,
   "org.typelevel" %% "cats-tagless-macros" % catsTaglessVersion,
-  "com.h2database" % "h2" % "1.4.200"
+  "com.h2database" % "h2" % "1.4.200",
+  "eu.timepit" %% "refined" % "0.9.17"
 )
 
 addCompilerPlugin("org.typelevel" %% "kind-projector" % "0.11.0" cross CrossVersion.full)
