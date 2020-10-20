@@ -3,6 +3,11 @@ package com.evolutiongaming.bootcamp.testing2
 import cats.Monad
 import cats.syntax.all._
 import cats.tagless.finalAlg
+import eu.timepit.refined._
+import eu.timepit.refined.api.Refined
+import eu.timepit.refined.auto._
+import eu.timepit.refined.numeric._
+import eu.timepit.refined.string._
 import org.scalatest.funsuite.AnyFunSuite
 
 // *Introduction*
@@ -25,7 +30,8 @@ object PowerfulScala {
   // Excercise 1
   //
   // Prove Scala is at least as powerful as Java. Make sure that we cannot
-  // call `energy("wrong stuff")`.
+  // call `energy("wrong stuff")`. You will also have to change
+  // "we got a correct result" test, because it accepts `String` now.
   //
   // Run the suite using the command below:
   //
@@ -48,9 +54,65 @@ class PowerfulScalaSpec extends AnyFunSuite {
   }
 
 }
-object Parametricity {
+
+object RefinedScala {
+
+  // As part of learning Algebraic Data Types, you learned another useful technique
+  // how to avoid bugs without having the actual unit tests: smart constructors.
+  //
+  // Like these:
+  case class PositiveNumber private (val value: Int) extends AnyVal
+  object PositiveNumber {
+    def create(value: Int): Option[PositiveNumber] =
+      if (value > 0) Some(PositiveNumber(value)) else None
+  }
+
+  // The problem about smart constructors and value classes is that you create a
+  // new type in Scala 2 (it is fixed in Scala 3), so you have to wrap all
+  // the operations or use some evil methods such as implicit conversions.
+  //
+  // Refined types to the rescue!
+  //
+  // There is a library allowing to check the properties of the types during
+  // compilation, i.e you have the same good old types, but with limitations:
+  case class DatabaseConfig(
+    host: String Refined IPv4,
+    timeoutMilliseconds: Int Refined NonNegative
+  )
+
+  // You can do this:
+  val config = DatabaseConfig(host = "127.0.0.1", timeoutMilliseconds = 16)
+  val timeoutInSeconds = config.timeoutMilliseconds / 1000
+
+  // But you cannot do any of these (try uncommenting them):
+  // DatabaseConfig(host = "127A.0.0.1", timeoutMilliseconds = 16)
+  // DatabaseConfig(host = "127.0.0.1", timeoutMilliseconds = -16)
 
   // Excercise 2
+  //
+  // Prove Scala is at more powerful than Java. Make sure that we cannot
+  // we cannot represent a wrong XML document using the case class by
+  // using `Url` and `Xml` refinements.
+  //
+  // sbt:scala-bootcamp> testOnly *testing2.RefinedScalaSpec
+  //
+  case class Document(url: String, body: String)
+
+}
+class RefinedScalaSpec extends AnyFunSuite {
+
+  test("wrong call does not compile") {
+    RefinedScala.Document(
+      url = "https://developer.mozilla.org/en-US/docs/Web/API/Document_Object_Model/Examples",
+      body = "<complete/>"
+    )
+    assertTypeError("""RefinedScala.Document("wrong url","<incomplete")""")
+  }
+
+}
+object Parametricity {
+
+  // Excercise 3
   //
   // You, probably, heard about "parametric reasoning" previously during these
   // lectures. Let's repeat the material a bit again.
@@ -92,7 +154,7 @@ object Parametricity {
   // How about this one?
   def f7[A](a: A): Int = ???
 
-  // Excercise 3
+  // Excercise 4
   //
   // How can we use in real life besides creating puzzles for students?
   //
@@ -186,7 +248,7 @@ class ParametricitySpec extends AnyFunSuite {
 }
 object EffectTracking {
 
-  // Excercise 4
+  // Excercise 5
   //
   // We _can_ actually break all the methods above easily with doing some evil
   // stuff. I.e., for example, we could do VW style code (see also
