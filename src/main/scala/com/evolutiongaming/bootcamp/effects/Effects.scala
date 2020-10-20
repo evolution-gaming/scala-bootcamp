@@ -2,11 +2,10 @@ package com.evolutiongaming.bootcamp.effects
 
 import java.util.concurrent.atomic.AtomicBoolean
 
-import cats.effect.{ExitCode, IO, IOApp, Timer}
+import cats.effect.{ExitCode, IO, IOApp}
 
 import scala.io.StdIn
 import cats.implicits._
-import com.evolutiongaming.bootcamp.monitoring.Main
 
 import scala.annotation.tailrec
 import scala.concurrent.{Await, Future}
@@ -209,9 +208,28 @@ object IOBuildingBlocks extends IOApp {
    * Question: What happens when `fib` is executed with a large enough `n`?
    * Question: How can we fix it using `IO.suspend`?
    */
-  def fib(n: Int, a: Long, b: Long): IO[Long] = {
+  private def fib(n: Int, a: Long, b: Long): IO[Long] = {
     if (n > 0) fib(n - 1, b, a + b).map(_ + 0) // Question: Why did I add this useless `.map` here?
     else IO.pure(a)
+  }
+
+  private def suspendProgram: IO[Unit] = fib(100000, 0, 1).map(_.toString).flatMap(putStrLn)
+
+  /*
+   * `parSequence`  -   takes a list of `IO`, executes them in parallel and returns an `IO` with a collection of
+   *                    all the results.
+   *
+   * `sequence`     -   does the same, but synchronously
+   */
+  private val tasks: List[IO[Unit]] = (0 to 10).map(x => putStrLn(x.toString)).toList
+  private val sequenceProgram: IO[Unit] = {
+    val sequenced: IO[List[Unit]] = tasks.sequence
+    putStrLn("start sequence") *> sequenced *> putStrLn("end sequence")
+  }
+
+  private val parSequenceProgram: IO[Unit] = {
+    val sequenced: IO[List[Unit]] = tasks.parSequence
+    putStrLn("start parSequence") *> sequenced *> putStrLn("end parSequence")
   }
 
   def run(args: List[String]): IO[ExitCode] = for {
@@ -219,13 +237,15 @@ object IOBuildingBlocks extends IOApp {
     _ <- asyncProgram
     _ <- cancelableProgram1
     _ <- cancelableProgram2
-    _ <- fib(100000, 0, 1).map(_.toString).flatMap(putStrLn)
+    _ <- suspendProgram
+    _ <- sequenceProgram
+    _ <- parSequenceProgram
   } yield ExitCode.Success
 
   // TODO: keep going - https://typelevel.org/cats-effect/datatypes/io.html
   // ContextShift
   // Raising errors & recovering from them
-  // Launching parallel IOs and collecting results, sequence, parSequence
+  // Resources
 }
 
 object Exercise1_Imperative {
@@ -286,7 +306,7 @@ object Exercise1_Common {
  *
  * Using the following can be helpful:
  *  - `for`-comprehension
- *  - `IO.as` as a `map` which discards the first result to return `ExitCode`-s
+ *  - `IO#as` as a `map` which discards the first result to return `ExitCode`-s
  *  - `*>` as a `flatMap` which discards the first result to sequence `IO[Unit]` with another `IO`
  *  - Tests in `AsynchronousEffectsSpec` to check your work
  */
