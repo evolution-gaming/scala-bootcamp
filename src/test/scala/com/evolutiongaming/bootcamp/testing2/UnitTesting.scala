@@ -861,6 +861,25 @@ class Excercise14OptionSpec extends AnyFunSuite {
   }
 
 }
+//
+// How can we be sure `Future` and `Option` behave the same way?
+//
+// We know they both have the same methods `map` and `flatMap`, i.e. they are Monads,
+// but these could be doing anything, no?
+//
+// This is a valid question, and you cannot just rely on them behaving similar
+// unless proven.
+//
+// The "behavior" of the similar structures is usually called a law. The laws
+// for common structures such as `Monad` or `Traversable` are proven and commonly
+// tested using property-based testing libraries such as ScalaCheck.
+//
+// These libraries allow checking that the specific property stands true not
+// for a single parameter value, but for a whole range or domain.
+//
+// We will not do property testing this time, but you can read more about it here:
+// https://www.scalatest.org/user_guide/property_based_testing
+
 
 // What is the big problem with the code we wrote above? We use `var` and
 // `AtomicReference` in our stubs a lot. It is a mutable state. Scala developers
@@ -873,6 +892,13 @@ class Excercise14OptionSpec extends AnyFunSuite {
 // And yes, we can, there is a special type in `cats` library mentioned above.
 // It is called `State` and also have the `map` and `flatMap` methods we need.
 // Plus it has "state" storage which we can use in our tests!
+//
+// Hint: `State` is rarely useful outside of testing. There are much better and
+// more performant structures for that such as `Ref`. Do not go and refactor all
+// your code to `State`.
+//
+// You can read more about it here:
+// https://typelevel.org/cats/datatypes/state.html
 //
 // Let's use it to simplify our tests a bit.
 //

@@ -1,5 +1,8 @@
 package com.evolutiongaming.bootcamp.testing2
 
+import cats.Monad
+import cats.syntax.all._
+import cats.tagless.finalAlg
 import org.scalatest.funsuite.AnyFunSuite
 
 // *Introduction*
@@ -178,6 +181,106 @@ class ParametricitySpec extends AnyFunSuite {
   test("reversed7 works correctly") {
     assert(Parametricity.reversed7(List.empty[Int]) == Nil)
     assert(Parametricity.reversed7(List(1, 2, 3, 4, 5)) == List(5, 4, 3, 2, 1))
+  }
+
+}
+object EffectTracking {
+
+  // Excercise 4
+  //
+  // We _can_ actually break all the methods above easily with doing some evil
+  // stuff. I.e., for example, we could do VW style code (see also
+  // https://github.com/auchenberg/volkswagen).
+  //
+  // I.e., we could record number of tests we did in some external variable and
+  // only stop working properly after 100 runs. Or we could just check the time
+  // and fail after specific time passed. Or we can be even more evil, and make
+  // sure we check some external URL and if it says to fail, we would fail.
+  //
+  // All these evil things we could do are called effects. Is it possible to
+  // prevent effects to happen during compile time? Turns out that we certain
+  // dicipline we can do it. One techinque is called effect tracking.
+  //
+  // We agree (or check using a static checker) that we do not do effects in
+  // the code. Then, when we really need to do an effect, we pass the effect
+  // as dependency.
+  //
+  // Another cool part is that writing unit tests becomes really easy.
+
+  trait Printing {
+    def print(text: String): Unit
+  }
+  trait Clock {
+    def currentTimeMillis(): Long
+  }
+  trait Variable {
+    def set(x: Long): Unit
+    def get(): Option[Long]
+  }
+  class Service(printing: Printing, clock: Clock, variable: Variable) {
+    def call: Unit = {
+      val currentTime = clock.currentTimeMillis()
+      val previousTime = variable.get()
+      previousTime map { previousTime =>
+        val timePassed = currentTime - previousTime
+        if (timePassed > 1000) printing.print("A second passed since first call!")
+      } getOrElse {
+        variable.set(currentTime)
+      }
+    }
+  }
+
+}
+object EffectTrackingSpec extends AnyFunSuite {
+
+  // Implement the tests validating `Service` functionality.
+  //
+  // Run the tests like following:
+  //
+  // sbt:scala-bootcamp> testOnly *testing2.ParametricitySpec
+  //
+  // Bonus task: implement them using `State` monad mentioned in `UnitTesting` section.
+  test("Service.call prints out correct message after a second") {
+    ???
+  }
+  test("Service.call does not print a message before a second passes") {
+    ???
+  }
+
+}
+object CatsTagless {
+
+  // Was not it tedious to write the code like that in a previous excersise?
+  // We cold use our `Reversable` trick and put the stuff
+  //
+  // As previously mentioned, there are libraries and tecnniques to ease our pain.
+  // The autogenerate most of the stuff for us. We will not go through them this
+  // time, but I just wanted to show how cool does it look.
+
+  @finalAlg
+  trait Printing[F[_]] {
+    def print(text: String): F[Unit]
+  }
+  @finalAlg
+  trait Clock[F[_]] {
+    def currentTimeMillis(): F[Long]
+  }
+  @finalAlg
+  trait Variable[F[_]] {
+    def set(x: Long): F[Unit]
+    def get(): F[Option[Long]]
+  }
+  class Service[F[_]: Monad: Printing: Clock: Variable] {
+    def call: F[Unit] = for {
+      currentTime <- Clock[F].currentTimeMillis()
+      previousTime <- Variable[F].get()
+      _ <- previousTime map { previousTime =>
+        val timePassed = currentTime - previousTime
+        if (timePassed > 1000) Printing[F].print("A second passed since first call!") else ().pure[F]
+      } getOrElse {
+        Variable[F].set(currentTime)
+      }
+    } yield ()
   }
 
 }
