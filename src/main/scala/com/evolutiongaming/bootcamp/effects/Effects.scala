@@ -1,13 +1,17 @@
-package com.evolutiongaming.bootcamp.asynchronous_effects
+package com.evolutiongaming.bootcamp.effects
 
-import cats.effect.{ExitCode, IO, IOApp}
+import java.util.concurrent.atomic.AtomicBoolean
+
+import cats.effect.{ExitCode, IO, IOApp, Timer}
 
 import scala.io.StdIn
 import cats.implicits._
+import com.evolutiongaming.bootcamp.monitoring.Main
 
 import scala.annotation.tailrec
 import scala.concurrent.{Await, Future}
-import scala.concurrent.duration.Duration
+import scala.concurrent.duration._
+import scala.util.Try
 
 /*
  * Side effects - Modifying or accessing shared state outside the local environment - producing an
@@ -103,8 +107,7 @@ object LazyVsEagerApp extends App {
  * Question. Can you explain the concept of "referential transparency" using the code above?
  */
 
-object IOBuildingBlocks {
-  // TODO:
+object IOBuildingBlocks extends IOApp {
   /*
    * `IO.pure` lifts pure values into IO, yielding IO values that are "already evaluated".
    * It's eagerly evaluated therefore don't pass side effecting computations into it.
@@ -113,35 +116,120 @@ object IOBuildingBlocks {
    *
    * `IO.apply` describes operations that can be evaluated immediately, on the current thread.
    */
-  def putStrLn(value: String): IO[Unit] = IO(println(value))
-  val readLn: IO[String] = IO(StdIn.readLine())
+  object Console {
+    def putStrLn(value: String): IO[Unit] = IO(println(value))
+    val readLn: IO[String] = IO(StdIn.readLine())
+  }
 
-  for {
+  import Console._
+  private val nameProgram = for {
     _ <- putStrLn("What's your name?")
     n <- readLn
     _ <- putStrLn(s"Hello, $n!")
   } yield ()
 
-  // TODO: more from https://typelevel.org/cats-effect/datatypes/io.html, including:
-  // IO.async and IO.cancelable
+  import scala.concurrent.ExecutionContext.Implicits.global
 
   /* Asynchronous process - a process which continues its execution in a different place or time than the one
    * that started it.
    *
    * Concurrency - a program structuring technique in which there are multiple logical threads of control,
    * whose effects are interleaved.
+   *
+   * IO.async - describes an asynchronous process which cannot be cancelled
    */
+  private def tickNSeconds(n: Int): IO[Unit] =
+    if (n <= 0) IO.unit
+    else for {
+      _ <- putStrLn(s"Tick $n")
+      _ <- IO.sleep(1.second)
+      _ <- tickNSeconds(n - 1)
+    } yield ()
 
+  private val asyncProgram = for {
+    _ <- putStrLn("launching async")
+    _ <- IO.async[Unit] { cb: (Either[Throwable, Unit] => Unit) =>
+      tickNSeconds(2)
+        .unsafeToFuture() // avoid 'unsafe*' in real code
+        .onComplete { x: Try[Unit] =>
+          cb(x.toEither)
+        }
+    }
+    _ <- putStrLn("async finished")
+  } yield ()
+
+  /*
+   * Cancellation is the ability to interrupt an IO task before the completion. You should make sure you
+   * release any acquired resources.
+   *
+   * IO.cancelable - similar to IO.async, but should return an IO which captures the cancellation logic.
+   *
+   * `IO#start` - forks a new IO as a Fiber (you can think of them as lightweight threads). Fibers can be
+   * `join`-ed (awaiting the result) or `cancel`-ed.
+   */
+  private val cancelableProgram1 = for {
+    _ <- putStrLn("Launching cancelable")
+    io = IO.cancelable[Int] { _ =>
+      val keepGoing = new AtomicBoolean(true)
+
+      scala.concurrent.ExecutionContext.global.execute { () =>
+        while (keepGoing.get()) {
+          Thread.sleep(1000)
+          println("Tick")
+        }
+      }
+
+      IO { keepGoing.getAndSet(false) }.void
+    }
+    fiber <- io.start
+    _ <- putStrLn(s"Started $fiber")
+    _ <- IO.sleep(5.seconds)
+    _ <- putStrLn(s"cancelling $fiber...")
+    _ <- fiber.cancel
+    _ <- putStrLn(s"cancelable $fiber finished")
+  } yield ()
+
+  private val cancelableProgram2 = for {
+    fiber <- tickNSeconds(60).start
+    _ <- putStrLn(s"started $fiber...")
+    _ <- IO.sleep(5.seconds)
+    _ <- putStrLn(s"cancelling $fiber...")
+    _ <- fiber.cancel
+    _ <- putStrLn(s"cancelable $fiber finished...")
+  } yield ()
+
+  /*
+   * `IO.suspend` is equivalent to `IO(f).flatten` and can be used to introduce an async boundary for
+   * "trampolining" to avoid a stack overflow.
+   *
+   *  def suspend[A](thunk: => IO[A]): IO[A]
+   *
+   * IO.flatMap is trampolined.
+   *
+   * Question: What happens when `fib` is executed with a large enough `n`?
+   * Question: How can we fix it using `IO.suspend`?
+   */
+  def fib(n: Int, a: Long, b: Long): IO[Long] = {
+    if (n > 0) fib(n - 1, b, a + b).map(_ + 0) // Question: Why did I add this useless `.map` here?
+    else IO.pure(a)
+  }
+
+  def run(args: List[String]): IO[ExitCode] = for {
+    _ <- nameProgram
+    _ <- asyncProgram
+    _ <- cancelableProgram1
+    _ <- cancelableProgram2
+    _ <- fib(100000, 0, 1).map(_.toString).flatMap(putStrLn)
+  } yield ExitCode.Success
+
+  // TODO: keep going - https://typelevel.org/cats-effect/datatypes/io.html
   // ContextShift
-  // Fiber
   // Raising errors & recovering from them
   // Launching parallel IOs and collecting results, sequence, parSequence
-  // Cancellation & infinite running
-  // Forking using IO.start
 }
 
 object Exercise1_Imperative {
-  import com.evolutiongaming.bootcamp.asynchronous_effects.Exercise1_Common.response
+  import com.evolutiongaming.bootcamp.effects.Exercise1_Common.response
   private var counter: Int = 0
 
   @tailrec
@@ -231,9 +319,10 @@ object Exercise1_Functional extends IOApp {
 }
 
 /*
- * Provide your own simple implementation of `IO` along with tests that check that it works correctly.
+ * Provide your own simple implementation of a subset of `IO` along with tests that check that it works
+ * correctly.
  */
-object Homework {
+object Homework1 {
   // TODO - fill this out, then do a reference implementation and tests
   final class IO[A] {
     def map[B](f: A => B): IO[B] = ???
@@ -246,4 +335,8 @@ object Homework {
 
     def apply[A](body: => A): IO[A] = ???
   }
+}
+
+object Homework2 {
+  // TODO - some homework task which requires starting, joining, cancelling `Fiber`-s
 }

@@ -1,13 +1,13 @@
-package com.evolutiongaming.bootcamp.asynchronous_effects
+package com.evolutiongaming.bootcamp.effects
 
 import cats.effect.{ExitCode, IO}
 import cats.effect.testing.scalatest.AsyncIOSpec
-import com.evolutiongaming.bootcamp.asynchronous_effects.Exercise1_Common._
+import com.evolutiongaming.bootcamp.effects.Exercise1_Common._
 import org.scalatest.Assertion
 import org.scalatest.freespec.AsyncFreeSpec
 import org.scalatest.matchers.should.Matchers
 
-class AsynchronousEffectsSpec extends AsyncFreeSpec with AsyncIOSpec with Matchers {
+class EffectsSpec extends AsyncFreeSpec with AsyncIOSpec with Matchers {
   final class TestConsole(var providedInput: List[String] = Nil, var expectedOutput: List[String] = Nil) extends Console {
     def expectOutput(x: String): TestConsole = {
       expectedOutput = expectedOutput :+ x
