@@ -10,7 +10,7 @@ import cats.implicits._
 import scala.annotation.tailrec
 import scala.concurrent.{Await, Future}
 import scala.concurrent.duration._
-import scala.util.Try
+import scala.util.{Random, Try}
 
 /*
  * Side effects - Modifying or accessing shared state outside the local environment - producing an
@@ -106,24 +106,32 @@ object LazyVsEagerApp extends App {
  * Question. Can you explain the concept of "referential transparency" using the code above?
  */
 
-object IOBuildingBlocks extends IOApp {
-  /*
-   * `IO.pure` lifts pure values into IO, yielding IO values that are "already evaluated".
-   * It's eagerly evaluated therefore don't pass side effecting computations into it.
-   *
-   * `IO.unit` is just `IO.pure(())`, commonly used to signal completion of side effecting routines.
-   *
-   * `IO.apply` describes operations that can be evaluated immediately, on the current thread.
-   */
-  object Console {
-    def putStrLn(value: String): IO[Unit] = IO(println(value))
-    val readLn: IO[String] = IO(StdIn.readLine())
-  }
+/*
+ * `IO.pure` lifts pure values into IO, yielding IO values that are "already evaluated".
+ * It's eagerly evaluated therefore don't pass side effecting computations into it.
+ *
+ * `IO.unit` is just `IO.pure(())`, commonly used to signal completion of side effecting routines.
+ *
+ * `IO.apply` describes operations that can be evaluated immediately, on the current thread.
+ */
 
-  import Console._
+trait Console {
+  def putStrLn(value: String): IO[Unit]
+  def readStrLn: IO[String]
+}
+
+object Console {
+  object Real extends Console {
+    def putStrLn(value: String): IO[Unit] = IO(println(value))
+    def readStrLn: IO[String] = IO(StdIn.readLine())
+  }
+}
+
+object IOBuildingBlocks extends IOApp {
+  import Console.Real._
   private val nameProgram = for {
     _ <- putStrLn("What's your name?")
-    n <- readLn
+    n <- readStrLn
     _ <- putStrLn(s"Hello, $n!")
   } yield ()
 
@@ -138,12 +146,14 @@ object IOBuildingBlocks extends IOApp {
    * IO.async - describes an asynchronous process which cannot be cancelled
    */
   private def tickNSeconds(n: Int): IO[Unit] =
-    if (n <= 0) IO.unit
-    else for {
-      _ <- putStrLn(s"Tick $n")
-      _ <- IO.sleep(1.second)
-      _ <- tickNSeconds(n - 1)
-    } yield ()
+    if (n <= 0)
+      IO.unit
+    else
+      for {
+        _ <- putStrLn(s"Tick $n")
+        _ <- IO.sleep(1.second)
+        _ <- tickNSeconds(n - 1)
+      } yield ()
 
   private val asyncProgram = for {
     _ <- putStrLn("launching async")
@@ -203,7 +213,7 @@ object IOBuildingBlocks extends IOApp {
    *
    *  def suspend[A](thunk: => IO[A]): IO[A]
    *
-   * IO.flatMap is trampolined.
+   * IO.flatMap is "trampolined" (that means - it is stack-safe).
    *
    * Question: What happens when `fib` is executed with a large enough `n`?
    * Question: How can we fix it using `IO.suspend`?
@@ -216,21 +226,28 @@ object IOBuildingBlocks extends IOApp {
   private def suspendProgram: IO[Unit] = fib(100000, 0, 1).map(_.toString).flatMap(putStrLn)
 
   /*
-   * `parSequence`  -   takes a list of `IO`, executes them in parallel and returns an `IO` with a collection of
-   *                    all the results.
+   * `sequence`     -   takes a list of `IO`, executes them in sequence and returns an `IO` with a collection
+   *                    of all the results.
    *
-   * `sequence`     -   does the same, but synchronously
+   * `parSequence`  -   does the same, but executes in parallel
    */
-  private val tasks: List[IO[Unit]] = (0 to 10).map(x => putStrLn(x.toString)).toList
-  private val sequenceProgram: IO[Unit] = {
-    val sequenced: IO[List[Unit]] = tasks.sequence
-    putStrLn("start sequence") *> sequenced *> putStrLn("end sequence")
-  }
+  private val tasks: List[IO[Int]] = (0 to 10)
+    .map { x =>
+      IO.sleep(Random.nextInt(1000).millis) *> putStrLn(x.toString) as x
+    }
+    .toList
 
-  private val parSequenceProgram: IO[Unit] = {
-    val sequenced: IO[List[Unit]] = tasks.parSequence
-    putStrLn("start parSequence") *> sequenced *> putStrLn("end parSequence")
-  }
+  private val sequenceProgram: IO[Unit] = for {
+    _         <-  putStrLn("start sequence")
+    sequenced <-  tasks.sequence
+    _         <-  putStrLn(s"end sequence, results: $sequenced")
+  } yield ()
+
+  private val parSequenceProgram: IO[Unit] = for {
+    _         <-  putStrLn("start parSequence")
+    sequenced <-  tasks.parSequence
+    _         <-  putStrLn(s"end parSequence, results: $sequenced")
+  } yield ()
 
   def run(args: List[String]): IO[ExitCode] = for {
     _ <- nameProgram
@@ -284,25 +301,10 @@ object Exercise1_Common {
     case x if x.nonEmpty  =>  s"I don't know what to say about '$x'.".some
     case _                =>  none
   }
-
-  trait Console {
-    def writeString(value: String): IO[Unit]
-    def readString: IO[String]
-  }
-
-  /*
-   * Exercise 1a. Implement `RealConsole` using `IO.apply` and `IO.unit`.
-   */
-  final object RealConsole extends Console {
-    // TODO: replace `writeString` implementation with `???` after code review
-    def writeString(value: String): IO[Unit] = IO(println(value))
-    // TODO: replace `readString` implementation with `???` after code review
-    def readString: IO[String] = IO(StdIn.readLine())
-  }
 }
 
 /*
- * Exercise 1b. Re-implement Exercise1_Imperative avoiding side-effecting code using the "IO Monad"
+ * Exercise 1. Re-implement Exercise1_Imperative avoiding side-effecting code using the "IO Monad"
  *
  * Using the following can be helpful:
  *  - `for`-comprehension
@@ -318,24 +320,24 @@ object Exercise1_Functional extends IOApp {
     import console._
 
     for {
-      _           <-  writeString("What is your favourite animal?")
-      animal      <-  readString
+      _           <-  putStrLn("What is your favourite animal?")
+      animal      <-  readStrLn
       output      =   response(animal)
       result      <-  output match {
                         case None =>
                           if (counter >= 2) {
-                            writeString("I am disappoint. You have failed to answer too many times.") as ExitCode.Error
+                            putStrLn("I am disappoint. You have failed to answer too many times.") as ExitCode.Error
                           } else {
-                            writeString("Empty input is not valid, try again...") *> process(console, counter + 1)
+                            putStrLn("Empty input is not valid, try again...") *> process(console, counter + 1)
                           }
 
                         case Some(x) =>
-                          writeString(x) as ExitCode.Success
+                          putStrLn(x) as ExitCode.Success
                       }
     } yield result
   }
 
-  override def run(args: List[String]): IO[ExitCode] = process(RealConsole)
+  override def run(args: List[String]): IO[ExitCode] = process(Console.Real)
 }
 
 /*
@@ -343,7 +345,7 @@ object Exercise1_Functional extends IOApp {
  * correctly.
  */
 object Homework1 {
-  // TODO - fill this out, then do a reference implementation and tests
+  // TODO - do a reference implementation and reference tests, then remove
   final class IO[A] {
     def map[B](f: A => B): IO[B] = ???
     def flatMap[B](f: A => IO[B]): IO[B] = ???

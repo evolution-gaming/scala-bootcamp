@@ -2,7 +2,6 @@ package com.evolutiongaming.bootcamp.effects
 
 import cats.effect.{ExitCode, IO}
 import cats.effect.testing.scalatest.AsyncIOSpec
-import com.evolutiongaming.bootcamp.effects.Exercise1_Common._
 import org.scalatest.Assertion
 import org.scalatest.freespec.AsyncFreeSpec
 import org.scalatest.matchers.should.Matchers
@@ -23,7 +22,7 @@ class EffectsSpec extends AsyncFreeSpec with AsyncIOSpec with Matchers {
       if (providedInput.isEmpty && expectedOutput.isEmpty) IO.unit
       else IO.raiseError(sys.error(s"Non empty console: $providedInput, $expectedOutput"))
 
-    override def writeString(value: String): IO[Unit] = expectedOutput match {
+    override def putStrLn(value: String): IO[Unit] = expectedOutput match {
       case Nil =>
         IO.raiseError(sys.error(s"Writing `$value` unexpectedly"))
 
@@ -35,7 +34,7 @@ class EffectsSpec extends AsyncFreeSpec with AsyncIOSpec with Matchers {
         IO.raiseError(sys.error(s"Writing `$value` but expected `$x` (remaining in buffer $xs)"))
     }
 
-    override def readString: IO[String] = providedInput match {
+    override def readStrLn: IO[String] = providedInput match {
       case Nil =>
         IO.raiseError(sys.error(s"Cannot read - out of provided input"))
 
