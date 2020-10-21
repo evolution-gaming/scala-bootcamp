@@ -228,7 +228,7 @@ object IOBuildingBlocks2 extends IOApp {
    *
    *   def suspend[A](thunk: => IO[A]): IO[A]
    *
-   * IO.flatMap is "trampolined" (that means - it is stack-safe).
+   * `IO.flatMap` is "trampolined" (that means - it is stack-safe).
    *
    * Question: What happens when `fib` is executed with a large enough `n`?
    * Question: How can we fix it using `IO.suspend`?
@@ -239,13 +239,14 @@ object IOBuildingBlocks2 extends IOApp {
       case _ => fib(n - 1, b, a + b).map(_ + 0) // Question: Why did I add this useless `.map` here?
     }
 
-  /* Asynchronous process - a process which continues its execution in a different place or time than the one
+  /*
+   * Asynchronous process - a process which continues its execution in a different place or time than the one
    * that started it.
    *
    * Concurrency - a program structuring technique in which there are multiple logical threads of control,
    * whose effects are interleaved.
    *
-   * IO.async - describes an asynchronous process which cannot be cancelled
+   * `IO.async` - describes an asynchronous process which cannot be cancelled
    */
   private def tickNSeconds(n: Int): IO[Unit] =
     if (n <= 0) IO.unit
@@ -271,9 +272,9 @@ object IOBuildingBlocks2 extends IOApp {
    * Cancellation is the ability to interrupt an IO task before the completion. You should make sure you
    * release any acquired resources.
    *
-   * IO.cancelable - similar to IO.async, but should return an IO which captures the cancellation logic.
+   * `IO.cancelable` - similar to `IO.async`, but should return an IO which captures the cancellation logic.
    *
-   * `IO#start` - forks a new IO as a Fiber (you can think of them as lightweight threads). Fibers can be
+   * `IO#start` - forks a new IO as a `Fiber` (you can think of them as lightweight threads). Fibers can be
    * `join`-ed (awaiting the result) or `cancel`-ed.
    */
   private val cancelableProgram1 = for {
@@ -311,8 +312,8 @@ object IOBuildingBlocks2 extends IOApp {
    * `ContextShift` is the pure equivalent to `ExecutionContext`:
    * - https://typelevel.org/cats-effect/datatypes/contextshift.html
    *
-   * ContextSwitch#shift or IO.shift can be used to do "cooperative yielding" by triggering a logical fork
-   * so that the current thread isn't occupied on long running operations.
+   * `ContextSwitch#shift` or `IO.shift` can be used to do "cooperative yielding" by triggering a logical fork
+   * so that the current thread is not occupied on long running operations.
    *
    * This forms an async boundary.
    *
@@ -379,7 +380,7 @@ object IOBuildingBlocks2 extends IOApp {
 }
 
 /*
- * Operations available for `MonadError` and `ApplicativeError` are available for `IO`
+ * Handling errors - operations available for `MonadError` and `ApplicativeError` are available for `IO`.
  *
  * See:
  *  - https://typelevel.org/cats/api/cats/MonadError.html
@@ -391,10 +392,10 @@ object HandlingErrors extends IOApp {
   } yield "success"
 
   def run(args: List[String]): IO[ExitCode] = for {
-    attempt           <-  failingProgram.attempt
+    attempt           <-  failingProgram.attempt  // Either[Throwable, A]
     _                 <-  putStrLn(s"attempt = $attempt")
 
-    option            <-  failingProgram.option
+    option            <-  failingProgram.option   // Option[A]
     _                 <-  putStrLn(s"option = $option")
 
     handleError       <-  failingProgram.handleError(x => s"error:  ${x.getMessage}")
