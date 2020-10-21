@@ -195,34 +195,12 @@ object Exercise1_Common {
 object Exercise1_Functional extends IOApp {
   import Exercise1_Common._
 
-  // TODO: replace `process` implementation `???` after code review
-  def process(console: Console, counter: Int = 0): IO[ExitCode] = {
-    import console._
-
-    for {
-      _           <-  putStrLn("What is your favourite animal?")
-      animal      <-  readStrLn
-      output      =   response(animal)
-      result      <-  output match {
-                        case None =>
-                          if (counter >= 2) {
-                            putStrLn("I am disappoint. You have failed to answer too many times.") as ExitCode.Error
-                          } else {
-                            putStrLn("Empty input is not valid, try again...") *> process(console, counter + 1)
-                          }
-
-                        case Some(x) =>
-                          putStrLn(x) as ExitCode.Success
-                      }
-    } yield result
-  }
+  def process(console: Console, counter: Int = 0): IO[ExitCode] = ???
 
   override def run(args: List[String]): IO[ExitCode] = process(Console.Real)
 }
 
 object IOBuildingBlocks2 extends IOApp {
-  import scala.concurrent.ExecutionContext.Implicits.global
-
   /*
    * `IO.suspend` is equivalent to `IO(f).flatten` and can be used to avoid a stack overflow.
    *
@@ -238,6 +216,15 @@ object IOBuildingBlocks2 extends IOApp {
       case 0 => IO.pure(a)
       case _ => fib(n - 1, b, a + b).map(_ + 0) // Question: Why did I add this useless `.map` here?
     }
+
+  def run(args: List[String]): IO[ExitCode] =
+    fib(100000)
+      .flatMap(x => putStrLn(s"fib = $x")) as ExitCode.Success
+}
+
+
+object AsyncAndCancelable extends IOApp {
+  import scala.concurrent.ExecutionContext.Implicits.global
 
   /*
    * Asynchronous process - a process which continues its execution in a different place or time than the one
@@ -308,17 +295,56 @@ object IOBuildingBlocks2 extends IOApp {
     _ <- putStrLn(s"cancelable $fiber finished...")
   } yield ()
 
-  /*
-   * `ContextShift` is the pure equivalent to `ExecutionContext`:
-   * - https://typelevel.org/cats-effect/datatypes/contextshift.html
-   *
-   * `ContextSwitch#shift` or `IO.shift` can be used to do "cooperative yielding" by triggering a logical fork
-   * so that the current thread is not occupied on long running operations.
-   *
-   * This forms an async boundary.
-   *
-   * We can adjust `fib` to have async boundaries every 1000 invocations.
-   */
+  def run(args: List[String]): IO[ExitCode] = for {
+    _ <- asyncProgram
+    _ <- cancelableProgram1
+    _ <- cancelableProgram2
+  } yield ExitCode.Success
+}
+
+/*
+ * `sequence`     -   takes a list of `IO`, executes them in sequence and returns an `IO` with a collection
+ *                    of all the results.
+ *
+ * `parSequence`  -   does the same, but executes in parallel
+ */
+object Sequence extends IOApp {
+  private val tasks: List[IO[Int]] = (0 to 10)
+    .map { x =>
+      IO.sleep(Random.nextInt(1000).millis) *> putStrLn(x.toString) as x
+    }
+    .toList
+
+  private val sequenceProgram: IO[Unit] = for {
+    _         <-  putStrLn("start sequence")
+    sequenced <-  tasks.sequence
+    _         <-  putStrLn(s"end sequence, results: $sequenced")
+  } yield ()
+
+  private val parSequenceProgram: IO[Unit] = for {
+    _         <-  putStrLn("start parSequence")
+    sequenced <-  tasks.parSequence
+    _         <-  putStrLn(s"end parSequence, results: $sequenced")
+  } yield ()
+
+  def run(args: List[String]): IO[ExitCode] = for {
+    _ <- sequenceProgram
+    _ <- parSequenceProgram
+  } yield ExitCode.Success
+}
+
+/*
+ * `ContextShift` is the pure equivalent to `ExecutionContext`:
+ * - https://typelevel.org/cats-effect/datatypes/contextshift.html
+ *
+ * `ContextSwitch#shift` or `IO.shift` can be used to do "cooperative yielding" by triggering a logical fork
+ * so that the current thread is not occupied on long running operations.
+ *
+ * This forms an async boundary.
+ *
+ * We can adjust `fib` to have async boundaries every 1000 invocations.
+ */
+object Shift extends IOApp {
   private val Default: ContextShift[IO] = implicitly[ContextShift[IO]]
 
   private def fibWithShift(n: Int, a: Long = 0, b: Long = 1): IO[Long] =  IO.suspend {
@@ -343,39 +369,9 @@ object IOBuildingBlocks2 extends IOApp {
     _     <- IO(cachedThreadPool.shutdown())
   } yield ()
 
-  /*
-   * `sequence`     -   takes a list of `IO`, executes them in sequence and returns an `IO` with a collection
-   *                    of all the results.
-   *
-   * `parSequence`  -   does the same, but executes in parallel
-   */
-  private val tasks: List[IO[Int]] = (0 to 10)
-    .map { x =>
-      IO.sleep(Random.nextInt(1000).millis) *> putStrLn(x.toString) as x
-    }
-    .toList
-
-  private val sequenceProgram: IO[Unit] = for {
-    _         <-  putStrLn("start sequence")
-    sequenced <-  tasks.sequence
-    _         <-  putStrLn(s"end sequence, results: $sequenced")
-  } yield ()
-
-  private val parSequenceProgram: IO[Unit] = for {
-    _         <-  putStrLn("start parSequence")
-    sequenced <-  tasks.parSequence
-    _         <-  putStrLn(s"end parSequence, results: $sequenced")
-  } yield ()
-
   def run(args: List[String]): IO[ExitCode] = for {
-    _ <- fib(100000).flatMap(x => putStrLn(s"fib = $x"))
-    _ <- asyncProgram
-    _ <- cancelableProgram1
-    _ <- cancelableProgram2
     _ <- fibWithShift(100000).flatMap(x => putStrLn(s"fibWithShift = $x"))
     _ <- shiftToSpecific
-    _ <- sequenceProgram
-    _ <- parSequenceProgram
   } yield ExitCode.Success
 }
 
@@ -426,54 +422,4 @@ object HandlingErrors extends IOApp {
                       )
     _                 <-  putStrLn(s"redeemWith = $redeemWith")
   } yield ExitCode.Success
-}
-
-/*
- * Provide your own "crude" implementation of a subset of `IO` functionality.
- *
- * Provide also tests for these implementations in EffectsHomeworkSpec.
- *
- * Refer to:
- *  - https://typelevel.org/cats-effect/datatypes/io.html
- *  - https://typelevel.org/cats-effect/api/cats/effect/IO$.html
- *  - https://typelevel.org/cats-effect/api/cats/effect/IO.html
- * about the meaning of each method as needed.
- */
-object EffectsHomework1 {
-  // TODO - do a reference implementation and reference tests, then remove
-  final class IO[A] {
-    def map[B](f: A => B): IO[B] = ???
-    def flatMap[B](f: A => IO[B]): IO[B] = ???
-    def *>[B](another: IO[B]): IO[B] = ???
-    def as[B](newValue: => B): IO[B] = ???
-    def void: IO[Unit] = ???
-    def attempt: IO[Either[Throwable, A]] = ???
-    def option: IO[Option[A]] = ???
-    def handleErrorWith[AA >: A](f: Throwable => IO[AA]): IO[AA] = ???
-    def redeem[B](recover: Throwable => B, map: A => B): IO[B] = ???
-    def redeemWith[B](recover: Throwable => IO[B], bind: A => IO[B]): IO[B] = ???
-    def unsafeRunSync(): A = ???
-    def unsafeToFuture(): Future[A] = ???
-  }
-
-  object IO {
-    def apply[A](body: => A): IO[A] = ???
-    def suspend[A](thunk: => IO[A]): IO[A] = ???
-    def delay[A](body: => A): IO[A] = ???
-    def pure[A](a: A): IO[A] = ???
-    def fromEither[A](e: Either[Throwable, A]): IO[A] = ???
-    def fromOption[A](option: Option[A])(orElse: => Throwable): IO[A] = ???
-    def fromTry[A](t: Try[A]): IO[A] = ???
-    def none[A]: IO[Option[A]] = ???
-    def raiseError[A](e: Throwable): IO[A] = ???
-    def raiseUnless(cond: Boolean)(e: => Throwable): IO[Unit] = ???
-    def raiseWhen(cond: Boolean)(e: => Throwable): IO[Unit] = ???
-    def unlessA(cond: Boolean)(action: => IO[Unit]): IO[Unit] = ???
-    def whenA(cond: Boolean)(action: => IO[Unit]): IO[Unit] = ???
-    val unit: IO[Unit] = ???
-  }
-}
-
-object EffectsHomework2 {
-  // TODO: implement parallel merge-sort, with tests
 }
