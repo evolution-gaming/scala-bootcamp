@@ -127,14 +127,98 @@ object Console {
   }
 }
 
-object IOBuildingBlocks extends IOApp {
-  import Console.Real._
+import Console.Real._
+
+/*
+ * `IO` is a Monad and thus you can work with it as you would with other Monad-s - use `.map`, `.flatMap`,
+ * and `for`-comprehensions.
+ */
+object IOBuildingBlocks1 extends IOApp {
   private val nameProgram = for {
     _ <- putStrLn("What's your name?")
     n <- readStrLn
     _ <- putStrLn(s"Hello, $n!")
   } yield ()
 
+  def run(args: List[String]): IO[ExitCode] = nameProgram as ExitCode.Success
+}
+
+object Exercise1_Imperative {
+  import com.evolutiongaming.bootcamp.effects.Exercise1_Common.response
+  private var counter: Int = 0
+
+  @tailrec
+  def main(args: Array[String]): Unit = {
+    println("What is your favourite animal?")
+    val animal = StdIn.readLine()
+    val output = response(animal)
+    output match {
+      case Some(x)  =>
+        println(x)
+
+      case None     =>
+        if (counter >= 2) {
+          println("I am disappoint. You have failed to answer too many times.")
+          sys.exit(1)
+        } else {
+          counter += 1
+          println("Empty input is not valid, try again...")
+          main(args)
+        }
+    }
+  }
+
+  // Question: How do you test this?
+  // Question: How do you refactor this to retry upon empty input at most 3 times?
+}
+
+object Exercise1_Common {
+  def response(animal: String): Option[String] = animal.trim match {
+    case "cat" | "cats"   =>  "In ancient times cats were worshipped as gods; they have not forgotten this.".some
+    case "dog" | "dogs"   =>  "Be the person your dog thinks you are.".some
+    case x if x.nonEmpty  =>  s"I don't know what to say about '$x'.".some
+    case _                =>  none
+  }
+}
+
+/*
+ * Exercise 1. Re-implement Exercise1_Imperative avoiding side-effecting code using the "IO Monad"
+ *
+ * Using the following can be helpful:
+ *  - `for`-comprehension
+ *  - `IO#as` as a `map` which discards the first result to return `ExitCode`-s
+ *  - `*>` as a `flatMap` which discards the first result to sequence `IO[Unit]` with another `IO`
+ *  - Tests in `AsynchronousEffectsSpec` to check your work
+ */
+object Exercise1_Functional extends IOApp {
+  import Exercise1_Common._
+
+  // TODO: replace `process` implementation `???` after code review
+  def process(console: Console, counter: Int = 0): IO[ExitCode] = {
+    import console._
+
+    for {
+      _           <-  putStrLn("What is your favourite animal?")
+      animal      <-  readStrLn
+      output      =   response(animal)
+      result      <-  output match {
+                        case None =>
+                          if (counter >= 2) {
+                            putStrLn("I am disappoint. You have failed to answer too many times.") as ExitCode.Error
+                          } else {
+                            putStrLn("Empty input is not valid, try again...") *> process(console, counter + 1)
+                          }
+
+                        case Some(x) =>
+                          putStrLn(x) as ExitCode.Success
+                      }
+    } yield result
+  }
+
+  override def run(args: List[String]): IO[ExitCode] = process(Console.Real)
+}
+
+object IOBuildingBlocks2 extends IOApp {
   import scala.concurrent.ExecutionContext.Implicits.global
 
   /* Asynchronous process - a process which continues its execution in a different place or time than the one
@@ -249,8 +333,12 @@ object IOBuildingBlocks extends IOApp {
     _         <-  putStrLn(s"end parSequence, results: $sequenced")
   } yield ()
 
+  // TODO: keep going - https://typelevel.org/cats-effect/datatypes/io.html
+  // ContextShift
+  // Raising errors & recovering from them
+  // Resources
+
   def run(args: List[String]): IO[ExitCode] = for {
-    _ <- nameProgram
     _ <- asyncProgram
     _ <- cancelableProgram1
     _ <- cancelableProgram2
@@ -258,107 +346,50 @@ object IOBuildingBlocks extends IOApp {
     _ <- sequenceProgram
     _ <- parSequenceProgram
   } yield ExitCode.Success
-
-  // TODO: keep going - https://typelevel.org/cats-effect/datatypes/io.html
-  // ContextShift
-  // Raising errors & recovering from them
-  // Resources
-}
-
-object Exercise1_Imperative {
-  import com.evolutiongaming.bootcamp.effects.Exercise1_Common.response
-  private var counter: Int = 0
-
-  @tailrec
-  def main(args: Array[String]): Unit = {
-    println("What is your favourite animal?")
-    val animal = StdIn.readLine()
-    val output = response(animal)
-    output match {
-      case Some(x)  =>
-        println(x)
-
-      case None     =>
-        if (counter >= 2) {
-          println("I am disappoint. You have failed to answer too many times.")
-          sys.exit(1)
-        } else {
-          counter += 1
-          println("Empty input is not valid, try again...")
-          main(args)
-        }
-    }
-  }
-
-  // Question: How do you test this?
-  // Question: How do you refactor this to retry upon empty input at most 3 times?
-}
-
-object Exercise1_Common {
-  def response(animal: String): Option[String] = animal.trim match {
-    case "cat" | "cats"   =>  "In ancient times cats were worshipped as gods; they have not forgotten this.".some
-    case "dog" | "dogs"   =>  "Be the person your dog thinks you are.".some
-    case x if x.nonEmpty  =>  s"I don't know what to say about '$x'.".some
-    case _                =>  none
-  }
 }
 
 /*
- * Exercise 1. Re-implement Exercise1_Imperative avoiding side-effecting code using the "IO Monad"
+ * Provide your own "crude" implementation of a subset of `IO` functionality.
  *
- * Using the following can be helpful:
- *  - `for`-comprehension
- *  - `IO#as` as a `map` which discards the first result to return `ExitCode`-s
- *  - `*>` as a `flatMap` which discards the first result to sequence `IO[Unit]` with another `IO`
- *  - Tests in `AsynchronousEffectsSpec` to check your work
+ * Provide also tests for these implementations in EffectsHomeworkSpec.
+ *
+ * Refer to:
+ *  - https://typelevel.org/cats-effect/datatypes/io.html
+ *  - https://typelevel.org/cats-effect/api/cats/effect/IO$.html
+ *  - https://typelevel.org/cats-effect/api/cats/effect/IO.html
+ * about the meaning of each method as needed.
  */
-object Exercise1_Functional extends IOApp {
-  import Exercise1_Common._
-
-  // TODO: replace `process` implementation `???` after code review
-  def process(console: Console, counter: Int = 0): IO[ExitCode] = {
-    import console._
-
-    for {
-      _           <-  putStrLn("What is your favourite animal?")
-      animal      <-  readStrLn
-      output      =   response(animal)
-      result      <-  output match {
-                        case None =>
-                          if (counter >= 2) {
-                            putStrLn("I am disappoint. You have failed to answer too many times.") as ExitCode.Error
-                          } else {
-                            putStrLn("Empty input is not valid, try again...") *> process(console, counter + 1)
-                          }
-
-                        case Some(x) =>
-                          putStrLn(x) as ExitCode.Success
-                      }
-    } yield result
-  }
-
-  override def run(args: List[String]): IO[ExitCode] = process(Console.Real)
-}
-
-/*
- * Provide your own simple implementation of a subset of `IO` along with tests that check that it works
- * correctly.
- */
-object Homework1 {
+object EffectsHomework {
   // TODO - do a reference implementation and reference tests, then remove
   final class IO[A] {
     def map[B](f: A => B): IO[B] = ???
     def flatMap[B](f: A => IO[B]): IO[B] = ???
+    def *>[B](another: IO[B]): IO[B] = ???
+    def as[B](newValue: => B): IO[B] = ???
+    def void: IO[Unit] = ???
+    def attempt: IO[Either[Throwable, A]] = ???
+    def option: IO[Option[A]] = ???
+    def handleErrorWith[AA >: A](f: Throwable => IO[AA]): IO[AA] = ???
+    def redeem[B](recover: Throwable => B, map: A => B): IO[B] = ???
+    def redeemWith[B](recover: Throwable => IO[B], bind: A => IO[B]): IO[B] = ???
+    def unsafeRunSync(): A = ???
+    def unsafeToFuture(): Future[A] = ???
   }
 
   object IO {
-    def pure[A](a: A): IO[A] = ???
-    val unit: IO[Unit] = ???
-
     def apply[A](body: => A): IO[A] = ???
+    def suspend[A](thunk: => IO[A]): IO[A] = ???
+    def delay[A](body: => A): IO[A] = ???
+    def pure[A](a: A): IO[A] = ???
+    def fromEither[A](e: Either[Throwable, A]): IO[A] = ???
+    def fromOption[A](option: Option[A])(orElse: => Throwable): IO[A] = ???
+    def fromTry[A](t: Try[A]): IO[A] = ???
+    def none[A]: IO[Option[A]] = ???
+    def raiseError[A](e: Throwable): IO[A] = ???
+    def raiseUnless(cond: Boolean)(e: => Throwable): IO[Unit] = ???
+    def raiseWhen(cond: Boolean)(e: => Throwable): IO[Unit] = ???
+    def unlessA(cond: Boolean)(action: => IO[Unit]): IO[Unit] = ???
+    def whenA(cond: Boolean)(action: => IO[Unit]): IO[Unit] = ???
+    val unit: IO[Unit] = ???
   }
-}
-
-object Homework2 {
-  // TODO - some homework task which requires starting, joining, cancelling `Fiber`-s
 }
