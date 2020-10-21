@@ -233,12 +233,11 @@ object IOBuildingBlocks2 extends IOApp {
    * Question: What happens when `fib` is executed with a large enough `n`?
    * Question: How can we fix it using `IO.suspend`?
    */
-  private def fib(n: Int, a: Long = 0, b: Long = 1): IO[Long] = IO.suspend {
+  private def fib(n: Int, a: Long = 0, b: Long = 1): IO[Long] =
     n match {
       case 0 => IO.pure(a)
       case _ => fib(n - 1, b, a + b).map(_ + 0) // Question: Why did I add this useless `.map` here?
     }
-  }
 
   /* Asynchronous process - a process which continues its execution in a different place or time than the one
    * that started it.
@@ -379,15 +378,52 @@ object IOBuildingBlocks2 extends IOApp {
   } yield ExitCode.Success
 }
 
+/*
+ * Operations available for `MonadError` and `ApplicativeError` are available for `IO`
+ *
+ * See:
+ *  - https://typelevel.org/cats/api/cats/MonadError.html
+ */
 object HandlingErrors extends IOApp {
-  // TODO: raiseError, attempt, handleErrorWith, recoverWith
-
-  private val failingProgram: IO[Unit] = for {
-    _ <- IO.raiseError { sys.error("error") }
-  } yield ()
+  private def failingProgram: IO[String] = for {
+    // `raiseError` fails the `IO` with the specified exception
+    _ <- IO.raiseError { new RuntimeException("error") }
+  } yield "success"
 
   def run(args: List[String]): IO[ExitCode] = for {
-    _ <- failingProgram
+    attempt           <-  failingProgram.attempt
+    _                 <-  putStrLn(s"attempt = $attempt")
+
+    option            <-  failingProgram.option
+    _                 <-  putStrLn(s"option = $option")
+
+    handleError       <-  failingProgram.handleError(x => s"error:  ${x.getMessage}")
+    _                 <-  putStrLn(s"handleError = $handleError")
+
+    handleErrorWith   <-  failingProgram.handleErrorWith(x => IO.pure(s"error: ${x.getMessage}"))
+    _                 <-  putStrLn(s"handleErrorWith = $handleErrorWith")
+
+    recover           <-  failingProgram.recover {
+                            case x if x.getMessage == "error" => s"error: ${x.getMessage}"
+                          }
+    _                 <-  putStrLn(s"recover = $recover")
+
+    recoverWith       <-  failingProgram.recoverWith {
+                            case x if x.getMessage == "error" => IO.pure(s"error: ${x.getMessage}")
+                          }
+    _                 <-  putStrLn(s"recoverWith = $recoverWith")
+
+    redeem            <-  failingProgram.redeem(
+                        (x: Throwable) => s"error: ${x.getMessage}",
+                        (x: String) => s"success: $x",
+                      )
+    _                 <-  putStrLn(s"redeem = $redeem")
+
+    redeemWith        <-  failingProgram.redeemWith(
+                        (x: Throwable)  =>  IO.pure(s"error: ${x.getMessage}"),
+                        (x: String)     =>  IO.pure(s"success: $x"),
+                      )
+    _                 <-  putStrLn(s"redeemWith = $redeemWith")
   } yield ExitCode.Success
 }
 
