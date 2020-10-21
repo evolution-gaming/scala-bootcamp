@@ -1,14 +1,15 @@
 package com.evolutiongaming.bootcamp.effects
 
+import java.util.concurrent.Executors
 import java.util.concurrent.atomic.AtomicBoolean
 
-import cats.effect.{ExitCode, IO, IOApp}
+import cats.effect.{ContextShift, ExitCode, IO, IOApp}
 
 import scala.io.StdIn
 import cats.implicits._
 
 import scala.annotation.tailrec
-import scala.concurrent.{Await, Future}
+import scala.concurrent.{Await, ExecutionContext, Future}
 import scala.concurrent.duration._
 import scala.util.{Random, Try}
 
@@ -114,7 +115,6 @@ object LazyVsEagerApp extends App {
  *
  * `IO.apply` describes operations that can be evaluated immediately, on the current thread.
  */
-
 trait Console {
   def putStrLn(value: String): IO[Unit]
   def readStrLn: IO[String]
@@ -132,12 +132,14 @@ import Console.Real._
 /*
  * `IO` is a Monad and thus you can work with it as you would with other Monad-s - use `.map`, `.flatMap`,
  * and `for`-comprehensions.
+ *
+ * `IOApp` is the `App` equivalent for `IO`-based programs.
  */
 object IOBuildingBlocks1 extends IOApp {
   private val nameProgram = for {
-    _ <- putStrLn("What's your name?")
-    n <- readStrLn
-    _ <- putStrLn(s"Hello, $n!")
+    _     <- putStrLn("What's your name?")
+    name  <- readStrLn
+    _     <- putStrLn(s"Hi, $name!")
   } yield ()
 
   def run(args: List[String]): IO[ExitCode] = nameProgram as ExitCode.Success
@@ -221,6 +223,23 @@ object Exercise1_Functional extends IOApp {
 object IOBuildingBlocks2 extends IOApp {
   import scala.concurrent.ExecutionContext.Implicits.global
 
+  /*
+   * `IO.suspend` is equivalent to `IO(f).flatten` and can be used to avoid a stack overflow.
+   *
+   *   def suspend[A](thunk: => IO[A]): IO[A]
+   *
+   * IO.flatMap is "trampolined" (that means - it is stack-safe).
+   *
+   * Question: What happens when `fib` is executed with a large enough `n`?
+   * Question: How can we fix it using `IO.suspend`?
+   */
+  private def fib(n: Int, a: Long = 0, b: Long = 1): IO[Long] = IO.suspend {
+    n match {
+      case 0 => IO.pure(a)
+      case _ => fib(n - 1, b, a + b).map(_ + 0) // Question: Why did I add this useless `.map` here?
+    }
+  }
+
   /* Asynchronous process - a process which continues its execution in a different place or time than the one
    * that started it.
    *
@@ -230,14 +249,12 @@ object IOBuildingBlocks2 extends IOApp {
    * IO.async - describes an asynchronous process which cannot be cancelled
    */
   private def tickNSeconds(n: Int): IO[Unit] =
-    if (n <= 0)
-      IO.unit
-    else
-      for {
-        _ <- putStrLn(s"Tick $n")
-        _ <- IO.sleep(1.second)
-        _ <- tickNSeconds(n - 1)
-      } yield ()
+    if (n <= 0) IO.unit
+    else for {
+      _ <- putStrLn(s"Tick $n")
+      _ <- IO.sleep(1.second)
+      _ <- tickNSeconds(n - 1)
+    } yield ()
 
   private val asyncProgram = for {
     _ <- putStrLn("launching async")
@@ -292,22 +309,39 @@ object IOBuildingBlocks2 extends IOApp {
   } yield ()
 
   /*
-   * `IO.suspend` is equivalent to `IO(f).flatten` and can be used to introduce an async boundary for
-   * "trampolining" to avoid a stack overflow.
+   * `ContextShift` is the pure equivalent to `ExecutionContext`:
+   * - https://typelevel.org/cats-effect/datatypes/contextshift.html
    *
-   *  def suspend[A](thunk: => IO[A]): IO[A]
+   * ContextSwitch#shift or IO.shift can be used to do "cooperative yielding" by triggering a logical fork
+   * so that the current thread isn't occupied on long running operations.
    *
-   * IO.flatMap is "trampolined" (that means - it is stack-safe).
+   * This forms an async boundary.
    *
-   * Question: What happens when `fib` is executed with a large enough `n`?
-   * Question: How can we fix it using `IO.suspend`?
+   * We can adjust `fib` to have async boundaries every 1000 invocations.
    */
-  private def fib(n: Int, a: Long, b: Long): IO[Long] = {
-    if (n > 0) fib(n - 1, b, a + b).map(_ + 0) // Question: Why did I add this useless `.map` here?
-    else IO.pure(a)
+  private val Default: ContextShift[IO] = implicitly[ContextShift[IO]]
+
+  private def fibWithShift(n: Int, a: Long = 0, b: Long = 1): IO[Long] =  IO.suspend {
+    n match {
+      case 0 => IO.pure(a)
+      case _ =>
+        val next = fibWithShift(n - 1, b, a + b)
+        if (n % 1000 == 0) Default.shift *> next
+        else next
+    }
   }
 
-  private def suspendProgram: IO[Unit] = fib(100000, 0, 1).map(_.toString).flatMap(putStrLn)
+  private val cachedThreadPool = Executors.newCachedThreadPool()
+  private val Blocking: ContextShift[IO] = IO.contextShift(ExecutionContext.fromExecutor(cachedThreadPool))
+
+  private val shiftToSpecific: IO[Unit] = for {
+    _     <- putStrLn("What's your name?")
+    _     <- IO.shift(Blocking)
+    name  <- readStrLn
+    _     <- IO.shift(Default)
+    _     <- putStrLn(s"Hi, $name!")
+    _     <- IO(cachedThreadPool.shutdown())
+  } yield ()
 
   /*
    * `sequence`     -   takes a list of `IO`, executes them in sequence and returns an `IO` with a collection
@@ -333,18 +367,27 @@ object IOBuildingBlocks2 extends IOApp {
     _         <-  putStrLn(s"end parSequence, results: $sequenced")
   } yield ()
 
-  // TODO: keep going - https://typelevel.org/cats-effect/datatypes/io.html
-  // ContextShift
-  // Raising errors & recovering from them
-  // Resources
-
   def run(args: List[String]): IO[ExitCode] = for {
+    _ <- fib(100000).flatMap(x => putStrLn(s"fib = $x"))
     _ <- asyncProgram
     _ <- cancelableProgram1
     _ <- cancelableProgram2
-    _ <- suspendProgram
+    _ <- fibWithShift(100000).flatMap(x => putStrLn(s"fibWithShift = $x"))
+    _ <- shiftToSpecific
     _ <- sequenceProgram
     _ <- parSequenceProgram
+  } yield ExitCode.Success
+}
+
+object HandlingErrors extends IOApp {
+  // TODO: raiseError, attempt, handleErrorWith, recoverWith
+
+  private val failingProgram: IO[Unit] = for {
+    _ <- IO.raiseError { sys.error("error") }
+  } yield ()
+
+  def run(args: List[String]): IO[ExitCode] = for {
+    _ <- failingProgram
   } yield ExitCode.Success
 }
 
@@ -359,7 +402,7 @@ object IOBuildingBlocks2 extends IOApp {
  *  - https://typelevel.org/cats-effect/api/cats/effect/IO.html
  * about the meaning of each method as needed.
  */
-object EffectsHomework {
+object EffectsHomework1 {
   // TODO - do a reference implementation and reference tests, then remove
   final class IO[A] {
     def map[B](f: A => B): IO[B] = ???
@@ -392,4 +435,8 @@ object EffectsHomework {
     def whenA(cond: Boolean)(action: => IO[Unit]): IO[Unit] = ???
     val unit: IO[Unit] = ???
   }
+}
+
+object EffectsHomework2 {
+  // TODO: implement parallel merge-sort, with tests
 }
