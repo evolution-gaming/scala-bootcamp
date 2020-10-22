@@ -17,7 +17,7 @@ import scala.util.{Random, Try}
  * Side effects - Modifying or accessing shared state outside the local environment - producing an
  *                observable effect other than returning a value to the invoker.
  *
- *                For example - updating a global variable, writing/reading to disk/console.
+ *                For example - updating a global variable, reading/writing to disk/console.
  *
  * But don't we need to do these "side effects" to write useful programs?
  *
@@ -27,9 +27,9 @@ import scala.util.{Random, Try}
  *  - This turns (or captures, or encodes) them into immutable data (pure values)
  *  - Keeps referential transparency so it is easier to refactor our programs and reason about them
  *  - We can evaluate them when we want
- *  - Can be sequentially executed
- *  - Can be used in `for`-comprehensions
- *  - Can model complex series of concurrent computations
+ *  - They can be sequentially executed
+ *  - They can be used in `for`-comprehensions
+ *  - They can model complex series of concurrent computations
  *
  * There are a number of popular libraries providing IO Monads in the Scala ecosystem, each with their
  * pros & cons:
@@ -41,9 +41,9 @@ import scala.util.{Random, Try}
  *  pattern), but we will not discuss this in this lecture.
  *
  * Asynchronous Effects, as opposed to Scala Future-s, are lazy. Nothing is run until an "unsafe" method
- * is executed (by your code, or by the IOApp trait) - usually at the "end of the world".
+ * is executed (by your code, or by the `IOApp` trait) - usually at the "end of the world".
  *
- * The IO monad in Cats Effect is called `IO`.
+ * The IO Monad in Cats Effect is called `IO`.
  *
  * A value of type IO[A] is a computation which, when evaluated, can perform effects before returning a value
  * of type A.
@@ -52,7 +52,7 @@ import scala.util.{Random, Try}
  *
  * It describes synchronous or asynchronous computations that:
  * - On evaluation yield exactly one result
- * - Can end in either success or failure (in case of failure flatMap chains get short-circuited)
+ * - Can end in either success or failure (and in case of failure, the `flatMap` chains get short-circuited)
  * - Can be canceled (if the user provides cancellation logic)
  */
 
@@ -109,6 +109,7 @@ object LazyVsEagerApp extends App {
 
 /*
  * `IO.pure` lifts pure values into IO, yielding IO values that are "already evaluated".
+ *
  * It's eagerly evaluated therefore don't pass side effecting computations into it.
  *
  * `IO.unit` is just `IO.pure(())`, commonly used to signal completion of side effecting routines.
@@ -206,7 +207,7 @@ object IOBuildingBlocks2 extends IOApp {
    *
    *   def suspend[A](thunk: => IO[A]): IO[A]
    *
-   * `IO.flatMap` is "trampolined" (that means - it is stack-safe).
+   * `IO.flatMap` is also "trampolined" (that means - it is stack-safe).
    *
    * Question: What happens when `fib` is executed with a large enough `n`?
    * Question: How can we fix it using `IO.suspend`?
@@ -246,11 +247,10 @@ object AsyncAndCancelable extends IOApp {
   private val asyncProgram = for {
     _ <- putStrLn("launching async")
     _ <- IO.async[Unit] { cb: (Either[Throwable, Unit] => Unit) =>
-      tickNSeconds(2)
-        .unsafeToFuture() // avoid 'unsafe*' in real code
-        .onComplete { x: Try[Unit] =>
-          cb(x.toEither)
-        }
+      val future = tickNSeconds(2).unsafeToFuture() // avoid 'unsafe*' in real code
+      future onComplete { x: Try[Unit] =>
+        cb(x.toEither)
+      }
     }
     _ <- putStrLn("async finished")
   } yield ()
@@ -340,7 +340,7 @@ object Sequence extends IOApp {
  * `ContextSwitch#shift` or `IO.shift` can be used to do "cooperative yielding" by triggering a logical fork
  * so that the current thread is not occupied on long running operations.
  *
- * This forms an async boundary.
+ * This forms an "async boundary".
  *
  * We can adjust `fib` to have async boundaries every 1000 invocations.
  */
