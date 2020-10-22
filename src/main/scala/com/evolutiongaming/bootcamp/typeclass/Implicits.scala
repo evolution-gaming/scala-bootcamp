@@ -22,7 +22,7 @@ object Implicits {
     //implicit conversions defined in the lexical scope
     implicit def intToString(value: Int): String = value.toString
 
-    def repeatStrTwice(string: String): String = string.repeat(2)
+    def repeatStrTwice(string: String): String = string * 2
 
     /*
     Here we have a String arg required but we passed an Int. Before stopping compilation with an error, the
