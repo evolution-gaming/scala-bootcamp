@@ -82,6 +82,7 @@ All resources are listed in no particular order.
 - [Functional Programming in Scala](https://www.manning.com/books/functional-programming-in-scala#toc) ($25+)
 - [Practical FP in Scala: A hands-on approach](https://leanpub.com/pfp-scala) ($30+)
 - [Programming in Scala](https://booksites.artima.com/programming_in_scala_3ed) ($30+)
+- [Zionomicon](https://www.zionomicon.com/) ($70)
 
 ### Other
 
