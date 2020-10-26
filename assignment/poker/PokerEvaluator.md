@@ -63,14 +63,18 @@ the game rules of the specific poker games.
 Your code should read from standard input (`stdin`) and write to standard output (`stdout`) until `EOF` is 
 reached (see [standard streams](https://en.wikipedia.org/wiki/Standard_streams) if needed).
 
-The program will be tested by redirecting input to `stdin` and redirecting output to `stdout`, with up to 
-100,000 lines of input per a single run.
+The program will be tested using `stdin` and `stdout` redirection. for example:
+```shell script
+run.sh < test-cases.txt > solutions.txt
+```
+
+The largest test runs will have up to 100,000 lines of input.
 
 There will be 1 test case per 1 line of input. Your program should produce a corresponding 1 line of output
 for each line of input, even in case of errors. In case the input line is invalid or not supported by 
 your solution, output a clear and easy to understand error message, prefixed with `Error: `.
 
-Please do NOT output extra text or expect extra input besides the lines with test cases.
+Please do NOT output extra text or expect extra input besides the lines with the test cases.
 
 #### Input of Test Cases
 
