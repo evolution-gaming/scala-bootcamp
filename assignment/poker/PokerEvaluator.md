@@ -118,6 +118,8 @@ and separated by `=` signs.
 The order of the cards in each hand should remain the same as in the input, e.g., don't reorder `2h3s` into 
 `3s2h`.
 
+#### Examples
+
 Example input:
 ```
 texas-holdem 4cKs4h8s7s Ad4s Ac4d As9s KhKd 5d6d
