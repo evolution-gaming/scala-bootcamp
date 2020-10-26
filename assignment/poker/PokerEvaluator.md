@@ -143,8 +143,8 @@ Include a `prepare.sh` shell script for installing the prerequisites for running
 shell script to run it.
 
 To run your solution, it should be enough to launch a fresh [Ubuntu Docker](https://hub.docker.com/_/ubuntu) 
-`latest` image, pull the source code of your solution to it, run `prepare.sh` and run `run.sh` with input and 
-output redirection.
+`latest` image, pull the source code of your solution to it from Git, run `prepare.sh`, and then run `run.sh` 
+with input and output redirection.
 
 Include a `ReadMe.md` file which documents all known limitations of your solution, in terms of functionality
 implemented, known defects, or considerations how to build and run it.  
