@@ -2,44 +2,49 @@
 
 ## Task Description
 
-Your task is to develop an algorithm for comparing the strength of poker hands. 
+Your task is to develop an algorithm for sorting poker hands according to their strength.
 
 ### Poker Games
 
-You should support one to three poker game types (the more the better):
-* Texas Hold'em - input is board of 5 cards, and multiple hands of 2 cards each
+You should support one to three poker game types (more is better):
+* Texas Hold'em - input is a board of 5 cards, and multiple hands of 2 cards each.
 
   A value of a Texas Hold'em hand is the best possible value out of all possible subsets of 
   5 cards from the 7 cards which are formed by 5 board cards and 2 hand cards.
+  
   See [Texas Hold'em rules](https://en.wikipedia.org/wiki/Texas_hold_%27em).
 
-* Omaha Hold'em - input is board of 5 cards, and multiple hands of 4 cards each
+* Omaha Hold'em - input is a board of 5 cards, and multiple hands of 4 cards each.
 
   A value of an Omaha Hold'em hand is the best possible value out of all possible subsets of 
   5 cards from the 7 cards which are formed by 3 out of 5 board cards and 2 out of 4 hand cards. 
+  
   See [Omaha Hold'em rules](https://en.wikipedia.org/wiki/Omaha_hold_%27em).
 
-* Five Card Draw - input is multiple hands of 5 cards each
+* Five Card Draw - input is multiple hands of 5 cards each.
 
-  A value of a Five Card Draw is the value of the 5 hand cards.
+  A value of a Five Card Draw hand is the value of the 5 hand cards.
+  
   See [Five Card Draw rules](https://en.wikipedia.org/wiki/Five-card_draw).
 
 ### Hand Value
 
-The hand values (for 5 cards) in descending order (from strongest to weakest):
+The hand values for 5 cards are as follows (in descending order - from strongest to weakest):
 
 * `Straight Flush` - a `Straight` (see below) which is also a `Flush` (see below)
-* `Four of a kind` - Four cards of the same value
-* `Full House` - Combination of `Three of a kind` and a `Pair`
+* `Four of a kind` - Four cards of the same rank
+* `Full House` - a combination of `Three of a kind` and a `Pair`
 * `Flush` - 5 cards of the same suit
-* `Straight` - Sequence of 5 cards in increasing value (note an exception - `A` can both precede `2` and follow `K`)
-* `Three of a kind` - Three cards with the same value
-* `Two pairs` - Two `Pair`-s
-* `Pair` - two cards of the same value
+* `Straight` - a sequence of 5 cards of consecutive rank (note an exception - `A` can both precede `2` and follow `K`)
+* `Three of a kind` - three cards with the same rank
+* `Two pairs` - two `Pair`-s
+* `Pair` - two cards of the same rank
 * `High card` - the "fallback" in case no other hand value rule applies
 
-In case of ties the ranks of the cards forming the combinations decide the highest value. 
-In case of further ties, the ranks of remaining cards (in the order of the rank) decide the highest value. 
+In case of ties the ranks of the cards forming the combinations decide the highest value.
+ 
+In case of further ties, the ranks of the remaining cards decide the highest value. 
+
 All suits are considered equal in strength.
 
 When comparing `Full House`-s, the `Three of a kind` rank comparison is more important than the `Pair` rank 
@@ -56,12 +61,12 @@ the game rules of the specific poker games.
 ### Input and Output
 
 Your code should read from standard input (`stdin`) and write to standard output (`stdout`) until `EOF` is 
-reached (see [standard streams](https://en.wikipedia.org/wiki/Standard_streams)).
+reached (see [standard streams](https://en.wikipedia.org/wiki/Standard_streams) if needed).
 
-The program will be tested by piping input to `stdin` and piping output to `stdout`, with up to 100,000 
-lines of input per a single run.
+The program will be tested by redirecting input to `stdin` and redirecting output to `stdout`, with up to 
+100,000 lines of input per a single run.
 
-There will be 1 test case per 1 line of input, your program should produce a corresponding 1 line of output
+There will be 1 test case per 1 line of input. Your program should produce a corresponding 1 line of output
 for each line of input, even in case of errors. In case the input line is invalid or not supported by 
 your solution, output a clear and easy to understand error message, prefixed with `Error: `.
 
@@ -92,7 +97,7 @@ the suit (one of `h`, `d`, `c`, `s`). Jokers are not used.
 
 #### Output of Solutions
 
-The output is to be written to standard output using the format:
+Write output to standard output using the format:
 
 ```
 <hand block 1> <hand block 2> <...> <hand block n>
@@ -131,16 +136,20 @@ Qc8dAd6c KsAsTcTs Js2dKd8c 7dQsAc5d Jh2h3c9c
 
 ### Requirements for Implementation
 
-The homework can be written in any programming language which can be run on Ubuntu Linux system and should 
-include a `ReadMe.md` file with documentation on how to compile and run it, as well as install any
-prerequisites. 
+The homework can be written in any programming language which can be run on an
+[Ubuntu Linux Docker container](https://hub.docker.com/_/ubuntu).
 
 Include a `prepare.sh` shell script for installing the prerequisites for running your solution, and a `run.sh`
 shell script to run it.
 
-Please also document all known limitations of your solution.
+To run your solution, it should be enough to launch a fresh [Ubuntu Docker](https://hub.docker.com/_/ubuntu) 
+`latest` image, pull the source code of your solution to it, run `prepare.sh` and run `run.sh` with input and 
+output redirection.
 
-The documentation should be in English. 
+Include a `ReadMe.md` file which documents all known limitations of your solution, in terms of functionality
+implemented, known defects, or considerations how to build and run it.  
+
+The code, comments and documentation should be in English.
 
 ### Reference I/O Implementation
 
@@ -159,7 +168,8 @@ For extra credit you should do the following (one or more):
 
 A complete, working solution in a non-Scala language will be preferred to an incomplete solution in Scala.
 
-Yielding correct results is more important than the algorithmic complexity of the solution.
+Yielding correct results and code readability is more important than the algorithmic complexity of the 
+solution.
 
 ## Submission
 
