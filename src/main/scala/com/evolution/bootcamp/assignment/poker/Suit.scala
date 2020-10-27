@@ -4,6 +4,7 @@ import cats.syntax.either._
 
 sealed trait Suit {
   def character: Char
+  override def toString: ErrorMessage = character.toString
 }
 
 case object Hearts extends Suit {
