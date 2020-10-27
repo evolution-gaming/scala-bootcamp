@@ -5,10 +5,14 @@ import cats.syntax.either._
 object Solver {
   def sortConsideringEquals[K, V : Ordering](input: List[(K, V)]): List[Set[K]] = {
     input
-      .groupBy { case (_, value) => value }
+      .groupBy { case (_, v) => v }
       .toList
-      .sortBy { case (k, _) => k }
-      .map { case (_, v) => v.map { case (k, _) => k } .toSet }
+      .sortBy { case (v, _) => v }
+      .map { case (_, listOfK) =>
+        listOfK
+          .map { case (k, _) => k }
+          .toSet
+      }
   }
 
   def solve(testCase: TestCase): Either[ErrorMessage, Solution] = {
