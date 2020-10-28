@@ -1,9 +1,9 @@
 package com.evolutiongaming.bootcamp.effects
 
-import java.util.concurrent.Executors
-import java.util.concurrent.atomic.AtomicBoolean
+import java.util.concurrent.{Executors, ThreadFactory}
+import java.util.concurrent.atomic.{AtomicBoolean, AtomicInteger}
 
-import cats.effect.{ContextShift, ExitCode, IO, IOApp}
+import cats.effect.{Blocker, ContextShift, ExitCode, IO, IOApp, Resource}
 
 import scala.io.StdIn
 import cats.implicits._
@@ -302,6 +302,115 @@ object AsyncAndCancelable extends IOApp {
   } yield ExitCode.Success
 }
 
+/* Cancellation on legacy code,
+ * Cancellation is a Concurrent Action - resources must not be closed on cancel or closing must be synchronised as they might be used concurrently,
+ * doing that may lead data corruption, exceptions and all kinds of unexpected behavior.
+ * https://typelevel.org/cats-effect/datatypes/io.html#gotcha-cancellation-is-a-concurrent-action
+ */
+object CancelableResultsAndLegacy extends IOApp {
+
+  private val cancelableLegacyIntegrationProgram = {
+    class UglyLegacyCode {
+      private val cancelled = new AtomicBoolean(false)
+
+      private def longRecursiveCompute(x: Long, until: Long): Long = {
+        if (cancelled.get()) {
+          throw new InterruptedException("compute interrupted")
+        } else if (x >= until) {
+          x
+        } else {
+          println(s" ${Thread.currentThread().toString} Calculating in longRecursiveCompute: $x")
+          Thread.sleep(1000)
+          longRecursiveCompute(x + x, until)
+        }
+      }
+
+      def compute(i: Long, until: Long)(onComplete: Long => Unit, onError: Exception => Unit): Unit = {
+        val t = new Thread(() => {
+          try {
+            onComplete(longRecursiveCompute(i, until))
+          } catch {
+            case e: InterruptedException => onError(e)
+          }
+        })
+        t.start()
+      }
+
+      def cancel(): Unit = cancelled.set(true)
+    }
+
+    for {
+      _ <- putStrLn("Launching cancelable")
+      io = IO.cancelable[Long] { cb =>
+        val legacy = new UglyLegacyCode
+        legacy.compute(2L, Long.MaxValue)(res => cb(Right(res)), e => cb(Left(e)))
+        IO.delay(legacy.cancel())
+      }
+      fiber <- io.start
+      _ <- putStrLn(s"Started $fiber")
+      res <- IO.race(IO.sleep(10.seconds), fiber.join)
+      _ <-
+        res.fold(
+          _ => putStrLn(s"cancelling $fiber...") *> fiber.cancel *> putStrLn("IO cancelled"),
+          i => putStrLn(s"IO completed with: $i")
+        )
+    } yield ()
+  }
+  override def run(args: List[String]): IO[ExitCode] = for {
+    _ <- cancelableLegacyIntegrationProgram
+  } yield ExitCode.Success
+}
+
+/**
+ * IO is cancellable on async boundary IO.shift or on IO.cancelBoundary
+ * https://typelevel.org/cats-effect/datatypes/io.html#iocancelboundary
+ */
+object CancelBoundaries extends IOApp  {
+
+  val nonCancelableProgram: IO[Unit] = {
+    //program has no context shift and no cancel boundry set, it's not cancellable
+    def nonCancellableTimes(rec: Int): IO[Unit] = for {
+      _ <- putStrLn(s"Running remaining iterations: ${rec}")
+      _ <- IO.sleep(1.seconds).uncancelable
+      _ <- if(rec > 0) IO.suspend(nonCancellableTimes(rec - 1)) else IO.unit
+    } yield ()
+
+    for {
+      _ <- putStrLn("Starting nonCancelableProgram")
+          fib <- nonCancellableTimes(10).start
+      _ <- IO.sleep(5.seconds)
+      _ <- fib.cancel
+      _ <- putStrLn("Cancelled nonCancelableProgram")
+      _ <- IO.sleep(5.seconds) //just to keep program alive, otherwise deamon thread will be terminated
+      _ <- putStrLn("End nonCancelableProgram")
+    } yield ()
+  }
+
+  val cancelableProgram: IO[Unit] = {
+    //on every iteration canel boundry is set, program is cancellable
+    def cancellableTimes(rec: Int): IO[Unit] = for {
+      _ <- putStrLn(s"Running remaining iterations: ${rec}")
+      _ <- IO.sleep(1.seconds).uncancelable
+      _ <- if(rec > 0) IO.cancelBoundary *> IO.suspend(cancellableTimes(rec - 1)) else IO.unit
+    } yield ()
+
+    for {
+      _ <- putStrLn("Starting cancelableProgram")
+      fib <- cancellableTimes(10).start
+      _ <- IO.sleep(5.seconds)
+      _ <- fib.cancel
+      _ <- putStrLn("Cancelled cancelableProgram")
+      _ <- IO.sleep(5.seconds) //just to keep program alive, otherwise deamon thread will be terminated
+      _ <- putStrLn("End cancelableProgram")
+    } yield ()
+  }
+
+  override def run(args: List[String]): IO[ExitCode] = for {
+    _ <- cancelableProgram
+    _ <- nonCancelableProgram
+  } yield ExitCode.Success
+}
+
 /*
  * `sequence`     -   takes a list of `IO`, executes them in sequence and returns an `IO` with a collection
  *                    of all the results.
@@ -374,6 +483,76 @@ object Shift extends IOApp {
     _ <- shiftToSpecific
   } yield ExitCode.Success
 }
+
+/* Example showcases how does context shift works in terms of executing thread.
+ * 1. cpu bound pool
+ * 2. Blocker https://typelevel.org/cats-effect/datatypes/contextshift.html#blocker
+ */
+object Shift2 extends IOApp {
+
+  def logLine(s: => String): IO[Unit] = IO.suspend(putStrLn(s"${Thread.currentThread().toString} $s"))
+
+  def newThreadFactory(name: String): ThreadFactory = new ThreadFactory {
+    val ctr = new AtomicInteger(0)
+    def newThread(r: Runnable): Thread = {
+      val back = new Thread(r, s"$name-pool-${ctr.getAndIncrement()}")
+      back.setDaemon(true)
+      back
+    }
+  }
+
+  // dedicated pool with 2 threads for cpu bound tasks
+  // io-app default pools size is calculted as math.max(2, Runtime.getRuntime().availableProcessors())
+  // in case we want to restrict certain computation and not to interfere with global pool
+  // abusing thread pools may lead to unnecessary context switches which will degrade performance
+  val basicShiftingExample = {
+    val cpuBoundPool: ExecutionContext =
+      ExecutionContext
+        .fromExecutor(Executors.newFixedThreadPool(2, newThreadFactory("cpu-bound")))
+
+    val cpuBoundContext = IO.contextShift(cpuBoundPool)
+
+    def cpuBound(d: Double, invocation: Long): IO[Double] = IO.suspend {
+      if(d == 0.0) IO.pure(d)
+      else cpuBound(d / 2.0, invocation + 1) //putStrLn(s"${Thread.currentThread().toString} current value: ${d}") *>
+    }
+
+    for {
+      _ <- logLine(s"Started on default thread")
+      _ <- ContextShift[IO].evalOn(cpuBoundPool)(logLine(s"Evaling on cpu-bound-pool"))
+      _ <- logLine(s"We are back on main default")
+
+      result <- cpuBoundContext.shift >> logLine(s"running on cpu-bound-pool-") *> cpuBound(100000.0, 0)
+      _ <- IO.shift >> logLine(s"result=${result} result on default")
+    } yield ()
+  }
+
+  // https://typelevel.org/cats-effect/datatypes/contextshift.html#blocker
+  // special pool with explicit construct for blocking operations
+  val blockingExample = {
+    val blocker: Resource[IO, Blocker] = Blocker.fromExecutorService(IO.delay(Executors.newCachedThreadPool(newThreadFactory("blocker"))))
+
+    blocker.use { blocker =>
+      def blockingCall(id: Int): Unit = {
+        println(s"${Thread.currentThread().toString} Starting blocking work id:$id")
+        Thread.sleep(5000)
+        println(s"${Thread.currentThread().toString} Ended work id:$id")
+      }
+
+      //launching paralell 10 blocking tasks
+      (0 to 9).toList.map(id => blocker.delay[IO, Unit](blockingCall(id))).parSequence
+    }
+  }
+
+  def run(args: List[String]): IO[ExitCode] = {
+    for {
+      _ <- basicShiftingExample
+      _ <- blockingExample
+      _ <- logLine("End")
+    } yield ExitCode.Success
+  }
+}
+
 
 /*
  * Handling errors - operations available for `MonadError` and `ApplicativeError` are available for `IO`.
