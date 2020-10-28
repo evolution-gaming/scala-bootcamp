@@ -303,8 +303,9 @@ object AsyncAndCancelable extends IOApp {
 }
 
 /* Cancellation on legacy code,
- * Cancellation is a Concurrent Action - resources must not be closed on cancel or closing must be synchronised as they might be used concurrently,
- * doing that may lead data corruption, exceptions and all kinds of unexpected behavior.
+ * When writing your cancellable code, be aware that cancellation is a concurrent action. That is, there is no synchronization provided by Cats Effect IO for it.
+ * Therefore, if your effect code is doing an operation that isn't safe to do concurrently with cancellation, it can lead data corruption or other errors.
+ * You can solve it, for example, by introducing a lock, as per Cats Effect IO documentation here: ...
  * https://typelevel.org/cats-effect/datatypes/io.html#gotcha-cancellation-is-a-concurrent-action
  */
 object CancelableResultsAndLegacy extends IOApp {
