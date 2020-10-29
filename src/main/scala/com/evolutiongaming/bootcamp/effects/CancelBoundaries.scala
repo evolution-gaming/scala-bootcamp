@@ -114,7 +114,12 @@ object CancelBoundariesExercises extends IOApp {
     } yield ()
   }
 
+  /* Try https://typelevel.org/cats-effect/datatypes/io.html#concurrency-and-cancellation
+   * first notCancelable example, try starting it as fiber, then cancelling, what's behavior?
+   */
+
   override def run(args: List[String]): IO[ExitCode] = for {
+    _ <- retryExercise
     _ <- computeExercise
   } yield ExitCode.Success
 }
