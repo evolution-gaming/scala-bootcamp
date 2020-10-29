@@ -1,7 +1,10 @@
 package com.evolutiongaming.bootcamp.effects
 
+import java.io.{BufferedInputStream, BufferedReader, FileInputStream, FileReader}
+import java.nio.file.{Files, Path, Paths}
 import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.{Executors, ThreadFactory}
+import java.util.function.{IntFunction, Predicate}
 
 import cats.effect.{Blocker, ContextShift, ExitCode, IO, IOApp, Resource}
 import cats.implicits._
@@ -118,4 +121,40 @@ object ContextShifts extends IOApp {
       _ <- logLine("End")
     } yield ExitCode.Success
   }
+}
+
+object ContextShiftExerciseOne extends IOApp {
+
+  /*
+   * create program that does work on custom pool with 1 thread
+   */
+  val singleThreadProgram: IO[Unit] = IO.delay(???)
+
+  /*
+   * refactor program to do blocking work on blocker
+   */
+  val blockingProgram = {
+    def listSourceFiles(root: Path) = IO.delay {
+      Files
+        .walk(root)
+        .filter((t: Path) => t.toString.endsWith(".scala"))
+        .toArray[Path]((i: Int) => new Array[Path](i)).toList
+    }
+    def linesOfCode(file: Path): IO[Long] =
+      Resource.make(IO.delay(new FileReader(file.toFile)))(file => IO.delay(file.close()))
+        .map(new BufferedReader(_)).use(br => IO.delay(br.lines().count()))
+
+    for {
+      sourceFiles <- listSourceFiles(Paths.get("./src"))
+      listOfLineLenghts <- sourceFiles.map(linesOfCode).parSequence
+      linesOfCode = listOfLineLenghts.sum
+      _ <- putStrLn(s"Total Lines of code: ${linesOfCode}")
+    } yield ()
+  }
+
+  override def run(args: List[String]): IO[ExitCode] = for {
+    _ <- singleThreadProgram
+    _ <- blockingProgram
+  } yield ExitCode.Success
+
 }
