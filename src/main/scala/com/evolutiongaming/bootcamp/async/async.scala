@@ -250,6 +250,7 @@ object Exercise3 extends App {
   val taskIterations = 1000
   val initialBalance = 10
 
+
   //PLACE TO FIX - START
   var balance1: Int = initialBalance
   var balance2: Int = initialBalance
@@ -264,6 +265,7 @@ object Exercise3 extends App {
     println(balance1 + balance2)
   }
   //PLACE TO FIX - FINISH
+
 
   def transfer(state: State): State = {
     if (state.balance1 >= state.balance2) {
@@ -282,4 +284,30 @@ object Exercise3 extends App {
   printBalancesSum() //should print 20
 
   final case class State(balance1: Int, balance2: Int)
+}
+
+object Singletons extends App {
+  /*
+  Properly implementing lazy initialized singletons which correctly work in a multithreading environment
+  is a challenge. Luckily Scala got it for you!
+   */
+
+  lazy val immaLazyVal: String = {
+    println("Lazy Val!")
+    "value"
+  }
+
+  object Holder {
+    val valInsideObject: String = {
+      println("Val inside Object!")
+      "value"
+    }
+  }
+
+  println("Start")
+  immaLazyVal
+  immaLazyVal
+  Holder.valInsideObject
+  Holder.valInsideObject
+  println("End")
 }
