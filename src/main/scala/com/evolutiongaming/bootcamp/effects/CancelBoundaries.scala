@@ -71,7 +71,7 @@ object CancelBoundaries extends IOApp  {
 object CancelBoundariesExercises extends IOApp {
   def delay(duration: FiniteDuration): IO[Unit] = IO.sleep(duration).uncancelable
 
-  /*
+  /* Exercise #1
    * Fix retry function without altering delay function, to be cancellable immediately, so running program there is no retrying after cancel
    */
   val retryExercise: IO[Unit] = {
@@ -97,7 +97,7 @@ object CancelBoundariesExercises extends IOApp {
     } yield ()
   }
 
-  /*
+  /* Exercise #2
    * Fix program so that no Calculation is happening after cancellation
    */
   val computeExercise = {
@@ -114,7 +114,8 @@ object CancelBoundariesExercises extends IOApp {
     } yield ()
   }
 
-  /* Try https://typelevel.org/cats-effect/datatypes/io.html#concurrency-and-cancellation
+  /* Exercise #3
+   * Try https://typelevel.org/cats-effect/datatypes/io.html#concurrency-and-cancellation
    * first notCancelable example, try starting it as fiber, then cancelling, what's behavior?
    */
 

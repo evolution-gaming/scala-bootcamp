@@ -125,12 +125,12 @@ object ContextShifts extends IOApp {
 
 object ContextShiftExerciseOne extends IOApp {
 
-  /*
+  /* Exercise #1
    * create program that does work on custom pool with 1 thread
    */
   val singleThreadProgram: IO[Unit] = IO.delay(???)
 
-  /*
+  /* Exercise #2
    * refactor program to do blocking work on blocker
    */
   val blockingProgram = {
