@@ -17,7 +17,7 @@ import scala.util.control.NonFatal
  * but counter is still taken into account even if not crossing async boundaries.
  * Technically IO is switching from Main to io-app context.
  * That may lead to inconsistent state when doing `race` with internal state update.
- * That means - critical block's should be marked as `cancellable`
+ * That means - critical block's should be marked as `uncancellable`
  *
  * https://typelevel.org/cats-effect/datatypes/io.html#concurrency-and-cancellation
  * https://typelevel.org/cats-effect/datatypes/io.html#iocancelboundary
