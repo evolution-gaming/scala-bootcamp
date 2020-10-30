@@ -4,6 +4,8 @@ import java.util.concurrent.atomic.AtomicBoolean
 
 import cats.effect.{ExitCode, IO, IOApp}
 import com.evolutiongaming.bootcamp.effects.Console.Real.putStrLn
+
+import scala.annotation.tailrec
 import scala.concurrent.duration._
 
 /* Cancellation on legacy code,
@@ -11,7 +13,7 @@ import scala.concurrent.duration._
  * That is, there is no synchronization provided by Cats Effect IO for it.
  * Therefore, if your effect code is doing an operation that isn't safe to do concurrently with cancellation,
  * it can lead data corruption or other errors.
- * You can solve it, for example, by introducing a lock, as per Cats Effect IO documentation here: ...
+ * You can solve it, for example, by introducing a lock, as per Cats Effect IO documentation here:
  * https://typelevel.org/cats-effect/datatypes/io.html#gotcha-cancellation-is-a-concurrent-action
  */
 object CancelableResultsAndLegacy extends IOApp {
@@ -20,6 +22,7 @@ object CancelableResultsAndLegacy extends IOApp {
     class UglyLegacyCode {
       private val cancelled = new AtomicBoolean(false)
 
+      @tailrec
       private def longRecursiveCompute(x: Long, until: Long): Long = {
         if (cancelled.get()) {
           throw new InterruptedException("compute interrupted")

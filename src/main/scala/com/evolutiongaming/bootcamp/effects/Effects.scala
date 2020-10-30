@@ -1,15 +1,11 @@
 package com.evolutiongaming.bootcamp.effects
 
-import java.util.concurrent.{Executors, ThreadFactory}
-import java.util.concurrent.atomic.{AtomicBoolean, AtomicInteger}
-
-import cats.effect.{Blocker, ContextShift, ExitCode, IO, IOApp, Resource}
-
+import java.util.concurrent.atomic.AtomicBoolean
+import cats.effect.{ExitCode, IO, IOApp}
 import scala.io.StdIn
 import cats.implicits._
-
 import scala.annotation.tailrec
-import scala.concurrent.{Await, ExecutionContext, Future}
+import scala.concurrent.{Await, Future}
 import scala.concurrent.duration._
 import scala.util.{Random, Try}
 

@@ -1,10 +1,8 @@
 package com.evolutiongaming.bootcamp.effects
 
-import java.io.{BufferedInputStream, BufferedReader, FileInputStream, FileReader}
 import java.nio.file.{Files, Path, Paths}
 import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.{Executors, ThreadFactory}
-import java.util.function.{IntFunction, Predicate}
 
 import cats.effect.{Blocker, ContextShift, ExitCode, IO, IOApp, Resource}
 import cats.implicits._
@@ -19,19 +17,19 @@ import scala.concurrent.ExecutionContext
  * `ContextSwitch#shift` or `IO.shift` can be used to do "cooperative yielding" by triggering a logical fork
  * so that the current thread is not occupied on long running operations.
  *
- * When choosing sizes for thread pools rule of thumb:
- * 1. cpu-bound tasks should have not more then available cores on the machine threads, should be used for pure computation only
- *    IO app default ContextShift constructed as `math.max(2, Runtime.getRuntime().availableProcessors())`
+ * When choosing sizes for thread pools the rule of thumb is:
+ * 1. cpu-bound tasks should have not more then available cores on the machine threads, should be used for pure
+ *    computation only IO app default ContextShift constructed as `math.max(2, Runtime.getRuntime().availableProcessors())`
  * 2. blocking io tasks - unbounded thread pool used only for blocking tasks,
  *    avoid using for computation as that will lead to poor performance because of context switches
  * https://typelevel.org/cats-effect/concurrency/basics.html#thread-pools
  * https://typelevel.org/cats-effect/concurrency/basics.html#concurrency
  * https://monix.io/docs/3x/best-practices/blocking.html
  *
- * Failure to run blocking tasks on separate pool(via blocker) will lead to thread pool starvation. See example.
+ * Failure to run blocking tasks on a separate pool (via blocker) will lead to thread pool starvation. See example.
  *
  * Example showcases how does context shift works in terms of executing thread.
- * 1. cpu bound pool
+ * 1. CPU bound pool
  * 2. Blocker https://typelevel.org/cats-effect/datatypes/contextshift.html#blocker
  */
 object ContextShifts extends IOApp {
@@ -49,8 +47,8 @@ object ContextShifts extends IOApp {
   }
 
   // dedicated pool with 2 threads for cpu bound tasks
-  // io-app default pools size is calculted as math.max(2, Runtime.getRuntime().availableProcessors())
-  // in case we want to restrict certain computation and not to interfere with global pool
+  // io-app default pools size is calculated as math.max(2, Runtime.getRuntime().availableProcessors())
+  // in case we want to restrict certain computation and not interfere with global pool
   // abusing thread pools may lead to unnecessary context switches which will degrade performance
   val basicShiftingExample: IO[Unit] = {
     val cpuBoundPool: ExecutionContext =
@@ -86,12 +84,12 @@ object ContextShifts extends IOApp {
         println(s"${Thread.currentThread().toString} Ended work id:$id")
       }
 
-      //launching paralell 10 blocking tasks
+      //launching parallel 10 blocking tasks
       (0 to 9).toList.map(id => blocker.delay[IO, Unit](blockingCall(id))).parSequence.void
     }
   }
 
-  //Anti pattern: running blocking tasks on cpu-bound pool
+  // Anti-pattern: running blocking tasks on cpu-bound pool
   val threadPoolStarvationExample: IO[Unit] = {
     val twoThreadPool: ExecutionContext =
       ExecutionContext
