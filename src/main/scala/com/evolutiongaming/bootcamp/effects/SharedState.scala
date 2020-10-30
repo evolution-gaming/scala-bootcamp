@@ -6,11 +6,10 @@ import java.util.concurrent.atomic.AtomicReference
 
 import cats.effect.concurrent._
 import cats.effect.{Concurrent, ExitCode, IO, IOApp}
-import cats.implicits.{catsSyntaxMonadErrorRethrow, catsSyntaxParallelSequence}
+import cats.implicits.{catsSyntaxMonadErrorRethrow, catsSyntaxParallelSequence, catsSyntaxParallelTraverse}
 import cats.syntax.applicativeError._
 import cats.syntax.flatMap._
 import cats.syntax.functor._
-import com.evolutiongaming.bootcamp.mutable_state.RefsExamples
 import io.chrisdavenport.log4cats.slf4j.Slf4jLogger
 
 import scala.concurrent.duration.DurationInt
@@ -42,7 +41,7 @@ object SyncronizationCommon {
 
   def run(friends: Friends): Unit = {
     def myRunnable(name: String): Runnable = new Runnable {
-      override def run() {
+      override def run(): Unit = {
         println("Thread " + Thread.currentThread().getName +
           s" friends size  ${friends.getSize}")
         println("Thread " + Thread.currentThread().getName +
@@ -228,7 +227,7 @@ object ExerciseZero extends IOApp {
 */
 object GetSetExample extends IOApp {
 
-  import RefsExamples.logger
+  import IosCommon.logger
 
   def report(messagesRef: Ref[IO, List[String]], msg: String): IO[Unit] =
     for {
@@ -255,7 +254,7 @@ object GetSetExample extends IOApp {
 */
 object UpdateExample extends IOApp {
 
-  import RefsExamples.logger
+  import IosCommon.logger
 
   val counterRef: IO[Ref[IO, Int]] = Ref.of[IO, Int](0)
 
@@ -284,8 +283,7 @@ object UpdateExample extends IOApp {
 */
 object ModifyExample extends IOApp {
 
-  import RefsExamples._
-  import cats.implicits._
+  import IosCommon.logger
 
   def inc(ref: Ref[IO, Int]): IO[Unit] = ref.modify(i => i + 1 -> i)
 
