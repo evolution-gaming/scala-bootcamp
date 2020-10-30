@@ -1,7 +1,9 @@
 package com.evolutiongaming.bootcamp.effects
 
 /*
- * Please implement Cache that will allow concurrent access and which items should have an expiration date
+ * Please implement a Cache which allows concurrent access.
+ *
+ * Cached items should have an expiration timestamp after which they are evicted.
  */
 object SharedStateHomework {
 

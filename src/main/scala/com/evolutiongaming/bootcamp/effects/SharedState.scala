@@ -19,17 +19,16 @@ import scala.concurrent.duration.DurationInt
  * We use counters, caches, locks, queues and so on.
  * But as we all have multicore processors in our machines we want to leverage the concurrency.
  * And here lies so many pitfalls.
- * The main problem is that in concurrent environment we determine the order of processes execution without
- * providing some additional synchronization/ monitoring.
+ * The main problem is that in concurrent environment we determine the order of process execution without
+ * providing additional synchronization / monitoring.
  * The best way to deal with concurrency is by using immutable data structures.
- * They will gain you sort of superpower not to pay attention to how things will be executed.
- * But what if we have to store shared state across our app ?
- * Java offers you some of a choices : synchronized blocks, volatile variables and Atomic* classes.
- * Why should not try them ?
- *
+ * They will give you a superpower to pay less attention to how things will be executed.
+ * But what if we have to store shared state across our application?
+ * Java offers you multiple choices: synchronized blocks, volatile variables and Atomic* classes.
+ * Let's try them!
  */
 
-object SyncronizationCommon {
+object SynchronizationCommon {
 
   trait Friends {
     def getSize: Int
@@ -67,12 +66,13 @@ object SyncronizationCommon {
 }
 
 /*
- * Example with no synchronization
- * Is there any problems with solution ?
+ * Example with no synchronization.
+ *
+ * Are there any problems with this solution?
  */
 object NoSynchronization {
 
-  import SyncronizationCommon._
+  import SynchronizationCommon._
 
   class SimpleFriends extends Friends {
     private var friendList: List[String] = List.empty
@@ -97,12 +97,13 @@ object NoSynchronization {
 }
 
 /*
- * We can use good-old synchronized from Java
- * Is there any problems with solution ?
+ * We can use good-old `synchronized` from Java.
+ *
+ * Are there any problems with this solution?
  */
 object SlightlyBetterSynchronization {
 
-  import SyncronizationCommon._
+  import SynchronizationCommon._
 
   class SynchronizedFriends extends Friends {
     private var friendList: List[String] = List.empty
@@ -128,16 +129,19 @@ object SlightlyBetterSynchronization {
 }
 
 /*
- * We can go with AtomicReference
- * Atomic prefix indicates that operations with this classes will be atomic.
- * Java classes rely on Compare-and-swap operation which is a machine-level operation
- * that insures that swapping operation will be atomic.
- * Is there any problems with solution ?
+ * We can go with `AtomicReference`.
+ *
+ * `Atomic` prefix indicates that operations with this classes will be atomic.
+ *
+ * Java classes rely on Compare-and-Swap operation which is a machine-level operation
+ * that insures that the swapping operation will be atomic.
+ *
+ * Are there any problems with this solution?
  */
 
 object AtomicRefSyncExample {
 
-  import SyncronizationCommon._
+  import SynchronizationCommon._
 
   class AtomicFriends extends Friends {
     private val friendsRef: AtomicReference[List[String]] = new AtomicReference(List.empty)
@@ -168,11 +172,11 @@ object IosCommon {
 
 /*
  * But we are living in a beautiful world of FP,
- * so there should be something that is referentially transparent and composable, right ?
- * Or maybe we can build it by ourselves ?
- * But what about the State monad, it is used for storing state, right ?
- * Turns out that State is no more than function S => (S,A) which is sequential by its definition
- * So no concurrency for State
+ * so there should be something that is referentially transparent and composable, right?
+ * Or maybe we can build it by ourselves?
+ * But what about the State monad, it is used for storing state, right?
+ * Turns out that State is no more than function S => (S,A) which is sequential by its definition.
+ * So no concurrency for State.
  */
 object ExerciseZero extends IOApp {
 
@@ -215,16 +219,14 @@ object ExerciseZero extends IOApp {
 
 /*
  * What is Ref ?
+ *
  * Purely functional mutable reference
  * Concurrent, lock-free
  * Always contains a value
+ *
+ * Note - Ref#get and then Ref#set is not Atomic
+ *
  */
-
-/*
-*
-* Ref#get and then Ref#set is not Atomic
-*
-*/
 object GetSetExample extends IOApp {
 
   import IosCommon.logger
@@ -249,7 +251,7 @@ object GetSetExample extends IOApp {
 
 /*
 *
-* Ref#get could happens after another Ref#update. Update and then Get is not Atomic
+* Ref#get could happen after another Ref#update. `update` and then `get` is not Atomic.
 *
 */
 object UpdateExample extends IOApp {
@@ -278,7 +280,7 @@ object UpdateExample extends IOApp {
 
 /*
 *
-* Ref#modify will allow you to perform update and return something in atomic way
+* Ref#modify will allow you to perform update and return something in an atomic way.
 *
 */
 object ModifyExample extends IOApp {
@@ -300,7 +302,7 @@ object ModifyExample extends IOApp {
 }
 
 /*
-* Limitations of Ref is that we cannot have efectfull updates on Ref
+* Limitations of Ref is that we cannot have effectful updates on Ref
 * Try to think what will happen if we would try to implement following method ?
 *
 */
@@ -314,10 +316,10 @@ object RefLimitation {
 }
 
 /*
- * Actually we can do this at some extent by introducing some functional locking mechanism
- * Something like Semaphore
- * What is Semaphore ?
- * Purely functional semaphore realization.
+ * Actually we can do this at some extent by introducing a functional locking mechanism.
+ * Something like a Semaphore.
+ * What is a Semaphore?
+ * Purely functional semaphore implementation.
  * A semaphore has a non-negative number of permits available. Acquiring a permit
  * decrements the current number of permits and releasing a permit increases
  * the current number of permits. An acquire that occurs when there are no
@@ -346,7 +348,7 @@ object SemaphoreExample extends IOApp {
 }
 
 /*
- * What will happen in case of f will never terminate inside update ?
+ * What will happen in case of a function `f` will never terminate inside update?
  */
 object SerialRef {
 
@@ -394,17 +396,17 @@ object SerialRef {
 }
 
 /*
- * What is Deferred ?
+ * What is Deferred?
  * Purely functional synchronisation
  * Simple one-shot semantics
  * Semantic blocking
- * You can think of it as an functional version of Promise
+ * You can think of it as an functional version of a Promise
  * Deferred always starts empty
  * It can only be completed once and can never be modified or unset again.
- * get on a completed Deferred returns A,
- * get on an empty Deferred semantically blocks until a result is available.
- * complete on an empty Deferred puts a value in it and awakes the listeners.
- * complete on a full Deferred fails.
+ * `get` on a completed Deferred returns A.
+ * `get` on an empty Deferred semantically blocks until a result is available.
+ * `complete` on an empty Deferred puts a value in it and awakes the listeners.
+ * `complete` on a full Deferred fails.
  *
  * Common use case: ensure that processes will start in some order
 * */
@@ -443,10 +445,11 @@ object EnsureOrder extends IOApp {
 }
 
 /*
- * What will happen if we fail somewhere before completing Deferred ?
- * What can you avoid this ?
- * Turns out that most basic technique is to just add a timeout on Deferred#get() like so Deferred#get().timeout(...)
- * Or you can go with more interesting technique
+ * What will happen if we fail somewhere before completing Deferred?
+ * What can you do to avoid this?
+ * Turns out that most basic technique is to just add a timeout on `Deferred#get()` with
+ * `Deferred#get().timeout(...)`.
+ * Or you can go with more interesting technique...
  */
 
 object HandlingErrorsWithDeferred extends IOApp {
@@ -490,9 +493,9 @@ object HandlingErrorsWithDeferred extends IOApp {
 }
 
 /*
- * What about combining Refs and Deferred ?
- * Implement a memoize function that takes some `f:F[A]` and memoizes it (stores the result of computation)
- * What will happen if `f` will fail with some error ?
+ * What about combining Refs and Deferred?
+ * Implement a `memoize` function that takes some `f:F[A]` and memoizes it (stores the result of computation).
+ * What will happen if the function `f` will fail with some error?
  */
 object RefsExerciseTwo extends IOApp {
 
@@ -557,7 +560,7 @@ object RefsExerciseTwo extends IOApp {
 }
 
 /*
- * Can we do it with Semaphore ?
+ * Can we do it with a Semaphore?
  */
 object SemaphoreAttempt extends IOApp {
 
@@ -582,8 +585,9 @@ object SemaphoreAttempt extends IOApp {
 }
 
 /*
- * What is MVar?
- * Came from Haskell world
+ * What is an MVar?
+ * Comes from the Haskell world
+ *
  * Use-cases:
  * As synchronized, thread-safe mutable variables
  * As channels, with take and put acting as “receive” and “send”
@@ -597,7 +601,7 @@ object MvarQueueExample extends IOApp {
   val N = 10
   val mvarF: IO[MVar2[IO, Int]] = MVar.empty[IO, Int]
 
-  //Puts 'n', 'n+1', ..., 'N-1' to 'mvar'
+  // Puts 'n', 'n+1', ..., 'N-1' to 'mvar'
   def produce(mvar: MVar2[IO, Int], n: Int): IO[Unit] = {
     logger.info(s"produce($n)") >> IO(if (n < N) {
       mvar.put(n).flatTap(_ => logger.info(s"produced $n")) >> produce(mvar, n + 1)
@@ -606,7 +610,7 @@ object MvarQueueExample extends IOApp {
     }).flatten
   }
 
-  //Takes 'N-c' values from 'mvar' and sums them. Fails if cannot take in 100 ms.
+  // Takes 'N-c' values from 'mvar' and sums them. Fails if cannot take in 100 ms.
   def consume(mvar: MVar2[IO, Int], sum: Long, c: Int): IO[Long] = {
 
     logger.info(s"consume($sum, $c)") >> IO(if (c < N) {
@@ -629,7 +633,7 @@ object MvarQueueExample extends IOApp {
 
 
 /*
- * Question: what will happen in code below ?
+ * Question: what will happen in the code below ?
  */
 object MVarBehavior extends IOApp {
 
