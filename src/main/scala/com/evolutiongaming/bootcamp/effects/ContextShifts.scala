@@ -141,8 +141,7 @@ object ContextShiftExerciseOne extends IOApp {
         .toArray[Path]((i: Int) => new Array[Path](i)).toList
     }
     def linesOfCode(file: Path): IO[Long] =
-      Resource.make(IO.delay(new FileReader(file.toFile)))(file => IO.delay(file.close()))
-        .map(new BufferedReader(_)).use(br => IO.delay(br.lines().count()))
+      IO.delay(Files.lines(file).count())
 
     for {
       sourceFiles <- listSourceFiles(Paths.get("./src"))
