@@ -9,15 +9,23 @@ import scala.util.Random
 import scala.util.control.NonFatal
 
 /*
- * IO is cancellable only on async boundary IO.shift or on IO.cancelBoundary and after 512 flatMap loop iterations.
- * Docs states:
- * >We should also note that flatMap chains are only cancelable only if the chain happens after an asynchronous boundary.
- * >After an asynchronous boundary, cancellation checks are performed on every N flatMap. The value of N is hardcoded to 512.
- * which is bit misleading, because cancellation is checked and counter IS reset on async boundary,
- * but counter is still taken into account even if not crossing async boundaries.
+ * IO is cancellable only on async boundary `IO.shift` or on `IO.cancelBoundary` and after 512 flatMap loop iterations.
+ * Documentation states:
+ *
+ *   We should also note that flatMap chains are only cancelable only if the chain happens after an asynchronous
+ *   boundary.
+ *
+ *   After an asynchronous boundary, cancellation checks are performed on every N flatMap. The value of N is hardcoded to
+ *   512.
+ *
+ * This is bit misleading, because cancellation is checked and counter IS reset on async boundary,
+ * but the counter is still taken into account even if not crossing async boundaries.
+ *
  * Technically IO is switching from Main to io-app context.
+ *
  * That may lead to inconsistent state when doing `race` with internal state update.
- * That means - critical block's should be marked as `uncancellable`
+ *
+ * That means - critical blocks should be marked as `uncancellable`
  *
  * https://typelevel.org/cats-effect/datatypes/io.html#concurrency-and-cancellation
  * https://typelevel.org/cats-effect/datatypes/io.html#iocancelboundary
@@ -25,7 +33,7 @@ import scala.util.control.NonFatal
 object CancelBoundaries extends IOApp  {
 
   val nonCancelableProgram: IO[Unit] = {
-    //program has no context shift and no cancel boundry set, it's not cancellable
+    //program has no context shift and no cancel boundary set, it's not cancellable
     def nonCancellableTimes(rec: Int): IO[Unit] = for {
       _ <- putStrLn(s"Running remaining iterations: ${rec}")
       _ <- IO.sleep(1.seconds).uncancelable
@@ -44,7 +52,7 @@ object CancelBoundaries extends IOApp  {
   }
 
   val cancelableProgram: IO[Unit] = {
-    //on every iteration canel boundry is set, program is cancellable
+    //on every iteration cancel boundary is set, program is cancellable
     def cancellableTimes(rec: Int): IO[Unit] = for {
       _ <- putStrLn(s"Running remaining iterations: ${rec}")
       _ <- IO.sleep(1.seconds).uncancelable
@@ -72,7 +80,8 @@ object CancelBoundariesExercises extends IOApp {
   def delay(duration: FiniteDuration): IO[Unit] = IO.sleep(duration).uncancelable
 
   /* Exercise #1
-   * Fix retry function without altering delay function, to be cancellable immediately, so running program there is no retrying after cancel
+   * Fix retry function without altering delay function, to be cancellable immediately, so that running the program
+   * there is no retrying after cancel
    */
   val retryExercise: IO[Unit] = {
     implicit class ioRetrySyntax[A](task: IO[A]) {
@@ -116,9 +125,8 @@ object CancelBoundariesExercises extends IOApp {
 
   /* Exercise #3
    * Try https://typelevel.org/cats-effect/datatypes/io.html#concurrency-and-cancellation
-   * first notCancelable example, try starting it as fiber, then cancelling, what's behavior?
+   * first notCancelable example, try starting it as fiber, then cancelling. What is the behaviour?
    */
-
   override def run(args: List[String]): IO[ExitCode] = for {
     _ <- retryExercise
     _ <- computeExercise
