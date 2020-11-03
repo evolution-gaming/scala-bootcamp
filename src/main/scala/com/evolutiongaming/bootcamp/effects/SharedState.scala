@@ -66,69 +66,6 @@ object SynchronizationCommon {
 }
 
 /*
- * Example with no synchronization.
- *
- * Are there any problems with this solution?
- */
-object NoSynchronization {
-
-  import SynchronizationCommon._
-
-  class SimpleFriends extends Friends {
-    private var friendList: List[String] = List.empty
-
-    def getSize: Int = friendList.size
-
-    def put(s: String): Unit = {
-      if (!friendList.contains(s)) {
-        friendList = friendList ++ List(s)
-      }
-    }
-
-    def getFriendsList: List[String] = friendList
-  }
-
-  def main(args: Array[String]): Unit = {
-    val friends = new SimpleFriends
-    run(friends)
-  }
-
-
-}
-
-/*
- * We can use good-old `synchronized` from Java.
- *
- * Are there any problems with this solution?
- */
-object SlightlyBetterSynchronization {
-
-  import SynchronizationCommon._
-
-  class SynchronizedFriends extends Friends {
-    private var friendList: List[String] = List.empty
-
-    def getSize: Int = friendList.length
-
-    def put(s: String): Unit = this.synchronized {
-      if (!friendList.contains(s)) {
-        friendList = friendList ++ List(s)
-      }
-    }
-
-    def getFriendsList: List[String] = friendList
-  }
-
-  def main(args: Array[String]): Unit = {
-
-    val friends = new SynchronizedFriends
-
-    run(friends)
-
-  }
-}
-
-/*
  * We can go with `AtomicReference`.
  *
  * `Atomic` prefix indicates that operations with this classes will be atomic.
@@ -174,7 +111,8 @@ object IosCommon {
  * But we are living in a beautiful world of FP,
  * so there should be something that is referentially transparent and composable, right?
  * Or maybe we can build it by ourselves?
- * But what about the State monad, it is used for storing state, right?
+ * If you will search something about how to store state in FP, then probably you will face State Monad.
+ * Maybe we could just use State Monad ?
  * Turns out that State is no more than function S => (S,A) which is sequential by its definition.
  * So no concurrency for State.
  */
