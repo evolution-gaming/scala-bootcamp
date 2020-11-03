@@ -63,7 +63,7 @@ object BasicCancellableIO extends IOApp {
     IO.race(tick, workThatDoesFaster).void *> IO.sleep(5.seconds) *> IO.delay(println("Terminating"))
   }
 
-  val excericeSelfmadeIoTimeout = {
+  val exerciseSelfMadeIoTimeout = {
     val tick = (IO.delay(println("Working work long long never terminating")) *> IO.sleep(1.second)).foreverM.void
 
     //alternative to above abstracting from effect type using type classes
@@ -80,6 +80,6 @@ object BasicCancellableIO extends IOApp {
     _ <- futureTimeout
     //    _ <- ioTimeout
     //    _ <- raceAndCancel
-    //    _ <- excericeSelfmadeIoTimeout
+    //    _ <- exerciseSelfMadeIoTimeout
   } yield ExitCode.Success
 }
