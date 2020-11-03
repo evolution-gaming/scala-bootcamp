@@ -1,10 +1,10 @@
 package com.evolutiongaming.bootcamp.effects
 
-import cats.effect.{ExitCode, IO, IOApp}
-
-import scala.concurrent.{Future, blocking}
-import scala.concurrent.duration.{DurationInt, FiniteDuration}
+import cats.effect.{Concurrent, ExitCode, IO, IOApp, Timer}
 import cats.implicits._
+
+import scala.concurrent.duration.{DurationInt, FiniteDuration}
+import scala.concurrent.{Future, blocking}
 
 /*
  * Why cancellable IO is needed? Why it's better then Future?
@@ -17,6 +17,7 @@ import cats.implicits._
  * Cancellable IO to the rescue!
  */
 object BasicCancellableIO extends IOApp {
+
   import scala.concurrent.ExecutionContext.Implicits.global
 
   // dumb example on future timeouts via race
@@ -31,6 +32,7 @@ object BasicCancellableIO extends IOApp {
         }
       }
     }
+
     def completeAfter(timeout: FiniteDuration): Future[Unit] = Future {
       blocking {
         Thread.sleep(timeout.toMillis)
@@ -38,10 +40,10 @@ object BasicCancellableIO extends IOApp {
       }
     }
 
-    IO.fromFuture(IO.delay(Future.firstCompletedOf[Unit](Seq(runTask(10), completeAfter(5.seconds)))))// *> IO.sleep(5.seconds)
+    IO.fromFuture(IO.delay(Future.firstCompletedOf[Unit](Seq(runTask(10), completeAfter(5.seconds))))) // *> IO.sleep(5.seconds)
   }
 
-  val ioTimeout  = {
+  val ioTimeout = {
     def runTask(i: Int): IO[Unit] = (1 to i).toList.map { iteration =>
       for {
         _ <- IO.delay(println(s"${Thread.currentThread().toString} Starting iteration:$iteration work"))
@@ -62,13 +64,22 @@ object BasicCancellableIO extends IOApp {
   }
 
   val excericeSelfmadeIoTimeout = {
-    //implement IO timeout using IO.race
-    def timeoutIO[A](task: IO[A], timeout: FiniteDuration): IO[A] = ???
+    val tick = (IO.delay(println("Working work long long never terminating")) *> IO.sleep(1.second)).foreverM.void
+
+    //alternative to above abstracting from effect type using type classes
+    def tickF[F[_]](implicit F: Concurrent[F]): F[Unit] = F.raiseError(???)
+
+    def timeoutIO[A](task: IO[A], timeout: FiniteDuration): IO[A] = IO.raiseError(???)
+
+    def timeoutF[F[_], A](task: F[A], timeout: FiniteDuration)(implicit F: Concurrent[F], T: Timer[F]): F[A] = F.raiseError(???)
+
+    IO.never
   }
 
   override def run(args: List[String]): IO[ExitCode] = for {
     _ <- futureTimeout
-    _ <- ioTimeout
-    _ <- raceAndCancel
+    //    _ <- ioTimeout
+    //    _ <- raceAndCancel
+    //    _ <- excericeSelfmadeIoTimeout
   } yield ExitCode.Success
 }
