@@ -21,7 +21,7 @@ import scala.util.{Random, Try}
  *
  * In functional programming we wrap side effects into "IO Monads":
  *  - This turns (or captures, or encodes) them into immutable data (pure values)
- *  - Keeps referential transparency so it is easier to refactor our programs and reason about them
+ *  - Keeps referential transparency so that it is easier to refactor our programs and reason about them
  *  - We can evaluate them when we want
  *  - They can be sequentially executed
  *  - They can be used in `for`-comprehensions
@@ -36,7 +36,7 @@ import scala.util.{Random, Try}
  *  There are also ways how to write software without being tied to a particular IO Monad ("Tagless Final"
  *  pattern), but we will not discuss this in this lecture.
  *
- * Asynchronous Effects, as opposed to Scala Future-s, are lazy. Nothing is run until an "unsafe" method
+ * Asynchronous Effects, as opposed to Scala `Future`-s, are lazy. Nothing is run until an "unsafe" method
  * is executed (by your code, or by the `IOApp` trait) - usually at the "end of the world".
  *
  * The IO Monad in Cats Effect is called `IO`.
@@ -127,10 +127,11 @@ object Console {
 import Console.Real._
 
 /*
- * `IO` is a Monad and thus you can work with it as you would with other Monad-s - use `.map`, `.flatMap`,
- * and `for`-comprehensions.
+ * `IO` is a Monad and thus you can work with it as you would with other Monad-s, for example,
+ * use `.map`, `.flatMap`, and `for`-comprehensions.
  *
- * `IOApp` is the `App` equivalent for `IO`-based programs.
+ * `IOApp` is the `App` equivalent for `IO`-based programs and serves as the "end of the world" where
+ * effects are run.
  */
 object IOBuildingBlocks1 extends IOApp {
   private val nameProgram = for {
@@ -187,7 +188,7 @@ object Exercise1_Common {
  *  - `for`-comprehension
  *  - `IO#as` as a `map` which discards the first result to return `ExitCode`-s
  *  - `*>` as a `flatMap` which discards the first result to sequence `IO[Unit]` with another `IO`
- *  - Tests in `AsynchronousEffectsSpec` to check your work
+ *  - Tests in `EffectsSpec` to check your work
  */
 object Exercise1_Functional extends IOApp {
   import Exercise1_Common._
