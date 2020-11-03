@@ -1,4 +1,4 @@
-package com.evolutiongaming.bootcamp.http
+package com.evolutiongaming.bootcamp.http.descoped
 
 import akka.actor.ActorSystem
 import akka.http.scaladsl.Http
