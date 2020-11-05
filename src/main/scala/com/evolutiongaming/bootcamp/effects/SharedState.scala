@@ -258,9 +258,7 @@ object UpdateExample extends IOApp {
 }
 
 /*
-*
-* Ref#modify will allow you to perform update and return something in an atomic way.
-*
+ * Ref#modify will allow you to perform update and return something in an atomic way.
 */
 object ModifyExample extends IOApp {
 
@@ -281,8 +279,8 @@ object ModifyExample extends IOApp {
 }
 
 /*
-* Limitations of Ref is that we cannot have effectful updates on Ref
-* Try to think what will happen if we would try to implement following method ?
+ * Limitations of Ref is that we cannot have effectful updates on Ref
+ * Try to think what will happen if we would try to implement following method ?
 */
 object RefLimitation {
   import ExerciseZero.IOAtomicRef
@@ -416,7 +414,7 @@ object SerialRefExercise extends IOApp {
  * This means that cancelling a get will unsubscribe the registered listener and can thus avoid memory leaks.
  *
  * Common use case: ensure that processes will start in some order
-* */
+ */
 object DeferredExamples {
   val logger = Slf4jLogger.getLogger[IO]
 }
@@ -540,7 +538,7 @@ object RefsExerciseTwo extends IOApp {
      * Should print
      * Gonna Boom!
      * java.lang.IllegalArgumentException: BOOM
-     * */
+     */
 
     val failedResult: IO[Unit] = (for {
       mem <- memoize(errorProgram)
