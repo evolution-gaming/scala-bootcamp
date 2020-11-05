@@ -5,14 +5,17 @@ import java.util.concurrent.Executors
 import java.util.concurrent.atomic.AtomicReference
 
 import cats.effect.concurrent._
+import cats.effect.syntax.bracket._
 import cats.effect.{Concurrent, ExitCode, IO, IOApp}
-import cats.implicits.{catsSyntaxMonadErrorRethrow, catsSyntaxParallelSequence, catsSyntaxParallelTraverse}
+import cats.implicits.{catsSyntaxMonadErrorRethrow, catsSyntaxParallelSequence}
 import cats.syntax.applicativeError._
 import cats.syntax.flatMap._
 import cats.syntax.functor._
+import com.evolutiongaming.bootcamp.effects.IosCommon.logger
 import io.chrisdavenport.log4cats.slf4j.Slf4jLogger
 
-import scala.concurrent.duration.DurationInt
+import scala.annotation.tailrec
+import scala.concurrent.duration.{DurationInt, FiniteDuration}
 
 /*
  * In modern applications we tend to use some kind of a state one way or another.
@@ -110,11 +113,18 @@ object IosCommon {
 /*
  * But we are living in a beautiful world of FP,
  * so there should be something that is referentially transparent and composable, right?
- * Or maybe we can build it by ourselves?
  * If you will search something about how to store state in FP, then probably you will face State Monad.
  * Maybe we could just use State Monad ?
  * Turns out that State is no more than function S => (S,A) which is sequential by its definition.
  * So no concurrency for State.
+ *
+ * But we can build it by ourselves?
+ *
+ * Start with implementing IOAtomicRef.of(...) function
+ * Then get and set
+ * Then update and modify
+ * Tip: can we implement update using modify ?
+ *
  */
 object ExerciseZero extends IOApp {
 
@@ -132,7 +142,7 @@ object ExerciseZero extends IOApp {
 
   }
 
-  class SimpleRef[A] extends IOAtomicRef[A] {
+  class SimpleRef[A](ar: AtomicReference[A]) extends IOAtomicRef[A] {
 
     override def get(): IO[A] = ???
 
@@ -143,27 +153,62 @@ object ExerciseZero extends IOApp {
     override def modify[B](f: A => (A, B)): IO[B] = ???
   }
 
+  /*
+   * Question : Why we should wrap ref creation in effect ?
+   */
   object IOAtomicRef {
-    def of[A](a: A): IO[IOAtomicRef[A]] = ???
+    def of[A](a: A): IO[IOAtomicRef[A]] = IO.delay(new SimpleRef[A](new AtomicReference[A](a)))
   }
 
-  override def run(args: List[String]): IO[ExitCode] = for {
-    ref <- IOAtomicRef.of(1)
-    _ <- ref.set(5)
-    v <- ref.get()
-    _ <- logger.info(s"value $v")
-  } yield (ExitCode.Success)
+  override def run(args: List[String]): IO[ExitCode] = {
+
+    val getTest = for {
+      ref <- IOAtomicRef.of(1)
+      content <- ref.get()
+      _ <- logger.info(s"get test content should be 1, content $content")
+    } yield ()
+
+    val setTest = for {
+      ref <- IOAtomicRef.of(1)
+      _ <- ref.set(42)
+      content <- ref.get()
+      _ <- logger.info(s"set test content should be 42, content $content")
+    } yield ()
+
+    val updateTest = for {
+      ref <- IOAtomicRef.of(1)
+      _ <- ref.update(_ + 1)
+      _ <- ref.update(_ + 1)
+      content <- ref.get()
+      _ <- logger.info(s"update test content should be 3, content $content")
+    } yield ()
+
+    val modifyTest = for {
+      ref <- IOAtomicRef.of(1)
+      contentReturn <- ref.modify(current => (current + 20, current))
+      contentState <- ref.get()
+      _ <- logger.info(s"modify test contentReturn should be 1, contentReturn $contentReturn")
+      _ <- logger.info(s"modify test contentState should be 21, contentState $contentState")
+    } yield ()
+
+    //    getTest *>
+    //      setTest *>
+    //      updateTest *>
+    //      modifyTest *>
+    IO(ExitCode.Success)
+  }
 }
 
 /*
  * What is Ref ?
- *
  * Purely functional mutable reference
  * Concurrent, lock-free
  * Always contains a value
- *
- * Note - Ref#get and then Ref#set is not Atomic
- *
+ */
+
+/*
+ * Why do we need update ?
+ * Because Ref#get and then Ref#set is not Atomic
  */
 object GetSetExample extends IOApp {
 
@@ -177,7 +222,7 @@ object GetSetExample extends IOApp {
     } yield ()
 
 
-  val program = for {
+  val program: IO[Unit] = for {
     messages <- Ref[IO].of(List.empty[String])
     _ <- List(report(messages, "one"), report(messages, "two")).parSequence.void
     msgs <- messages.get
@@ -188,9 +233,8 @@ object GetSetExample extends IOApp {
 }
 
 /*
-*
-* Ref#get could happen after another Ref#update. `update` and then `get` is not Atomic.
-*
+* Why do we need modify ?
+* Because Ref#get could happen after another Ref#update. `update` and then `get` is not Atomic.
 */
 object UpdateExample extends IOApp {
 
@@ -206,7 +250,7 @@ object UpdateExample extends IOApp {
     } yield ()
 
 
-  val program = for {
+  val program: IO[Unit] = for {
     counter <- Ref[IO].of(0)
     _ <- List(inc(counter), inc(counter)).parSequence.void
     v <- counter.get
@@ -227,11 +271,11 @@ object ModifyExample extends IOApp {
 
   def inc(ref: Ref[IO, Int]): IO[Unit] = ref.modify(i => i + 1 -> i)
 
-  val counterRef = Ref.of[IO, Int](0)
+  val counterRef: IO[Ref[IO, Int]] = Ref.of[IO, Int](0)
 
-  val program = for {
+  val program: IO[Unit] = for {
     counter <- counterRef
-    _ <- List.fill(10)(inc(counter)).parTraverse(_.start).void
+    _ <- List.fill(10)(inc(counter)).parSequence.void
     counterAfter <- counter.get
     _ <- logger.info(s"counter after update $counterAfter")
   } yield ()
@@ -241,14 +285,15 @@ object ModifyExample extends IOApp {
 
 /*
 * Limitations of Ref is that we cannot have effectful updates on Ref
+* Think of this
 * Try to think what will happen if we would try to implement following method ?
 *
 */
 object RefLimitation {
 
-  trait Ref[A] {
+  trait Ref[F[_], A] {
     // ....
-    def updateM(f: A => IO[A]): IO[Unit]
+    def updateM(f: A => F[A]): IO[Unit]
   }
 
 }
@@ -256,6 +301,9 @@ object RefLimitation {
 /*
  * Actually we can do this at some extent by introducing a functional locking mechanism.
  * Something like a Semaphore.
+ */
+
+/*
  * What is a Semaphore?
  * Purely functional semaphore implementation.
  * A semaphore has a non-negative number of permits available. Acquiring a permit
@@ -263,13 +311,19 @@ object RefLimitation {
  * the current number of permits. An acquire that occurs when there are no
  * permits available results in semantic blocking until a permit becomes available.
  *
+ * Most used methods:
+ * def available: F[Long] Returns the number of permits currently available. Always non-negative.
+ * def acquire: F[Unit]  Acquires a single permit
+ * def release: F[Unit]  Releases a single permit.
+ * def withPermit[A](t: F[A]): F[A] Returns an effect that acquires a permit, runs the supplied effect, and then releases the permit.
  */
 object SemaphoreExample extends IOApp {
-  def putStrLn[A](a: A): IO[Unit] = IO(println(a))
+
+  import IosCommon.logger
 
   def someExpensiveTask: IO[Unit] =
     IO.sleep(2.second) >>
-      putStrLn("expensive task") >>
+      logger.info("expensive task took 3 second") >>
       someExpensiveTask
 
   def process1(sem: Semaphore[IO]): IO[Unit] =
@@ -286,9 +340,12 @@ object SemaphoreExample extends IOApp {
 }
 
 /*
- * What will happen in case of a function `f` will never terminate inside update?
+ * Try to implement SerialRef which will semantically block on modify and wait until inner f is completed
+ * Question: What will happen in case of a function `f` will never terminate inside update or modify?
  */
-object SerialRef {
+object SerialRefExercise extends IOApp {
+
+  import IosCommon.logger
 
   trait SerialRef[F[_], A] {
 
@@ -306,30 +363,25 @@ object SerialRef {
     } yield {
       new SerialRef[F, A] {
 
-        def get: F[A] = r.get
+        def get: F[A] = ???
 
-        def modify[B](f: A => F[(A, B)]): F[B] = {
-          s.withPermit {
-            for {
-              a <- r.get
-              ab <- f(a)
-              (a, b) = ab
-              _ <- r.set(a)
-            } yield b
-          }
-        }
+        def modify[B](f: A => F[(A, B)]): F[B] = ???
 
-        def update(f: A => F[A]): F[Unit] = {
-          modify { a =>
-            for {
-              a <- f(a)
-            } yield {
-              (a, ())
-            }
-          }
-        }
+        def update(f: A => F[A]): F[Unit] = ???
       }
     }
+  }
+
+  override def run(args: List[String]): IO[ExitCode] = {
+    def modifyHelperIO(ref: SerialRef[IO, Int], duration: FiniteDuration, i: Int, s: String): IO[String] =
+      logger.info(s"$s started") *> ref.modify(x => IO.sleep(duration) *> IO((x + i, s))).flatTap(s => logger.info(s"$s finished"))
+
+    for {
+      ref <- SerialRefExercise.of[IO, Int](1)
+      _ <- List(modifyHelperIO(ref, 3.second, 10, "first modify"), modifyHelperIO(ref, 5.second, 20, "second modify")).parSequence.void
+      value <- ref.get
+      _ <- logger.info(s"ref value should be 31, $value")
+    } yield (ExitCode.Success)
   }
 }
 
@@ -345,6 +397,9 @@ object SerialRef {
  * `get` on an empty Deferred semantically blocks until a result is available.
  * `complete` on an empty Deferred puts a value in it and awakes the listeners.
  * `complete` on a full Deferred fails.
+ *
+ * Deferred is a cancelable data type, if the underlying F[_] is capable of it.
+ * This means that cancelling a get will unsubscribe the registered listener and can thus avoid memory leaks.
  *
  * Common use case: ensure that processes will start in some order
 * */
@@ -437,19 +492,7 @@ object HandlingErrorsWithDeferred extends IOApp {
  */
 object RefsExerciseTwo extends IOApp {
 
-  def memoize[F[_], A](f: F[A])(implicit C: Concurrent[F]): F[F[A]] = {
-    Ref.of[F, Option[Deferred[F, Either[Throwable, A]]]](None).map { ref =>
-      Deferred[F, Either[Throwable, A]].flatMap { d =>
-        ref.modify {
-          case None => Some(d) -> f.attempt.flatTap(d.complete)
-          case v@Some(other) => v -> other.get
-        }
-          .flatten
-          .rethrow
-      }
-
-    }
-  }
+  def memoize[F[_], A](f: F[A])(implicit C: Concurrent[F]): F[F[A]] = ???
 
   override def run(args: List[String]): IO[ExitCode] = {
 
@@ -465,7 +508,7 @@ object RefsExerciseTwo extends IOApp {
      * 42
      * */
 
-    val sucessResult: IO[Unit] = for {
+    val successResult: IO[Unit] = for {
       mem <- memoize(successProgram)
       x <- mem
       _ <- IO(println(x))
@@ -493,33 +536,10 @@ object RefsExerciseTwo extends IOApp {
       _ <- IO(println(y))
     } yield ()).handleErrorWith(e => IO(println(e)))
 
-    sucessResult *> failedResult *> IO(ExitCode.Success)
+    successResult *>
+      failedResult *>
+      IO(ExitCode.Success)
   }
-}
-
-/*
- * Can we do it with a Semaphore?
- */
-object SemaphoreAttempt extends IOApp {
-
-  trait MySemaphore[F[_]] {
-    def acquire: F[Unit]
-
-    def release: F[Unit]
-
-    def withPermit[A](t: F[A]): F[A]
-  }
-
-  class MySemaphoreImpl[F[_] : Concurrent] extends MySemaphore[F] {
-
-    override def acquire: F[Unit] = ???
-
-    override def withPermit[A](t: F[A]): F[A] = ???
-
-    override def release: F[Unit] = ???
-  }
-
-  override def run(args: List[String]): IO[ExitCode] = ???
 }
 
 /*
@@ -530,9 +550,17 @@ object SemaphoreAttempt extends IOApp {
  * As synchronized, thread-safe mutable variables
  * As channels, with take and put acting as “receive” and “send”
  * As a binary semaphore, with take and put acting as “acquire” and “release”
+ *
+ * Main methods:
+ * def take: F[A] Empties the `MVar` if full, returning the contained value,
+ * or blocks (asynchronously) until a value is available.
+ *
+ * def put(a: A): F[Unit] Fills the `MVar` if it is empty, or blocks (asynchronously)
+ * if the `MVar` is full, until the given value is next in
+ * line to be consumed on [[take]].
  */
 
-object MvarQueueExample extends IOApp {
+object MVarQueueExample extends IOApp {
 
   import IosCommon.logger
 
@@ -593,14 +621,86 @@ object MVarBehavior extends IOApp {
   }
 }
 
-object SharedState {
-  // TODO: https://typelevel.org/cats-effect/concurrency/basics.html
-  // TODO: https://typelevel.org/cats-effect/concurrency/deferred.html
-  // TODO: https://typelevel.org/cats-effect/concurrency/mvar.html
-  // TODO: https://typelevel.org/cats-effect/concurrency/ref.html
-  // TODO: https://typelevel.org/cats-effect/concurrency/semaphore.html
-  // TODO: Exercises
-  // TODO: Homework
+/*
+ * Implement MySemaphore from one of previous exercises in terms of MVar
+ *
+ * Question: How we can adapt code if we want more to allow more than 1 number of permit ?
+ */
+
+object MySemaphoreMVarExercise extends IOApp {
+
+  trait MySemaphore[F[_]] {
+    def acquire: F[Unit]
+
+    def release: F[Unit]
+
+    def withPermit[A](fa: F[A]): F[A]
+  }
+
+  class MySemaphoreMVar[F[_] : Concurrent](mvar: MVar2[F, Unit]) extends MySemaphore[F] {
+    override def acquire: F[Unit] = ???
+
+    override def release: F[Unit] = ???
+
+    override def withPermit[A](fa: F[A]): F[A] = ???
+  }
+
+  object MySemaphoreMVar {
+    def of[F[_] : Concurrent]: F[MySemaphoreMVar[F]] = MVar.of[F, Unit](()).map(mv => new MySemaphoreMVar[F](mv))
+  }
+
+
+  def someExpensiveTask: IO[Unit] =
+    IO.sleep(3.second) >>
+      logger.info("expensive task took 3 second")
+
+  def process1(sem: MySemaphore[IO]): IO[Unit] =
+    logger.info("start first process") >>
+      sem.withPermit(someExpensiveTask) >>
+      logger.info("finish fist process") >>
+      process1(sem)
+
+  def process2(sem: MySemaphore[IO]): IO[Unit] =
+    logger.info("start second process") >>
+      sem.withPermit(someExpensiveTask) >>
+      logger.info("finish second process") >>
+      process2(sem)
+
+  def run(args: List[String]): IO[ExitCode] = {
+    for {
+      mySem <- MySemaphoreMVar.of[IO]
+      _ <- List(process1(mySem), process2(mySem)).parSequence
+    } yield ExitCode.Success
+  }
+}
+
+
+/*
+ * Implement race method (who completed first - wins, other should be canceled) using MVar
+ * Tip: Recall that we can use Fibers in order to schedule task in background
+ */
+object RaceMvarExercise extends IOApp {
+
+  def race[A](taskA: IO[A], taskB: IO[A]): IO[A] = ???
+
+  override def run(args: List[String]): IO[ExitCode] = {
+
+    import IosCommon.logger
+
+    def task(index: Int, sleepDuration: FiniteDuration): IO[Int] = {
+      for {
+        _ <- logger.info(s"$index is sleeping for $sleepDuration seconds")
+        _ <- IO.sleep(sleepDuration)
+      } yield index
+    }
+
+    for {
+      index <- race(task(0, 3.seconds), task(1, 5.seconds))
+      _ <- logger.info(s"index should be 0, $index ")
+    } yield ExitCode.Success
+
+
+  }
 }
 
 
