@@ -20,7 +20,8 @@ import scala.concurrent.ExecutionContext
  * When choosing sizes for thread pools the rule of thumb is:
  * 1. cpu-bound tasks should have not more then available cores on the machine threads, should be used for pure
  *    computation only IO app default ContextShift constructed as `math.max(2, Runtime.getRuntime().availableProcessors())`
- * 2. blocking io tasks - unbounded thread pool used only for blocking tasks,
+ * 2. cpu intensive workload that must be restricted to not to interfere with main application logic (picture/video conversion, crypto)
+ * 3. blocking io tasks - unbounded thread pool used only for blocking tasks,
  *    avoid using for computation as that will lead to poor performance because of context switches
  * https://typelevel.org/cats-effect/concurrency/basics.html#thread-pools
  * https://typelevel.org/cats-effect/concurrency/basics.html#concurrency
@@ -46,76 +47,51 @@ object ContextShifts extends IOApp {
     }
   }
 
-  // dedicated pool with 2 threads for cpu bound tasks
-  // io-app default pools size is calculated as math.max(2, Runtime.getRuntime().availableProcessors())
-  // in case we want to restrict certain computation and not interfere with global pool
-  // abusing thread pools may lead to unnecessary context switches which will degrade performance
+  // Lets create basic exercise:
+  // * contextShift that is backed by 2 thread pool
+  // * program that runs on this thread pool
+  // * observe thread name, to see how task are scheduled on jvm threads
   val basicShiftingExample: IO[Unit] = {
-    val cpuBoundPool: ExecutionContext =
-      ExecutionContext
-        .fromExecutor(Executors.newFixedThreadPool(2, newThreadFactory("cpu-bound")))
+    def cpuBound(i: Int): IO[Int] =
+      if (i == Int.MaxValue) IO.pure(i)
+      else IO.suspend(cpuBound(i+1)) //putStrLn(s"${Thread.currentThread().toString} current value: ${d}") *>
 
-    val cpuBoundContext = IO.contextShift(cpuBoundPool)
 
-    def cpuBound(d: Double, invocation: Long): IO[Double] = IO.suspend {
-      if (d == 0.0) IO.pure(d)
-      else cpuBound(d / 2.0, invocation + 1) //putStrLn(s"${Thread.currentThread().toString} current value: ${d}") *>
-    }
-
-    for {
-      _ <- logLine(s"Started on default thread")
-      _ <- ContextShift[IO].evalOn(cpuBoundPool)(logLine(s"Evaling on cpu-bound-pool"))
-      _ <- logLine(s"We are back on main default")
-
-      result <- cpuBoundContext.shift >> logLine(s"running on cpu-bound-pool-") *> cpuBound(100000.0, 0)
-      _ <- IO.shift >> logLine(s"result=${result} result on default")
-    } yield ()
+    IO.delay(???)
   }
 
   // https://typelevel.org/cats-effect/datatypes/contextshift.html#blocker
   // special pool with explicit construct for blocking operations
+  // widely used together with blocking API's/Java API's, blocking db drivers...
+  // usually backed by cachedTreadPool
   val blockingExample: IO[Unit] = {
-    val blocker: Resource[IO, Blocker] = Blocker.fromExecutorService(IO.delay(Executors.newCachedThreadPool(newThreadFactory("blocker"))))
-
-    blocker.use { blocker =>
-      def blockingCall(id: Int): Unit = {
-        println(s"${Thread.currentThread().toString} Starting blocking work id:$id")
-        Thread.sleep(5000)
-        println(s"${Thread.currentThread().toString} Ended work id:$id")
-      }
-
-      //launching parallel 10 blocking tasks
-      (0 to 9).toList.map(id => blocker.delay[IO, Unit](blockingCall(id))).parSequence.void
+    def blockingCall(id: Int): Unit = {
+      println(s"${Thread.currentThread().toString} Starting blocking work id:$id")
+      Thread.sleep(5000)
+      println(s"${Thread.currentThread().toString} Ended work id:$id")
     }
+
+    IO.delay(???)
   }
 
   // Anti-pattern: running blocking tasks on cpu-bound pool
+  // Do not ever block on default contextShift or other specialized cpu-bound contextShift
+  // as that will make your program unresponsive
   val threadPoolStarvationExample: IO[Unit] = {
-    val twoThreadPool: ExecutionContext =
-      ExecutionContext
-        .fromExecutor(Executors.newFixedThreadPool(2, newThreadFactory("cpu-bound")))
-    val cs = IO.contextShift(twoThreadPool)
-
-    def blockingCall(): Unit = {
-      logLine("Starting blocking call").unsafeRunSync()
+    def blockingCall(id: Int): Unit = {
+      println(s"${Thread.currentThread().toString} Starting blocking work id:$id")
       Thread.sleep(5000)
-      logLine("End blocking call").unsafeRunSync()
+      println(s"${Thread.currentThread().toString} Ended work id:$id")
     }
 
-    for {
-      _ <- cs.shift *> logLine("Starting thread pool startvation example")
-      _ <- logLine("Spawning blocking tasks on 2 thread pool")
-      fib <- (0 to 9).toList.map(_ => cs.shift *> IO.delay(blockingCall())).parSequence.void.start
-      _ <- cs.shift *> logLine("This will happen only when thread frees up, such use of cpu bound pool would cause entire program to freeze")
-      _ <- fib.join
-    } yield ()
+    IO.delay(???)
   }
 
   def run(args: List[String]): IO[ExitCode] = {
     for {
       _ <- basicShiftingExample
-      _ <- blockingExample
-      _ <- threadPoolStarvationExample
+//      _ <- blockingExample
+//      _ <- threadPoolStarvationExample
       _ <- logLine("End")
     } yield ExitCode.Success
   }
@@ -124,9 +100,13 @@ object ContextShifts extends IOApp {
 object ContextShiftExerciseOne extends IOApp {
 
   /* Exercise #1
-   * create program that does work on custom pool with 1 thread
+   * create ContextShift that is backed by single thread thread pool
+   * and a program that does work this ContextShift, printing "hello" every second 100 times and completes the program
    */
-  val singleThreadProgram: IO[Unit] = IO.delay(???)
+  val singleThreadProgram: IO[Unit] = {
+
+    IO.delay(???)
+  }
 
   /* Exercise #2
    * refactor program to do blocking work on blocker
