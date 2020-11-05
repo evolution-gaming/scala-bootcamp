@@ -5,16 +5,13 @@ import java.util.concurrent.Executors
 import java.util.concurrent.atomic.AtomicReference
 
 import cats.effect.concurrent._
-import cats.effect.syntax.bracket._
 import cats.effect.{Concurrent, ExitCode, IO, IOApp}
 import cats.implicits.{catsSyntaxMonadErrorRethrow, catsSyntaxParallelSequence}
-import cats.syntax.applicativeError._
 import cats.syntax.flatMap._
 import cats.syntax.functor._
 import com.evolutiongaming.bootcamp.effects.IosCommon.logger
 import io.chrisdavenport.log4cats.slf4j.Slf4jLogger
 
-import scala.annotation.tailrec
 import scala.concurrent.duration.{DurationInt, FiniteDuration}
 
 /*
@@ -157,7 +154,7 @@ object ExerciseZero extends IOApp {
    * Question : Why we should wrap ref creation in effect ?
    */
   object IOAtomicRef {
-    def of[A](a: A): IO[IOAtomicRef[A]] = IO.delay(new SimpleRef[A](new AtomicReference[A](a)))
+    def of[A](a: A): IO[IOAtomicRef[A]] = ???
   }
 
   override def run(args: List[String]): IO[ExitCode] = {
@@ -269,7 +266,7 @@ object ModifyExample extends IOApp {
 
   import IosCommon.logger
 
-  def inc(ref: Ref[IO, Int]): IO[Unit] = ref.modify(i => i + 1 -> i)
+  def inc(ref: Ref[IO, Int]): IO[Unit] = ref.modify(s => (s + 1, s)).flatMap(i => logger.info(i.toString))
 
   val counterRef: IO[Ref[IO, Int]] = Ref.of[IO, Int](0)
 
@@ -277,7 +274,7 @@ object ModifyExample extends IOApp {
     counter <- counterRef
     _ <- List.fill(10)(inc(counter)).parSequence.void
     counterAfter <- counter.get
-    _ <- logger.info(s"counter after update $counterAfter")
+    _ <- logger.info(s"counter after update should be 10, $counterAfter")
   } yield ()
 
   override def run(args: List[String]): IO[ExitCode] = program.as(ExitCode.Success)
@@ -285,17 +282,27 @@ object ModifyExample extends IOApp {
 
 /*
 * Limitations of Ref is that we cannot have effectful updates on Ref
-* Think of this
 * Try to think what will happen if we would try to implement following method ?
-*
 */
 object RefLimitation {
-
-  trait Ref[F[_], A] {
+  import ExerciseZero.IOAtomicRef
+  trait EffectfullRef[A] extends IOAtomicRef[A]{
     // ....
-    def updateM(f: A => F[A]): IO[Unit]
+    def modifyM[B](f: A => IO[(A,B)]): IO[B]
   }
 
+  class EffectfullRefImpl[A](ar: AtomicReference[A]) extends EffectfullRef[A] {
+
+    override def get(): IO[A] = ???
+
+    override def set(a: A): IO[Unit] = ???
+
+    override def update(f: A => A): IO[Unit] = ???
+
+    override def modify[B](f: A => (A, B)): IO[B] = ???
+
+    override def modifyM[B](f: A => IO[(A, B)]): IO[B] = ???
+  }
 }
 
 /*
@@ -322,15 +329,22 @@ object SemaphoreExample extends IOApp {
   import IosCommon.logger
 
   def someExpensiveTask: IO[Unit] =
-    IO.sleep(2.second) >>
-      logger.info("expensive task took 3 second") >>
-      someExpensiveTask
+    IO.sleep(3.second) >>
+      logger.info("expensive task took 3 second")
 
   def process1(sem: Semaphore[IO]): IO[Unit] =
-    sem.withPermit(someExpensiveTask) >> process1(sem)
+    logger.info("start first process") >>
+      sem.withPermit(someExpensiveTask) >>
+      logger.info("finish fist process") >>
+      process1(sem)
+
 
   def process2(sem: Semaphore[IO]): IO[Unit] =
-    sem.withPermit(someExpensiveTask) >> process2(sem)
+    logger.info("start second process") >>
+      sem.withPermit(someExpensiveTask) >>
+      logger.info("finish second process") >>
+      process2(sem)
+
 
   def run(args: List[String]): IO[ExitCode] =
     Semaphore[IO](1).flatMap { sem =>
@@ -679,7 +693,7 @@ object MySemaphoreMVarExercise extends IOApp {
  * Implement race method (who completed first - wins, other should be canceled) using MVar
  * Tip: Recall that we can use Fibers in order to schedule task in background
  */
-object RaceMvarExercise extends IOApp {
+object RaceMVarExercise extends IOApp {
 
   def race[A](taskA: IO[A], taskB: IO[A]): IO[A] = ???
 
