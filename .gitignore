@@ -7,6 +7,7 @@
 .history
 .metals
 .vscode
+.bsp
 metals.sbt
 
 target/
