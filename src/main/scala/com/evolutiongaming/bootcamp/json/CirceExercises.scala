@@ -269,10 +269,4 @@ object CirceExercises {
     lazy val artistsJson: Json = ???
   }
 
-  /* Homework
-   * Create models json parsers for last.fm API getUserInfo
-   *
-   */
-
-
 }
