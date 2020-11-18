@@ -1,0 +1,19 @@
+FROM busybox
+
+WORKDIR /opt/
+
+USER root
+
+ENV N=10
+
+RUN ["mkdir", "-p", "/opt"]
+
+COPY messages /opt/messages
+
+RUN echo "additional message" >> /opt/messages
+
+COPY entrypointN.sh /opt/entrypointN.sh
+
+RUN chmod +x /opt/entrypointN.sh
+
+ENTRYPOINT /opt/entrypointN.sh

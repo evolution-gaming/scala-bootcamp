@@ -1,0 +1,67 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: webserver-deployment
+  labels:
+    app: example-webserver
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: example-webserver
+  template:
+    metadata:
+      labels:
+        app: example-webserver
+    spec:
+      containers:
+        - name: webserver
+          imagePullPolicy: Never
+          image: webserver
+          ports:
+            - containerPort: 10000
+              name: http
+          livenessProbe:
+            httpGet:
+              path: /alive
+              port: http
+            initialDelaySeconds: 15
+          readinessProbe:
+            httpGet:
+              path: /alive
+              port: http
+            initialDelaySeconds: 15
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: example-webserver-service
+  labels:
+    app: example-webserver
+spec:
+  type: ClusterIP
+  selector:
+    app: example-webserver
+  ports:
+    - name: http
+      protocol: TCP
+      port: 10000
+      targetPort: http
+---
+# Configuration below is untested due to https://github.com/kubernetes/minikube/issues/7332
+kind: Ingress
+apiVersion: extensions/v1beta1
+metadata:
+  name: "example-webserver-ingress"
+  labels:
+    app: example-webserver
+spec:
+  rules:
+    - host: "localhost"
+      http:
+        paths:
+          - path: /
+            backend:
+              serviceName: example-webserver-service
+              servicePort: http

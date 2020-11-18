@@ -1,0 +1,50 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: webserver-deployment
+  labels:
+    app: example-webserver
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: example-webserver
+  template:
+    metadata:
+      labels:
+        app: example-webserver
+    spec:
+      containers:
+        - name: webserver
+          imagePullPolicy: Never
+          image: webserver
+          ports:
+            - containerPort: 10000
+              name: http
+          livenessProbe:
+            httpGet:
+              path: /alive
+              port: http
+            initialDelaySeconds: 15
+          readinessProbe:
+            httpGet:
+              path: /alive
+              port: http
+            initialDelaySeconds: 15
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: example-webserver-service
+  labels:
+    app: example-webserver
+spec:
+  type: LoadBalancer
+  selector:
+    app: example-webserver
+  ports:
+    - name: http
+      protocol: TCP
+      port: 10000
+      targetPort: http
