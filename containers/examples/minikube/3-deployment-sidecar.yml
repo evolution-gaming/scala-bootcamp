@@ -1,0 +1,46 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: webserver-deployment
+  labels:
+    app: example-webserver
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: example-webserver
+  template:
+    metadata:
+      labels:
+        app: example-webserver
+    spec:
+      volumes:
+        - name: files
+          emptyDir: {}
+      containers:
+        - name: webserver
+          imagePullPolicy: Never
+          image: webserver
+          ports:
+            - containerPort: 10000
+              name: http
+          livenessProbe:
+            httpGet:
+              path: /alive
+              port: http
+            initialDelaySeconds: 15
+          readinessProbe:
+            httpGet:
+              path: /alive
+              port: http
+            initialDelaySeconds: 15
+          volumeMounts:
+            - mountPath: /tmp/
+              name: files
+        - name: logger
+          image: busybox
+          args: [/bin/sh, -c, 'tail -n+1 -F /tmp/files/main.log']
+          volumeMounts:
+            - name: files
+              mountPath: /tmp/

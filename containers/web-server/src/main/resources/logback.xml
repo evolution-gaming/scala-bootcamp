@@ -1,0 +1,32 @@
+<configuration scan="true">
+    <appender name="file_appender" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${logback.logDir}/${logback.logFile}.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.FixedWindowRollingPolicy">
+            <fileNamePattern>${logback.logDir}/${logback.logFile}.%i.log.gz</fileNamePattern>
+            <minIndex>1</minIndex>
+            <maxIndex>1</maxIndex>
+        </rollingPolicy>
+
+        <triggeringPolicy class="ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy">
+            <maxFileSize>64MB</maxFileSize>
+        </triggeringPolicy>
+
+        <encoder>
+            <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <appender name="console_appender" class="ch.qos.logback.core.ConsoleAppender">
+        <layout>
+            <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+        </layout>
+    </appender>
+
+    <logger name="org.http4s" level="debug"/>
+
+    <root level="info">
+        <appender-ref ref="file_appender"/>
+        <appender-ref ref="console_appender"/>
+    </root>
+
+</configuration>

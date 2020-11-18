@@ -1,0 +1,23 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: webserver-deployment
+  labels:
+    app: example-webserver
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: example-webserver
+  template:
+    metadata:
+      labels:
+        app: example-webserver
+    spec:
+      containers:
+        - name: webserver
+          imagePullPolicy: Never
+          image: webserver
+          ports:
+            - containerPort: 10000

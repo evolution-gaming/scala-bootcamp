@@ -1,0 +1,4 @@
+---
+version: "3.8"
+services:
+# Create docker-compose file, which could be used to run integration tests for this project
