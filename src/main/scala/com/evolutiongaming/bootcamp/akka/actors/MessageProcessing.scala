@@ -111,7 +111,7 @@ object MessageProcessing extends App {
   // to make reliable - each transfer/deposit/withdraw should have unique id, store completed actions ids
 
   // message ordering:
-  // - to the same destination order wil be saved
+  // - to the same destination order wil be preserved
   //     if  A.tell(B, m1) and A.tell(B, m2)  :  B will receive m1, m2 in order (akka specific)
   // - to the different destination: unknown (completely concurrently)
   //     if  A.tell(B, m1) and A.tell(C, m1)  :  order undefined here

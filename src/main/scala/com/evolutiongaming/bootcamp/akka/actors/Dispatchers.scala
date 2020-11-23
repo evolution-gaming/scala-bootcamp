@@ -12,7 +12,7 @@ object Dispatchers extends App {
 
   final class Main extends Actor {
     private val cache = context.actorOf(
-      Props(classOf[SimpleCache], 3.seconds).withDispatcher("dispatchers.custom-dispatcher"),
+      Props(new SimpleCache(3.seconds)).withDispatcher("dispatchers.custom-dispatcher"),
       "cache"
     )
 
