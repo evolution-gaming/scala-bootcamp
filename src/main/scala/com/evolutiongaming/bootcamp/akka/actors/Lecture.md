@@ -44,9 +44,9 @@ https://rockthejvm.com/
 The Actor formalism was first published in 1973.
 Actor languages and communications patterns formulated in 1986.
 First commercial use in Erlang (concurrency model based on Actors) for Ericsson telecommunications platform in 1995.
-Actors was implemented in the Scala standard library in 2006.
+Scala standard library rolled out its actors implementation in 2006 (deprecated since 2.11).
 Akka was created in 2009.
 
-The main goal is to simply multi-threading programming:
-- effective resource using
+The main goal is to simplify multi-threading programming:
+- effective resource utilization
 - avoid blocking, dead locks, synchronization of shared state
