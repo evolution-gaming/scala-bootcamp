@@ -14,13 +14,13 @@ object BinaryTreeSet {
   // `requester` should be notified when an operation is completed.
   object Operation {
     // insert an element `elem` into the tree.
-    case class Insert(requester: ActorRef, id: Int, elem: Int) extends Operation
+    final case class Insert(requester: ActorRef, id: Int, elem: Int) extends Operation
 
     // check whether an element `elem` is present in the tree
-    case class Contains(requester: ActorRef, id: Int, elem: Int) extends Operation
+    final case class Contains(requester: ActorRef, id: Int, elem: Int) extends Operation
 
     // remove the element `elem` from the tree
-    case class Remove(requester: ActorRef, id: Int, elem: Int) extends Operation
+    final case class Remove(requester: ActorRef, id: Int, elem: Int) extends Operation
   }
 
   sealed trait OperationReply {
@@ -30,21 +30,21 @@ object BinaryTreeSet {
   object OperationReply {
     // answer to the Contains request with identifier `id`.
     // `result` is true if and only if the element is present in the tree
-    case class ContainsResult(id: Int, result: Boolean) extends OperationReply
+    final case class ContainsResult(id: Int, result: Boolean) extends OperationReply
 
     // successful completion of an insert or remove operation
-    case class OperationFinished(id: Int) extends OperationReply
+    final case class OperationFinished(id: Int) extends OperationReply
   }
 }
 
-class BinaryTreeSet extends Actor {
+final class BinaryTreeSet extends Actor {
   import BinaryTreeSet._
 
-  def createRoot: ActorRef = context.actorOf(BinaryTreeNode.props(0, initiallyRemoved = true))
+  private val root = createRoot
 
-  var root = createRoot
-
-  def receive: Receive = {
+  override def receive: Receive = {
     case m: Operation => root ! m
   }
+
+  private def createRoot: ActorRef = context.actorOf(BinaryTreeNode.props(0, initiallyRemoved = true))
 }
