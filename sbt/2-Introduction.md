@@ -3,34 +3,32 @@ quite easy to do. If you have a compiler, you can do it directly. Let's compile
 the application in `introduction` directory directly as an excersise:
 ```
 # assuming you are at `scala-bootstrap/sbt`
-cd introduction
+cd 1-scalac-simple
 
 # let's compile the stuff now
 # (run `scalac --help` if you want to know more)
-scalac Introduction.scala
+scalac Sartre.scala
 
 # let's run it! (why we are not using `.scala` at the end?)
 # (run `scala --help` if you want to know more)
-scala Introduction
+scala Sartre
 
 # it wasn't so hard, may be no need for build tools?
 # let' see what your compiler generated:
 # (use `dir` instead of `ls -l` on Windows)
 ls -l
 
-# wow, what are these files? let's clean them up
-# (use `del` or your File Explorer on Windows)
-rm *.class
+# wow, what are all these files? how do we clean them up?
 ```
 
 What if we need to use the libraries to run our code? Let's try to compile the
 project without adding libraries first.
 ```
 # assuming you are at `scala-bootstrap/sbt`
-cd libraries
+cd 2-scalac-libs
 
 # let's try compile the stuff now (there will be an error)
-scalac Libraries.scala
+scalac Knuth.scala
 ```
 
 Got errors? We need cats-effect. Where we take the artifact?
@@ -38,13 +36,13 @@ Let's go Maven central: https://search.maven.org/
 Search for `cats-effect_2.13-2.2.0.jar` and press `Download` arrow
 at the right of the row.
 
-Select `jar`, download it and put it to `scala-bootstrap/sbt/libraries` near
-`Libraries.scala` file.
+Select `jar`, download it and put it to `scala-bootstrap/sbt/2-scalac-libs` near
+`Knuth.scala` file.
 ```
-scalac Libraries.scala
+scalac Knuth.scala
 
 # Hurray! We have it compiled! Let's try to run it now:
-scala Libraries
+scala Knuth
 
 # I got an error? Why did I? How to fix it?
 ```
@@ -97,3 +95,36 @@ language, often other, not Scala specific tools are used:
 - https://maven.apache.org/ the original XML reading beast by ASF,
 - https://gradle.org/ popular modern build tool by Gradle Inc.,
 - https://bazel.build/ scalable polyglot tool to build huge repositories by Google.
+
+Let's try to see if sbt could fix the pain highlighted above? Let's try to
+compile almost exactly the same project (except the name) we did with sbt.
+
+```
+# assuming you are at `scala-bootstrap/sbt`
+cd 3-sbt-simple
+
+# let's ask sbt to run (it will know it needs to compile first)
+sbt run
+
+# let's see if we have any garbage there now
+# (use `dir` or File Explorer instead of `ls -l` on Windows)
+ls -l
+
+# wow, isn't it neat, no more garbage in a root directory
+```
+
+It looks almost magical. We did not need to specify files to compile,
+we did not have to specify file to run and everything just worked out.
+How did sbt know what to do? We will find out a bit later. Let's
+try the magic on our project with libraries first.
+
+```
+# assuming you are at `scala-bootstrap/sbt`
+cd 4-sbt-libs
+
+...
+
+# let's ask sbt to run it
+sbt run
+
+```

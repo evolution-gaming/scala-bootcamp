@@ -1,5 +1,5 @@
 
-object Introduction extends App {
+object Sartre extends App {
 
   println("""
     "In 1787, at an inn near Moulins, an old man was dying, a friend of Diderot, trained by the
