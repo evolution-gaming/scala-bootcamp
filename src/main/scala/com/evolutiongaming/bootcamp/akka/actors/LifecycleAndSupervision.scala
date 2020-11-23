@@ -6,24 +6,28 @@ import scala.concurrent.duration._
 
 object LifecycleAndSupervision extends App {
 
-  class Worker extends Actor {
+  final class Worker extends Actor {
     import Worker._
 
     // Hooks
-    override def preStart(): Unit =
+    override def preStart(): Unit = {
       println("pre start")
-    override def postStop(): Unit =
+    }
+    override def postStop(): Unit = {
       println("post stop")
-    override def preRestart(reason: Throwable, message: Option[Any]): Unit =
-      println(s"pre restart reason: ${reason.getMessage}")
-    override def postRestart(reason: Throwable): Unit =
+    }
+    override def preRestart(reason: Throwable, message: Option[Any]): Unit = {
+      println(s"pre restart reason: ${ reason.getMessage }")
+    }
+    override def postRestart(reason: Throwable): Unit = {
       println("post restart")
+    }
 
-    def receive: Receive = {
-      case RestartCommand   => 1 / 0                       // expect ArithmeticException
-      case StopCommand      => Some(null).map(_.toString)  // expect NullPointerException
-      case ResumeCommand    => Map.empty.apply("")         // expect NoSuchElementException
-      case EscalateCommand  => throw new RuntimeException("why not?")
+    override def receive: Receive = {
+      case RestartCommand  => 1 / 0 // expect ArithmeticException
+      case StopCommand     => Some(null).map(_.toString) // expect NullPointerException
+      case ResumeCommand   => Map.empty.apply("") // expect NoSuchElementException
+      case EscalateCommand => throw new RuntimeException("why not?")
     }
   }
 
@@ -38,11 +42,10 @@ object LifecycleAndSupervision extends App {
   }
 
 
-
-  class SupervisorActor extends Actor {
+  final class SupervisorActor extends Actor {
     // when supervisorStrategy is not specified, actor uses SupervisorStrategy.defaultDecider
     override val supervisorStrategy: SupervisorStrategy =
-      // one for one - only for one failed child actor
+    // one for one - only for one failed child actor
       OneForOneStrategy(maxNrOfRetries = 2, withinTimeRange = 1.second) {
         case _: NoSuchElementException =>
           println("worker resumes")
@@ -59,11 +62,11 @@ object LifecycleAndSupervision extends App {
       }
 
     // child
-    val worker: ActorRef = context.actorOf(props = Props[Worker](), name = "worker")
+    private val worker: ActorRef = context.actorOf(props = Props[Worker](), name = "worker")
     // death watch
     context.watch(worker)
 
-    def receive: Receive = {
+    override def receive: Receive = {
       case Terminated(`worker`) => println("worker terminated")
       case command              => worker forward command
     }

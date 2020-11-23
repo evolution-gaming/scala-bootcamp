@@ -10,8 +10,8 @@ object ActorContext extends App {
   // Behavior switch
   // Each actor has a stack of behaviors and the top most one is always the acted one.
 
-  class CounterVar extends Actor {
-    var acc: Int = 0
+  final class CounterVar extends Actor {
+    private var acc: Int = 0
 
     override def receive: Receive = {
       case "inc" => acc += 1
@@ -20,13 +20,13 @@ object ActorContext extends App {
   }
 
   // functionally equivalent to the previous version
-  class CounterContextBecome extends Actor {
+  final class CounterContextBecome extends Actor {
     // note: we don't use var here
 
     // ~ a tail-recursive function, but it is asynchronous
     // state change is explicit and state is scoped to current behavior
     // we can change actor behavior for the next message
-    def counter(acc: Int): Receive = {
+    private def counter(acc: Int): Receive = {
       case "inc" => context.become(counter(acc + 1))
       case "get" => sender() ! acc
     }
@@ -37,9 +37,9 @@ object ActorContext extends App {
   // Creating and stopping actors
 
   // application as an actor
-  class Main extends Actor {
+  final class Main extends Actor {
     // an actor is created by exactly one other actor
-    val counter: ActorRef = context.actorOf(Props[CounterContextBecome](), "counter")
+    private val counter: ActorRef = context.actorOf(Props[CounterContextBecome](), "counter")
 
     (1 to 10).foreach(_ => counter ! "inc")
     counter ! "get"

@@ -10,14 +10,14 @@ import scala.concurrent.duration._
 // interacting actors and futures
 object Dispatchers extends App {
 
-  class Main extends Actor {
-    val cache = context.actorOf(
+  final class Main extends Actor {
+    private val cache = context.actorOf(
       Props(classOf[SimpleCache], 3.seconds).withDispatcher("dispatchers.custom-dispatcher"),
       "cache"
     )
 
     import context.dispatcher
-    val cancellableTask =
+    private val cancellableTask =
       context.system.scheduler.scheduleAtFixedRate(
         initialDelay = 0.seconds,
         interval = 1.seconds,
@@ -32,17 +32,17 @@ object Dispatchers extends App {
     }
   }
 
-  class SimpleCache(cleanAfter: FiniteDuration) extends Actor {
+  final class SimpleCache(cleanAfter: FiniteDuration) extends Actor {
     import SimpleCache._
 
     // all futures inside actor run in execution context
     // dispatcher is potentially shared among multiple actors
     import context.dispatcher
 
-    var cache: Map[String, String] = Map.empty
+    private var cache: Map[String, String] = Map.empty
 
     // eg webserver call
-    def someComputations(key: String): Future[String] =
+    private def someComputations(key: String): Future[String] =
       Future {
         Thread.sleep(200)
         s"result for $key"

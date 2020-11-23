@@ -6,7 +6,7 @@ import scala.concurrent.Future
 
 object LongInitializationPattern extends App {
 
-  class LongInit extends Actor with Stash {
+  final class LongInit extends Actor with Stash {
 
     import context.dispatcher
 
@@ -23,7 +23,7 @@ object LongInitializationPattern extends App {
       }
 
     // wait for state, keep requests
-    def notInitialized: Receive = {
+    private def notInitialized: Receive = {
       case LongInit.CommonRequest(x) =>
         println(s"stash $x")
         // save messages for the future processing when initial state is received
@@ -35,7 +35,7 @@ object LongInitializationPattern extends App {
     }
 
     // normal processing
-    def initialized: Receive = {
+    private def initialized: Receive = {
       case LongInit.CommonRequest(x) => println(s"received $x")
     }
 

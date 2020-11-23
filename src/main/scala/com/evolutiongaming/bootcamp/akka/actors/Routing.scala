@@ -6,21 +6,24 @@ import akka.routing.RoundRobinPool
 // for run and load balancing for many instances of one actor
 object Routing extends App {
 
-  class Worker extends Actor {
+  final class Worker extends Actor {
     import Worker._
-    def receive: Receive = {
+    override def receive: Receive = {
       case Request(id) => sender() ! Answer(self.path, id)
     }
   }
   object Worker {
-    case class Request(id: Int)
-    case class Answer(path: ActorPath, id: Int)
+    final case class Request(id: Int)
+    final case class Answer(path: ActorPath, id: Int)
   }
 
-  class Main extends Actor {
+  final class Main extends Actor {
     import Main._
     // a router pool that uses round-robin to select a routee
-    val workerRouter: ActorRef = context.actorOf(Props[Worker]().withRouter(RoundRobinPool(5)), "worker-pool")
+    private val workerRouter: ActorRef = context.actorOf(
+      Props[Worker]().withRouter(RoundRobinPool(5)),
+      "worker-pool",
+    )
 
     override def receive: Receive = {
       case RequestCount(x) =>
@@ -34,7 +37,7 @@ object Routing extends App {
     }
   }
   object Main {
-    case class RequestCount(x: Int)
+    final case class RequestCount(x: Int)
   }
 
   val evoActorSystem: ActorSystem = ActorSystem("evo-actor-system")

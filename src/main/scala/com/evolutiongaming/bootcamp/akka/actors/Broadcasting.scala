@@ -7,7 +7,7 @@ object Broadcasting extends App {
   case object Ping
   case object Pong
 
-  class Child extends Actor {
+  final class Child extends Actor {
     override def receive: Receive = {
       case Ping =>
         context.parent ! Pong
@@ -15,8 +15,8 @@ object Broadcasting extends App {
   }
 
   class Parent extends Actor {
-    val child1 = context.actorOf(Props[Child](), "child1")
-    val child2 = context.actorOf(Props[Child](), "child2")
+    private val child1 = context.actorOf(Props[Child](), "child1")
+    private val child2 = context.actorOf(Props[Child](), "child2")
 
     override def receive: Receive = {
       case Parent.PingChildren =>

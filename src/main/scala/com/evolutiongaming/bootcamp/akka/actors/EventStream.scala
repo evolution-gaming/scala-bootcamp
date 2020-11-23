@@ -10,7 +10,7 @@ object EventStream extends App {
   val evoActorSystem: ActorSystem = ActorSystem("evo-actor-system")
 
   // listener
-  class AlertListener extends Actor with ActorLogging {
+  final class AlertListener extends Actor with ActorLogging {
     override def receive: Receive = {
       case Alert(time, source) =>
         log.warning(s"something bad happened from $source at $time")
@@ -26,7 +26,7 @@ object EventStream extends App {
   evoActorSystem.eventStream.subscribe(alertListener, classOf[Alert])
 
   // publisher
-  class ProcessingActor extends Actor {
+  final class ProcessingActor extends Actor {
     override def receive: Receive = {
       case x: Int if x < 0 => context.system.eventStream.publish(Alert(s"processing: negative number $x"))
       case _               => // nothing

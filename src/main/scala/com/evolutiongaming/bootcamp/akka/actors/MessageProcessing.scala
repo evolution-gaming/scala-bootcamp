@@ -28,12 +28,12 @@ object MessageProcessing extends App {
     case object Failure
   }
 
-  class BankAccount extends Actor {
+  final class BankAccount extends Actor {
     import BankAccount._
 
     override def receive: Receive = bankAccount(balance = 0)
 
-    def bankAccount(balance: Int): Receive = LoggingReceive {
+    private def bankAccount(balance: Int): Receive = LoggingReceive {
       case Deposit(x) =>
         context.become(bankAccount(balance + x))
         sender() ! Done
@@ -46,12 +46,12 @@ object MessageProcessing extends App {
   }
 
   object WireTransfer {
-    case class Transfer(from: ActorRef, to: ActorRef, amount: Int)
+    final case class Transfer(from: ActorRef, to: ActorRef, amount: Int)
     case object Done
     case object Failure
   }
 
-  class WireTransfer extends Actor {
+  final class WireTransfer extends Actor {
     import WireTransfer._
 
     override def receive: Receive = LoggingReceive {
@@ -61,7 +61,7 @@ object MessageProcessing extends App {
         context.become(awaitWithdraw(to, amount, sender()))
     }
 
-    def awaitWithdraw(to: ActorRef, amount: Int, client: ActorRef): Receive = LoggingReceive {
+    private def awaitWithdraw(to: ActorRef, amount: Int, client: ActorRef): Receive = LoggingReceive {
       case BankAccount.Done =>
         // 2. make deposit to
         to ! BankAccount.Deposit(amount)
@@ -71,18 +71,18 @@ object MessageProcessing extends App {
         context.stop(self)
     }
 
-    def awaitDeposit(client: ActorRef): Receive = LoggingReceive {
+    private def awaitDeposit(client: ActorRef): Receive = LoggingReceive {
       case BankAccount.Done =>
         client ! Done
         context.stop(self)
     }
   }
 
-  class TransferMain extends Actor {
-    def spawnAccount(name: String): ActorRef = context.actorOf(Props[BankAccount](), name)
+  final class TransferMain extends Actor {
+    private def spawnAccount(name: String): ActorRef = context.actorOf(Props[BankAccount](), name)
 
-    val accA = spawnAccount("acc-A")
-    val accB = spawnAccount("acc-B")
+    private val accA = spawnAccount("acc-A")
+    private val accB = spawnAccount("acc-B")
 
     // make positive balance for one account
     accA ! BankAccount.Deposit(100)
@@ -91,7 +91,7 @@ object MessageProcessing extends App {
       case BankAccount.Done => makeTransfer(50)
     }
 
-    def makeTransfer(x: Int): Unit = {
+    private def makeTransfer(x: Int): Unit = {
       val transfer = context.actorOf(Props[WireTransfer](), "transfer")
       transfer ! WireTransfer.Transfer(from = accA, to = accB, amount = x)
 
