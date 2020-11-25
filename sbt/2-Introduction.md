@@ -145,3 +145,6 @@ It works! Note that when we run `scala` directly, we could not get it working
 because of transitive dependencies. In this case, actually, sbt detected by
 itself that additional libraries are requires, download them and put them
 into the right place.
+
+Have a look at generate `project/build.properties` file. What does it contain?
+Why?
