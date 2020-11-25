@@ -16,8 +16,8 @@ You should support one to three poker game types (more is better):
 
 * Omaha Hold'em - input is a board of 5 cards, and multiple hands of 4 cards each.
 
-  A value of an Omaha Hold'em hand is the best possible value out of all possible subsets of 
-  5 cards from the 7 cards which are formed by 3 out of 5 board cards and 2 out of 4 hand cards. 
+  A value of an Omaha Hold'em hand is the best possible value out of all possible 5 card combinations
+  which are formed from 3 out of 5 board cards and 2 out of 4 hand cards. 
   
   See [Omaha Hold'em rules](https://en.wikipedia.org/wiki/Omaha_hold_%27em).
 
