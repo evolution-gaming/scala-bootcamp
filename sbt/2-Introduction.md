@@ -122,9 +122,26 @@ try the magic on our project with libraries first.
 # assuming you are at `scala-bootstrap/sbt`
 cd 4-sbt-libs
 
-...
-
 # let's ask sbt to run it
 sbt run
 
+# oh no, error again
 ```
+
+Obviously, it cannot guess magically what libraries we are to use,
+though it can guess about the transitive dependencies.
+
+Let's specify the libraries we want to use. For that create `build.sbt`
+file in `4-sbt-libs` directory and add the following line into it:
+```
+libraryDependencies += "org.typelevel" %% "cats-effect" % "2.2.0"
+```
+
+Let's try to run it again?
+```
+sbt run
+```
+It works! Note that when we run `scala` directly, we could not get it working
+because of transitive dependencies. In this case, actually, sbt detected by
+itself that additional libraries are requires, download them and put them
+into the right place.

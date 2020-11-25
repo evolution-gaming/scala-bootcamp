@@ -20,16 +20,26 @@ Note, that Coursier sbt launcher differs a little bit from the official one
 and may not support some commands yet, such as `sbt --client`, which will not
 be needed for this workshop.
 
-For sake of having all the students the same sbt version, make sure you have
-`1.4.2` version when running `sbt --version`.
+For introduction part you will also need `scalac` and `scala` installed. These
+are only needed for  couple of introductory excersises. These are not required
+for normal sbt work.
 
-For introduction part you will also need `scalac` installed. If you do not like
-installing stuff on your computer, it is not strictly required. You will just
-miss couple of introductory excersises if you do not.
+If you used coursier, as suggested above, it is about running two command only
+and you should have it working:
+```
+cs install scala
+cs install scalac
+```
+You can remove it as easily by running the following after the lecture:
+```
+cs uninstall scala
+cs uuinstall scalac
+```
 
-If you used coursier, as suggested above, it is about running one command only:
-`cs install scalac` and you should have it working. You can remove it as easily
-by running `cs uninstall scalac` after the lecture.
+You can check if it works by running the following commands:
+```
+scala --version
+scalac --version
+```
+Post results of running both `sbt` and `scalac` commands into the chat.
 
-You can check if it works by running `scalac --version`. Post results of running
-both `sbt` and `scalac` commands into the chat.
