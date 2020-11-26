@@ -174,3 +174,31 @@ One cool feature that you can do when having multiple modules is _different_
 set of libraries you depend on. I.e. you could put your business logic into
 really clean project without any dependencies and this will protect you against
 accidenital usage of the library.
+
+Let's define the new structure for our `inspect` project:
+```
+lazy val root = (project in file("."))
+  .aggregate(domain, services)
+  .dependsOn(services)
+  .settings(name := "inspect")
+
+lazy val services = (project in file("services"))
+  .dependsOn(domain)
+  .settings(
+    name := "inspect-services",
+    libraryDependencies ++= Seq(
+      "org.typelevel" %% "cats-effect" % "2.2.0",
+      "org.scalatest" %% "scalatest" % "3.2.2" % "test"
+    )
+  )
+
+lazy val domain = (project in file("domain"))
+  .settings(
+    name := "inspect-domain",
+    libraryDependencies ++= Seq(
+      "org.scalatest" %% "scalatest" % "3.2.2" % "test"
+    )
+  )
+```
+Live coding session: refactor `inspect` project so text from `Printer` goes to
+`domain` and everything else goes to `services`, and it still works.
