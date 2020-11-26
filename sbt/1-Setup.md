@@ -40,10 +40,11 @@ cs uninstall scala
 cs uuinstall scalac
 ```
 
-You can check if it works by running the following commands:
+You can check if everything works by running the following commands:
 ```
+sbt --version
 scala --version
 scalac --version
 ```
-Post results of running both `sbt` and `scalac` commands into the chat.
+Post results of running all these commands into the chat.
 

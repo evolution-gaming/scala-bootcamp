@@ -118,6 +118,14 @@ task should be searched for, if it is not found in the current scope.
 We will not discuss it right now, but you can read about it here:
 https://www.scala-sbt.org/1.x/docs/Scope-Delegation.html#Scope+delegation+rules
 
+The important thing to remember: if `root-5-inspect / Compile / run / scalaVersion`
+is defined, and you will change `root-5-inspect / Compile / scalaVersion` or
+`root-5-inspect / scalaVersion`, the one under `run` will not be affected.
+
+This is a _very_ common issue people encounter, especially with not-so-well
+written builds or plugins. `inspect` will always help you to figure out what
+went wrong.
+
 Let's redefine our `run` to be `Compile / run`:
 ```
 Compile / run := println(s"Project version: ${version.value}")
