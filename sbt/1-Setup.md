@@ -48,3 +48,5 @@ scalac --version
 ```
 Post results of running all these commands into the chat.
 
+*Do not forget to do `git pull` just before the lecture!*
+

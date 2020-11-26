@@ -5,19 +5,20 @@ We will live code a new microservice now called `Permissons`.
 The requirements are the following:
 
 1. There are users, groups and permissions:
-1.1. Each user has a unique login and a password.
-1.2. Each group has a unique name.
-1.3. Each permission has a unique name.
+   - Each user has a unique login and a password.
+   - Each group has a unique name.
+   - Each permission has a unique name.
 
 2. Microservice should provide REST interface to:
-2.1. Create a user, a group or permission.
-2.2. Assign a user to a group.
-2.3. Assign a permission to a group.
+   - Create a user, a group or permission.
+   - Assign a user to a group.
+   - Assign a permission to a group.
+   - Get permissions by user login.
 
 3. It should use the following technical stack:
-3.1. Http4s to provide HTTP interface: https://http4s.org/
-3.2. Quill library to access a database: https://github.com/getquill/quill
-3.3. H2 database engine for storage: https://www.h2database.com/html/main.html
+   - Http4s to provide HTTP interface: https://http4s.org
+   - Quill library to access a database: https://https://getquill.io
+   - H2 database engine for storage: https://h2database.com
 
 We will code it wrongly first and the refactor to be a bit better.
 The homework will be related this task, but you do not have to worry if you
