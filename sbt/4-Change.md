@@ -202,3 +202,28 @@ lazy val domain = (project in file("domain"))
 ```
 Live coding session: refactor `inspect` project so text from `Printer` goes to
 `domain` and everything else goes to `services`, and it still works.
+
+# Plugins
+
+How do the people reuse the parts of sbt definitions between the different code bases?
+
+One way is to use predefined plugins created by other people. Let's add code
+coverage plugin to our sbt project: https://github.com/scoverage/sbt-scoverage
+
+For that, create `plugins.sbt` file in your `project` directory and add the
+following line:
+```
+addSbtPlugin("org.scoverage" % "sbt-scoverage" % "1.6.1")
+```
+
+This is it. Let's try to run a new plugin in our sbt session:
+```
+sbt:inspect> clean; coverage; test; coverageReport
+```
+
+# Common code
+
+Another, common, way is to put `.scala` files to `project` directory.
+
+Live coding session: move all library dependencies into
+`project/Dependencies.scala`.
