@@ -1,3 +1,5 @@
+# Inspect the exisiting project
+
 We will now investigate how sbt knew where to take the files from, where to take
 the libraries for running etc. For that we will use another, `5-inspect` project.
 It is not much different from previous projects, just a bit larger and more

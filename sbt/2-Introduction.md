@@ -1,3 +1,5 @@
+# Working without sbt
+
 How do the one compile Scala (or Java, or C) file without a built tool. It is
 quite easy to do. If you have a compiler, you can do it directly. Let's compile
 the application in `introduction` directory directly as an excersise:
@@ -52,6 +54,8 @@ applications may have hundreds of dependencies. Downloading them manually,
 copying in the right place and running could be a huge pain without the appropriate
 tools.
 
+# Build tools
+
 There are plenty of the builds tools in the programming world. One of most known
 is, arugable, `make` and derivatives, which is very well known to `C/C++` crowd.
 
@@ -78,6 +82,8 @@ The idea was to use "Convention over Configuration" principle a lot and make
 sure most of the projects use the same structure. Then compiling, running,
 testing etc. the code would be about putting it to the right directories.
 
+# Working with sbt
+
 `sbt`, which used to mean "Simple Build Tool` is a continuation of this
 tradition. Despite the name, `sbt` used to be really hard to use and understand
 with awkwards symbols, conventions and ideas. This is _not_ the case anymore,
@@ -87,7 +93,7 @@ because you might encounter such an opinion based on an experience of old years.
 Because it was so infamous, and out of strive to innovate, other tools appeared
 in Scala word since that. Most people still use sbt though.
 - http://www.lihaoyi.com/mill/ by Li Haoyi, from Databricks, whom I mentioned before,
-- https://github.com/propensive/fury by Jon Pretty from Propensive, a famous and
+- https://github.com/propensive/fury by Jon Pretty from Propensive, a famous andv
   very respected Scala developer.
 
 In large mixed corporate environments where Scala is not the only backend

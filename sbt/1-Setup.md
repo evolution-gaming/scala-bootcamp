@@ -1,3 +1,5 @@
+# Setup sbt
+
 Given this is not your first lecture on Scala, you, probably, have sbt setup and
 working for quite some time.
 
@@ -19,6 +21,8 @@ switch between Java versions out of the box.
 Note, that Coursier sbt launcher differs a little bit from the official one
 and may not support some commands yet, such as `sbt --client`, which will not
 be needed for this workshop.
+
+# Setup scala and scalac
 
 For introduction part you will also need `scalac` and `scala` installed. These
 are only needed for  couple of introductory excersises. These are not required
