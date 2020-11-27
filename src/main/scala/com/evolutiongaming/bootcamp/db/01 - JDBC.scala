@@ -4,32 +4,53 @@ import java.sql.{Connection, DriverManager}
 import java.time.Year
 import java.util.UUID
 
-import com.evolutiongaming.bootcamp.db.DbConfig._
-import com.evolutiongaming.bootcamp.db.DbCommon._
+import com.evolutiongaming.bootcamp.db.DbCommon.{
+  createTableAuthorsSql,
+  createTableBooksSql,
+  fetchHarryPotterBooksSql,
+  populateDataSql,
+}
+import com.evolutiongaming.bootcamp.db.DbConfig.{dbDriverName, dbPwd, dbUrl, dbUser}
 
 import scala.annotation.tailrec
 
-object JdbcExample {
+object Jdbc {
 
   def main(args: Array[String]): Unit = {
+
+    // just to make sure, that driver is loaded
     Class.forName(dbDriverName)
+    // get a connection, it should be wrapped in try-catch or in `Resource` to make it safer
     val connection = DriverManager.getConnection(dbUrl, dbUser, dbPwd)
+
+    // dirty and usually not required, data is already in DB
     setUpTables(connection)
-    fetchHPBooks(connection).foreach(println)
-    connection.close()
+
+    // direct transformation from corresponding, classic, Java code
+    // can be made safer and nicer, but we will not do that here
+    try {
+      connection.setAutoCommit(false) // start transaction
+      fetchHPBooks(connection).foreach(println)
+      connection.commit() // commit transaction
+    } finally try connection.close()
+    catch {
+      case e: Throwable =>
+        println(s"there was an error: $e");
+    }
   }
 
   private def setUpTables(connection: Connection): Unit = {
     val stmt = connection.createStatement()
-    stmt.executeUpdate(authorsSql)
-    stmt.executeUpdate(booksSql)
+    stmt.executeUpdate(createTableAuthorsSql)
+    stmt.executeUpdate(createTableBooksSql)
     stmt.executeUpdate(populateDataSql)
     stmt.close()
   }
 
   private def fetchHPBooks(connection: Connection): List[Book] = {
     val stmt = connection.createStatement()
-    val rs = stmt.executeQuery(fetchHPBooksSql)
+    val rs = stmt.executeQuery(fetchHarryPotterBooksSql)
+
     def parseBooks(): List[Book] = {
       @tailrec def internalParseBooks(acc: List[Book]): List[Book] =
         if (rs.next()) {
@@ -45,9 +66,12 @@ object JdbcExample {
         } else {
           acc
         }
-      internalParseBooks(List.empty)
+      internalParseBooks(Nil)
     }
+
     val books = parseBooks()
+
+    // at the end, have to close all resources!
     rs.close()
     stmt.close()
     books

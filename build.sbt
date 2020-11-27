@@ -8,7 +8,7 @@ scalaVersion := "2.13.3"
 scalacOptions ++= Seq(
   "-deprecation",
   "-feature",
-  "-Ymacro-annotations"
+  "-Ymacro-annotations",
 )
 
 val http4sVersion = "0.21.7"
@@ -58,13 +58,14 @@ libraryDependencies ++= Seq(
   "com.typesafe.akka" %% "akka-persistence" % akkaVersion,
   "org.tpolecat" %% "doobie-core" % doobieVersion,
   "org.tpolecat" %% "doobie-h2" % doobieVersion,
+  "org.tpolecat" %% "doobie-hikari" % doobieVersion,
   "com.typesafe.akka" %% "akka-testkit" % akkaVersion % Test,
   "org.mockito" %% "mockito-scala" % "1.15.0" % Test,
   "org.scalaj" %% "scalaj-http" % "2.4.2" % Test,
   "org.tpolecat" %% "doobie-scalatest" % doobieVersion % Test,
   "org.typelevel" %% "cats-tagless-macros" % catsTaglessVersion,
   "com.h2database" % "h2" % "1.4.200",
-  "eu.timepit" %% "refined" % "0.9.17"
+  "eu.timepit" %% "refined" % "0.9.17",
 )
 
 addCompilerPlugin("org.typelevel" %% "kind-projector" % "0.11.0" cross CrossVersion.full)

@@ -10,13 +10,13 @@ object DbCommon {
   val bookId2: UUID = UUID.randomUUID()
   val bookId3: UUID = UUID.randomUUID()
 
-  val authorsSql: String =
+  val createTableAuthorsSql: String =
     """CREATE TABLE authors (
       |  id UUID PRIMARY KEY,
       |  name VARCHAR(100) NOT NULL,
       |  birthday DATE);""".stripMargin
 
-  val booksSql: String =
+  val createTableBooksSql: String =
     """CREATE TABLE books (
       |  id UUID PRIMARY KEY,
       |  author UUID NOT NULL,
@@ -40,5 +40,5 @@ object DbCommon {
     """SELECT b.id, a.id, a.name, a.birthday, b.title, b.year FROM books b
       |INNER JOIN authors a ON b.author = a.id """.stripMargin
 
-  val fetchHPBooksSql: String = fetchBooksCommonSql + s"WHERE b.author = '$authorId2';"
+  val fetchHarryPotterBooksSql: String = fetchBooksCommonSql + s"WHERE b.author = '$authorId2';"
 }
