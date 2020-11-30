@@ -59,3 +59,15 @@ More information:
 * [Anatomy of a doobie query](https://camo.githubusercontent.com/48794728000ab130c9552ebd7f267767b56c3b20127b9b0f6f21801c7ad3da7c/68747470733a2f2f63646e2e7261776769742e636f6d2f74706f6c656361742f646f6f6269652d696e666f677261706869632f76302e362e302f646f6f6269652e737667)
 * [Book of Doobie](https://tpolecat.github.io/doobie/docs/index.html)
 * [doobie exercises](https://www.scala-exercises.org/doobie/)
+
+# Slick
+
+From official documentation:
+> Slick (“Scala Language-Integrated Connection Kit”) is Lightbend’s Functional Relational Mapping (FRM) 
+> library for Scala that makes it easy to work with relational databases.
+
+If we will have some free time, we can talk about Slick.
+It is `Future` base, not `IO` based, while Slick's `DBIO[A]` is very similar to `doobie`'s `ConnectionIO[A]`. 
+
+More information:
+* [Official site](https://scala-slick.org/docs/)

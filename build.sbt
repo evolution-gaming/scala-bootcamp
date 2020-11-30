@@ -2,7 +2,7 @@ name := "scala-bootcamp"
 
 version := "0.2"
 
-scalaVersion := "2.13.3"
+scalaVersion := "2.13.4"
 
 // From https://tpolecat.github.io/2017/04/25/scalac-flags.html
 scalacOptions ++= Seq(
@@ -29,6 +29,7 @@ val log4CatsVersion = "1.1.1"
 
 val scalaTestVersion = "3.1.0.0-RC2"
 val h2Version = "1.4.200"
+val slickVersion = "3.3.3"
 
 libraryDependencies ++= Seq(
   "org.typelevel" %% "cats-core" % catsVersion,
@@ -66,8 +67,11 @@ libraryDependencies ++= Seq(
   "org.typelevel" %% "cats-tagless-macros" % catsTaglessVersion,
   "com.h2database" % "h2" % "1.4.200",
   "eu.timepit" %% "refined" % "0.9.17",
+  "com.typesafe.slick" %% "slick" % slickVersion,
+  "org.slf4j" % "slf4j-nop" % "1.6.4",
+  "com.typesafe.slick" %% "slick-hikaricp" % slickVersion,
 )
 
-addCompilerPlugin("org.typelevel" %% "kind-projector" % "0.11.0" cross CrossVersion.full)
+addCompilerPlugin("org.typelevel" %% "kind-projector" % "0.11.1" cross CrossVersion.full)
 
-fork in run := true
+run / fork := true
