@@ -4,11 +4,11 @@ import java.util.UUID
 
 object DbCommon {
 
-  val authorId1: UUID = UUID.randomUUID()
-  val authorId2: UUID = UUID.randomUUID()
-  val bookId1: UUID = UUID.randomUUID()
-  val bookId2: UUID = UUID.randomUUID()
-  val bookId3: UUID = UUID.randomUUID()
+  val authorOdersky: UUID = UUID.randomUUID()
+  val authorRowling: UUID = UUID.randomUUID()
+  val bookScala: UUID = UUID.randomUUID()
+  val bookHPStone: UUID = UUID.randomUUID()
+  val bookHPSecrets: UUID = UUID.randomUUID()
 
   val createTableAuthorsSql: String =
     """CREATE TABLE authors (
@@ -27,18 +27,18 @@ object DbCommon {
   val populateDataSql: String =
     s"""
        |INSERT INTO authors (id, name, birthday) VALUES
-       |  ('$authorId1', 'Martin Odersky', '1958-09-05'),
-       |  ('$authorId2', 'J.K. Rowling', '1965-07-31');
+       |  ('$authorOdersky', 'Martin Odersky', '1958-09-05'),
+       |  ('$authorRowling', 'J.K. Rowling', '1965-07-31');
        |
        |INSERT INTO books (id, author, title, year) VALUES
-       |  ('$bookId1', '$authorId1', 'Programming in Scala', 2016),
-       |  ('$bookId2', '$authorId2', 'Harry Potter and Philosopher''s Stone', 1997),
-       |  ('$bookId3', '$authorId2', 'Harry Potter and the Chamber of Secrets', 1998);
+       |  ('$bookScala', '$authorOdersky', 'Programming in Scala', 2016),
+       |  ('$bookHPStone', '$authorRowling', 'Harry Potter and Philosopher''s Stone', 1997),
+       |  ('$bookHPSecrets', '$authorRowling', 'Harry Potter and the Chamber of Secrets', 1998);
        |""".stripMargin
 
   val fetchBooksCommonSql: String =
     """SELECT b.id, a.id, a.name, a.birthday, b.title, b.year FROM books b
       |INNER JOIN authors a ON b.author = a.id """.stripMargin
 
-  val fetchHarryPotterBooksSql: String = fetchBooksCommonSql + s"WHERE b.author = '$authorId2';"
+  val fetchHarryPotterBooksSql: String = fetchBooksCommonSql + s"WHERE b.author = '$authorRowling';"
 }

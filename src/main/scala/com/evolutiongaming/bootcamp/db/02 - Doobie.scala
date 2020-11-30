@@ -1,17 +1,15 @@
 package com.evolutiongaming.bootcamp.db
 
 import cats.effect._
-import cats.free.Free
 import cats.implicits._
 import doobie._
-import doobie.free.connection
 import doobie.implicits._
 
 object Doobie extends IOApp {
 
   override def run(args: List[String]): IO[ExitCode] = {
 
-//    /** simplest possible `doobie` program */
+    /** simplest possible `doobie` program */
     val rng: ConnectionIO[String] = "42".pure[ConnectionIO]
 
     /** simple queries */

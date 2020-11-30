@@ -19,7 +19,7 @@ object CustomMappings extends IOApp {
       s"${c.x},${c.y}"
   }
 
-  // TODO define `Get`, `Put`, `Meta`, talk about `Read` and `Write`
+  // define `Get`, `Put`, `Meta`, talk about `Read` and `Write`
 //  implicit val xyGet: Get[Coordinate] = Get[String].tmap(Coordinate.fromVarchar)
 //  implicit val xyPut: Put[Coordinate] = Put[String].tcontramap(Coordinate.toVarchar)
 //  implicit val xyMeta: Meta[Coordinate] = Meta[String].timap(Coordinate.fromVarchar)(Coordinate.toVarchar)

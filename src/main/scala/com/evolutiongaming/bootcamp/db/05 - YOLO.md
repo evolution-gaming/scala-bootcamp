@@ -22,7 +22,6 @@ import com.evolutiongaming.bootcamp.db.Book
 // is where nonblocking operations will be executed. For testing here we're using a synchronous EC.
 implicit val cs = IO.contextShift(ExecutionContexts.synchronous)
 
-// We will need these for some of the exaamples
 implicit val uuidMeta: Meta[UUID] = Meta[String].timap(UUID.fromString)(_.toString)
 implicit val yearMeta: Meta[Year] = Meta[Int].timap(Year.of)(_.getValue)
 
@@ -105,10 +104,6 @@ sql"select id, name, birthday from authors"
     .unsafeRunSync()
 ```
 
-## Sample for `Read` and `Put`
-// TODO
-
-
 ## Sample for `Meta`
 ```scala
 sql"select id, name, birthday from authors"
@@ -140,7 +135,7 @@ sql"select id, name, birthday from authors"
 
 ## Sample for logging of queries
 ```scala
-sql"select id, name, birthday from authors where id = $authorId1"
+sql"select id, name, birthday from authors where id = $authorOdersky"
     .queryWithLogHandler[Author](LogHandler.jdkLogHandler)
     .nel
     .transact(xa)
