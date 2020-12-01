@@ -2,13 +2,13 @@ name := "scala-bootcamp"
 
 version := "0.2"
 
-scalaVersion := "2.13.3"
+scalaVersion := "2.13.4"
 
 // From https://tpolecat.github.io/2017/04/25/scalac-flags.html
 scalacOptions ++= Seq(
   "-deprecation",
   "-feature",
-  "-Ymacro-annotations"
+  "-Ymacro-annotations",
 )
 
 val http4sVersion = "0.21.7"
@@ -29,6 +29,7 @@ val log4CatsVersion = "1.1.1"
 
 val scalaTestVersion = "3.1.0.0-RC2"
 val h2Version = "1.4.200"
+val slickVersion = "3.3.3"
 
 libraryDependencies ++= Seq(
   "org.typelevel" %% "cats-core" % catsVersion,
@@ -58,15 +59,19 @@ libraryDependencies ++= Seq(
   "com.typesafe.akka" %% "akka-persistence" % akkaVersion,
   "org.tpolecat" %% "doobie-core" % doobieVersion,
   "org.tpolecat" %% "doobie-h2" % doobieVersion,
+  "org.tpolecat" %% "doobie-hikari" % doobieVersion,
   "com.typesafe.akka" %% "akka-testkit" % akkaVersion % Test,
   "org.mockito" %% "mockito-scala" % "1.15.0" % Test,
   "org.scalaj" %% "scalaj-http" % "2.4.2" % Test,
   "org.tpolecat" %% "doobie-scalatest" % doobieVersion % Test,
   "org.typelevel" %% "cats-tagless-macros" % catsTaglessVersion,
   "com.h2database" % "h2" % "1.4.200",
-  "eu.timepit" %% "refined" % "0.9.17"
+  "eu.timepit" %% "refined" % "0.9.17",
+  "com.typesafe.slick" %% "slick" % slickVersion,
+  "org.slf4j" % "slf4j-nop" % "1.6.4",
+  "com.typesafe.slick" %% "slick-hikaricp" % slickVersion,
 )
 
-addCompilerPlugin("org.typelevel" %% "kind-projector" % "0.11.0" cross CrossVersion.full)
+addCompilerPlugin("org.typelevel" %% "kind-projector" % "0.11.1" cross CrossVersion.full)
 
-fork in run := true
+run / fork := true
