@@ -46,27 +46,56 @@ object ControlStructures {
   // }
 
   type ErrorMessage = String
-  def monthName(x: Int): Either[ErrorMessage, String] = {
+  def monthName(x: Int): Either[ErrorMessage, String] =
     x match {
-      case 1            => Right("January")
-      case 2            => Right("February")
-      case 3            => Right("March")
-      case 4            => Right("April")
-      case 5            => Right("May")
-      case 6            => Right("June")
-      case 7            => Right("July")
-      case 8            => Right("August")
-      case 9            => Right("September")
-      case 10           => Right("October")
-      case 11           => Right("November")
-      case 12           => Right("December")
-      case x if x <= 0  => Left(s"Month $x is too small")
-      case x            => Left(s"Month $x is too large")
+      case 1           => Right("January")
+      case 2           => Right("February")
+      case 3           => Right("March")
+      case 4           => Right("April")
+      case 5           => Right("May")
+      case 6           => Right("June")
+      case 7           => Right("July")
+      case 8           => Right("August")
+      case 9           => Right("September")
+      case 10          => Right("October")
+      case 11          => Right("November")
+      case 12          => Right("December")
+      case x if x <= 0 => Left(s"Month $x is too small")
+      case x           => Left(s"Month $x is too large")
     }
-  }
 
   // Question. How would you improve `monthName`?
   // Question. What would you use in its place if you wanted to more properly handle multiple locales?
+
+  sealed trait Shape
+
+  object Shape {
+    case object Origin extends Shape
+    final case class Circle(radius: Double) extends Shape
+    final case class Rectangle(width: Double, height: Double) extends Shape
+  }
+
+  import Shape._
+
+  // Typed Pattern
+  def matchOnShape1(s: Shape): String = s match {
+    case Origin               => s"Found the origin."
+    case circle: Circle       => s"Found a circle $circle."
+    case rectangle: Rectangle => s"Found a rectangle $rectangle."
+  }
+
+  // Unapply the instance of Shape
+  def matchOnShape2(s: Shape): String = s match {
+    case Origin                   => s"Found the origin."
+    case Circle(radius)           => s"Found a circle with radius $radius."
+    case Rectangle(width, height) => s"Found a rectangle with width $width and height $height."
+  }
+
+  def matchOnShape3(s: Shape): String = s match {
+    case Origin                               => s"Found the origin."
+    case circle @ Circle(radius)              => s"Found a circle $circle with radius $radius."
+    case rectangle @ Rectangle(width, height) => s"Found a rectangle $rectangle with width $width and height $height."
+  }
 
   // Exercise. Implement a "Fizz-Buzz" function using pattern matching:
   def fizzBuzz2(n: Int): String = ???
@@ -76,10 +105,9 @@ object ControlStructures {
   // A function which calls itself is called a recursive function. This is a commonly used way how to
   // express looping constructs in Functional Programming languages.
 
-  def sum1(list: List[Int]): Int = {
+  def sum1(list: List[Int]): Int =
     if (list.isEmpty) 0
     else list.head + sum1(list.tail)
-  }
 
   // Question. What are the risks of List#head and List#tail? How can you refactor `sum1` to avoid these invocations?
 
@@ -88,30 +116,26 @@ object ControlStructures {
   // @tailrec annotation verifies that a method will be compiled with tail call optimisation.
   @tailrec
   def last[A](list: List[A]): Option[A] = list match {
-    case Nil        => None
-    case x :: Nil   => Some(x)
-    case _ :: xs    => last(xs)
+    case Nil      => None
+    case x :: Nil => Some(x)
+    case _ :: xs  => last(xs)
   }
 
   // Recursion isn't used that often as it can be replaced with `foldLeft`, `foldRight`,
   // `reduce` or other larger building blocks.
 
-  def sum2(list: List[Int]): Int = {
+  def sum2(list: List[Int]): Int =
     list.foldLeft(0)((acc, x) => acc + x)
-  }
 
-  def sum3(list: List[Int]): Int = {
+  def sum3(list: List[Int]): Int =
     list.foldRight(0)((x, acc) => acc + x)
-  }
 
-  def sum4(list: List[Int]): Int = {
+  def sum4(list: List[Int]): Int =
     if (list.isEmpty) 0
     else list.reduce((a, b) => a + b)
-  }
 
-  def sum5(list: List[Int]): Int = {
+  def sum5(list: List[Int]): Int =
     list.sum // only for Numeric lists
-  }
 
   // Exercise: Implement a function `applyNTimes` which takes a function `f` and an integer `n` and
   // returns a function which applies the function `f` `n` times.
@@ -207,9 +231,10 @@ object ControlStructures {
 
   // You can also add `if` guards to `for` comprehensions:
   val e = for {
-    x       <- a
-    if x % 2 == 1
-    y       <- b
+    x <- a // generator
+    z  = x % 2 // definition
+    if z == 1 // filter expression
+    y <- b // generator
   } yield x + y
 
   // Question. What is the value of `e` above?
@@ -231,7 +256,12 @@ object ControlStructures {
   }
 
   // Upon success, should return the remaining amounts on both accounts as a tuple.
-  def makeTransfer(service: UserService, fromUserWithName: String, toUserWithName: String, amount: Amount): Either[ErrorMessage, (Amount, Amount)] = {
+  def makeTransfer(
+    service: UserService,
+    fromUserWithName: String,
+    toUserWithName: String,
+    amount: Amount
+  ): Either[ErrorMessage, (Amount, Amount)] = {
     // Replace with a proper implementation that uses validateUserName on each name,
     // findUserId to find UserId, validateAmount on the amount, findBalance to find previous
     // balances, and then updateAccount for both userId-s (with a positive and negative
@@ -276,14 +306,13 @@ object ControlStructures {
   def printFile(fileName: String): Unit = {
     // This code is only here to illustrate try-catch-finally, it shouldn't be considered as good code
     val source = Source.fromFile(fileName)
-    try { // executed until an exception happens
-      source.getLines() foreach println
-    } catch { // exception handlers
-      case e: FileNotFoundException   => println(s"Couldn't find the file: $e")
-      case e: Exception               => println(s"Exception occurred: $e")
-    } finally { // executed even if an exception happens
-      source.close
-    }
+    try // executed until an exception happens
+    source.getLines() foreach println
+    catch { // exception handlers
+      case e: FileNotFoundException => println(s"Couldn't find the file: $e")
+      case e: Exception             => println(s"Exception occurred: $e")
+    } finally // executed even if an exception happens
+    source.close
   }
 
   // Question. What issues can you find with the above `printFile` method?

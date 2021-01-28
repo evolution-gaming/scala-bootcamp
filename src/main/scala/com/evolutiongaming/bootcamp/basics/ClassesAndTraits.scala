@@ -17,9 +17,21 @@ object ClassesAndTraits {
       s"($x, $y)"
   }
 
+  // Singleton objects are defined using `object`.
+  // It is a class that has exactly one instance.
+  // An object with the same name as a class is called a companion object.
+  //
+  // Use it to contain methods and values related to this trait or class, but that aren't
+  // specific to instances of this trait or class.
+  object MutablePoint {
+    def apply(x: Double, y: Double): MutablePoint = new MutablePoint(x, y)
+
+    def unapply(point: MutablePoint): Option[(Double, Double)] = Option((point.x, point.y))
+  }
+
   val point1 = new MutablePoint(3, 4)
   println(point1.x) // 3.0
-  println(point1)   // (3.0, 4.0)
+  println(point1) // (3.0, 4.0)
 
   // Question. Is MutablePoint a good design? Why or why not?
 
@@ -59,8 +71,8 @@ object ClassesAndTraits {
   }
 
   final case class Circle(centerX: Double, centerY: Double, radius: Double) extends Shape {
-    override def x: Double = ???
-    override def y: Double = ???
+    override def x: Double    = ???
+    override def y: Double    = ???
     override def minX: Double = ???
     override def maxX: Double = ???
     override def minY: Double = ???
@@ -79,14 +91,20 @@ object ClassesAndTraits {
   // - a `copy` method is generated
   // - `equals` and `hashCode` methods are generated, which let you compare objects & use them in collections
   // - `toString` method is created for easier debugging purposes
+  // - extends Serializable
+  //
+  // Case object provides default equals, hashCode, unapply, toString methods, extends Serializable
+  //
+  // When declaring a case class, make it final. Otherwise someone may decide to inherit from it
+  // case-to-case inheritance is prohibited
 
   val point2 = Point(1, 2)
   println(point2.x)
 
   val shape: Shape = point2
   val point2Description = shape match {
-    case Point(x, y)  => s"x = $x, y = $y"
-    case _            => "other shape"
+    case Point(x, y) => s"x = $x, y = $y"
+    case _           => "other shape"
   }
 
   val point3 = point2.copy(x = 3)
@@ -95,7 +113,7 @@ object ClassesAndTraits {
   // Exercise. Implement an algorithm for finding the minimum bounding rectangle
   // (https://en.wikipedia.org/wiki/Minimum_bounding_rectangle) for a set of `Bounded` objects.
   //
-  def minimumBoundingRectangle(objects: Set[Bounded]): Bounded = {
+  def minimumBoundingRectangle(objects: Set[Bounded]): Bounded =
     new Bounded {
       implicit private val doubleOrdering: Ordering[Double] = Ordering.Double.IeeeOrdering
 
@@ -105,27 +123,18 @@ object ClassesAndTraits {
       override def minY: Double = objects.map(_.minX).min
       override def maxY: Double = objects.map(_.minX).min
     }
-  }
 
   // Pattern matching and exhaustiveness checking
   def describe(x: Shape): String = x match {
-    case Point(x, y) => s"Point(x = $x, y = $y)"
+    case Point(x, y)                      => s"Point(x = $x, y = $y)"
     case Circle(centerX, centerY, radius) => s"Circle(centerX = $centerX, centerY = $centerY, radius = $radius)"
   }
 
-  // Singleton objects are defined using `object`.
-  // It is a class that has exactly one instance.
-  // They can be thought of as "static classes" in Java.
+  // Singleton can extend classes and mix in traits
   object Origin extends Located {
     override def x: Double = 0
     override def y: Double = 0
   }
-
-  // An `object` defined with the same name as an existing trait or class is called
-  // a "companion object".
-
-  // Use it to contain methods and values related to this trait or class, but that aren't
-  // specific to instances of this trait or class.
 
   object Bounded {
     def minimumBoundingRectangle(objects: Set[Bounded]): Bounded = ???
@@ -151,8 +160,8 @@ object ClassesAndTraits {
   // Question. Do you agree with how the stack is modelled here? What would you do differently?
   final case class Stack[A](elements: List[A] = Nil) {
     def push(x: A): Stack[A] = ???
-    def peek: A = ???
-    def pop: (A, Stack[A]) = ???
+    def peek: A              = ???
+    def pop: (A, Stack[A])   = ???
   }
 
   // Homework
