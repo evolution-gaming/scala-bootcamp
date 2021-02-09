@@ -103,6 +103,16 @@ object Functions {
 
   // --
 
+  // Functions composition
+
+  val strToInt: String => Int = ???
+  val intToBool: Int => Boolean = ???
+
+  val strToBool1: String => Boolean = t => intToBool(strToInt(t))
+  val strToBool2: String => Boolean = intToBool.compose(strToInt)
+  val strToBool3: String => Boolean = strToInt.andThen(intToBool)
+
+  // --
 
   // The pattern matching block expands to the Function1 instance
   val pingPong: String => String = {
@@ -155,11 +165,11 @@ object Functions {
     if (from == to) message else message.reverse
   }
 
-  def translateFromRus: (Language, String) => String =
+  val translateFromRus: (Language, String) => String =
     (to: String, message: Language) => translate(message, "rus", to)
 
   // `=>` has right associative law
-  def translateF: Language => (Language => (String => String)) =
+  val translateF: Language => (Language => (String => String)) =
     (from: Language) => (to: Language) => (message: String) => translate(message, from, to)
 
   val fromRu = translateF("ru")
@@ -196,11 +206,11 @@ object Functions {
     map(key)
 
   // Pure function should:
+  // - be deterministic
+  // - not have side effects
   // - be total (not partial)
   // - not throw exceptions
-  // - be deterministic
   // - not do any mutation (local, non-local, reference, etc.)
-  // - not have side effects
   // - not use `null`
 
   // A function without side effects only returns a value

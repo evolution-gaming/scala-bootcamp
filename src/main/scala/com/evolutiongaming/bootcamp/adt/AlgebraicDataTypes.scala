@@ -49,7 +49,9 @@ object AlgebraicDataTypes {
   // compile time is `Age`, but at runtime, the representation is `Int`. Case classes can also be used to
   // define value classes, see `Name`.
   class Age(val value: Int) extends AnyVal
-  final case class Name(value: String) extends AnyVal
+  final case class Name(value: String) extends AnyVal {
+  // val drString = s"Dr. $value"
+  }
 
   // Type aliases may seem similar to value classes, but they provide no additional type safety. They can,
   // however, increase readability of the code in certain scenarios.
