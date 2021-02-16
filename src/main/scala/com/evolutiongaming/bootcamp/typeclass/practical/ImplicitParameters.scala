@@ -17,7 +17,32 @@ object LuckService {
   def bye(name: String): Unit = println(s"See you $name")
 }
 
-object ImplicitConversions extends App {
+object BasicImplicitConversion extends App {
+  case class A(x: Int)
+  case class B(x: Int)
+
+  implicit def conversion(a: A): B = B(a.x)
+
+  def myMethod(b: B): Unit = println(b)
+
+  myMethod(A(123))
+}
+
+object ImplicitConversionChaining extends App {
+  case class A(x: Int)
+  case class B(x: Int)
+  case class C(x: Int)
+
+  implicit def conversion(a: A): B = B(a.x)
+  implicit def conversion2(b: B): C = C(b.x)
+
+  def myMethod(c: C): Unit = println(c)
+
+  // you cant do this! implicits won't chain
+  // myMethod(A(123))
+}
+
+object ImplicitConversionExample extends App {
 
   implicit val nameDoesntMatter: ((Int, Int)) => Point = {
     case (x, y) => Point(x, y)
@@ -38,7 +63,7 @@ object ImplicitConversions extends App {
   }
 }
 
-object ImplicitConversionsForSyntax extends App {
+object ImplicitConversionForSyntax extends App {
 
   // stupid class used only for adding a new method to an existing type
   case class MyTupleExt(t: (Int, Int)) {
