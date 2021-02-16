@@ -6,15 +6,15 @@ object ImplicitParameters extends App {
 
   implicit val name = "Oleg"
 
-  LuckService.greet
-  LuckService.predictLuck
-  LuckService.bye("Olga")
+  LuckService.greet(name)
+  LuckService.predictLuck(name)
+  LuckService.bye(name)
 }
 
 object LuckService {
-  def greet(implicit name: String): Unit = println(s"Hello $name")
-  def predictLuck(implicit name: String): Unit = println(s"Your luck is ${Random.nextInt(11)} today, $name")
-  def bye(implicit name: String): Unit = println(s"See you $name")
+  def greet(name: String): Unit = println(s"Hello $name")
+  def predictLuck(name: String): Unit = println(s"Your luck is ${Random.nextInt(11)} today, $name")
+  def bye(name: String): Unit = println(s"See you $name")
 }
 
 object ImplicitConversions extends App {
@@ -38,6 +38,23 @@ object ImplicitConversions extends App {
   }
 }
 
+object ImplicitConversionsForSyntax extends App {
+
+  // stupid class used only for adding a new method to an existing type
+  case class MyTupleExt(t: (Int, Int)) {
+    def double: (Int, Int) = {
+      val (x, y) = t
+      (2 * x, 2 * y)
+    }
+  }
+
+  // an implicit conversion
+  implicit val nameDoesntMatter: ((Int, Int)) => MyTupleExt = MyTupleExt
+
+  // nobody expects MyTupleExt as param so it is used only for adding new methods
+  (1, 2).double
+}
+
 object ImplicitConversionsSugar extends App {
 
   println((4, 5).double)
@@ -59,5 +76,10 @@ object ImplicitConversionsSugar extends App {
     }
     result
   }
+}
+
+object Task {
+  // write an implicit class so the next line compiles
+  // val b: Boolean = List(true, true).allTrue
 }
 

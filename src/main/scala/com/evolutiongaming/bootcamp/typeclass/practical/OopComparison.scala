@@ -51,6 +51,33 @@ object Fp extends App {
 
   // the usage is the same
   printBeautifully(User("Oleg"))
+
+  object Task {
+    final case class Player(id: Int, login: String)
+
+    implicit val playerJsonable: Jsonable[Player] = ???
+
+    implicit val intJsonable: Jsonable[Int] = ???
+
+    implicit val optionIntJsonable: Jsonable[Option[Int]] = ???
+  }
+
+  // you will definitely get it but maybe a bit later and its ok
+  object GenericImplicitsTask {
+    // the thing can convert to json any options which is super useful
+    implicit def optionJsonable[A](implicit jsonableA: Jsonable[A]): Jsonable[Option[A]] = new Jsonable[Option[A]] {
+      def toJson(entity: Option[A]): Json = {
+        entity match {
+          case Some(value) => jsonableA.toJson(value)
+          case None => Json("null")
+        }
+      }
+    }
+
+    implicit def listJsonable[A](implicit jsonableA: Jsonable[A]): Jsonable[List[A]] = new Jsonable[List[A]] {
+      def toJson(entity: List[A]): Json = ???
+    }
+  }
 }
 
 // lets add pieces of sugar one by one
