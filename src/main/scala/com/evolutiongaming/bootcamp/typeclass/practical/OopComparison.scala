@@ -3,7 +3,7 @@ package com.evolutiongaming.bootcamp.typeclass.practical
 import com.evolutiongaming.bootcamp.typeclass.practical.Fp.{Jsonable, User}
 import com.evolutiongaming.bootcamp.typeclass.practical.Summoner.Jsonable
 
-case class Json(s: String) // my very basic json class
+final case class Json(s: String) // my very basic json class
 
 object Oop extends App {
   trait Jsonable {
@@ -175,7 +175,7 @@ object Result {
   }
 
   // --- domain library of your project ---
-  case class User(name: String)
+  final case class User(name: String)
 
   // --- domain utils library ---
   implicit val JsonableUser: Jsonable[User] = user => Json(s"{name: ${user.name}") // good luck choosing name

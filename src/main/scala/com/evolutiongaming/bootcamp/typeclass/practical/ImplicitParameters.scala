@@ -2,9 +2,12 @@ package com.evolutiongaming.bootcamp.typeclass.practical
 
 import scala.util.Random
 
+// Implicits: implicit parameters
+//            implicit conversions
+
 object ImplicitParameters extends App {
 
-  implicit val name = "Oleg"
+  val name = "Oleg"
 
   LuckService.greet(name)
   LuckService.predictLuck(name)
@@ -15,6 +18,31 @@ object LuckService {
   def greet(name: String): Unit = println(s"Hello $name")
   def predictLuck(name: String): Unit = println(s"Your luck is ${Random.nextInt(11)} today, $name")
   def bye(name: String): Unit = println(s"See you $name")
+}
+
+object ImplicitParamTask {
+
+  object Task1 {
+
+    final case class User(id: String)
+
+    trait DbConnection
+
+    object DbConnection {
+      def apply(): DbConnection = new DbConnection {}
+    }
+
+    // make second argument implicit
+    def createUser(user: User, connection: DbConnection): Unit = ???
+    createUser(User("123"), DbConnection())
+  }
+
+  object Task2 {
+    final case class Money(amount: Int)
+    val list: List[Money] = ???
+//    oh no, i won't compile
+//    list.sorted
+  }
 }
 
 object BasicImplicitConversion extends App {
@@ -38,7 +66,7 @@ object ImplicitConversionChaining extends App {
 
   def myMethod(c: C): Unit = println(c)
 
-  // you cant do this! implicits won't chain
+  // you can't do this! implicits don't chain
   // myMethod(A(123))
 }
 
@@ -88,19 +116,6 @@ object ImplicitConversionsSugar extends App {
     def double: (Int, Int) = (2 * x._1, 2 * x._2)
   }
 
-  def maxDepth(s: String): Int = {
-    var result: Int = 0
-    s.foldLeft(0) { (acc, ch) =>
-      if (ch == '(') acc + 1
-      else if (acc > result) {
-        result = acc
-        acc
-      } else if (ch == ')') acc - 1
-      else
-        acc
-    }
-    result
-  }
 }
 
 object Task {
