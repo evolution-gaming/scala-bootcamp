@@ -1,4 +1,4 @@
-package com.evolutiongaming.bootcamp.typeclass.practical
+package com.evolutiongaming.bootcamp.typeclass.v2
 
 object HktTeaser {
 

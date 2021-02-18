@@ -1,7 +1,7 @@
-package com.evolutiongaming.bootcamp.typeclass.practical
+package com.evolutiongaming.bootcamp.typeclass.v2
 
-import com.evolutiongaming.bootcamp.typeclass.practical.Fp.{Jsonable, User}
-import com.evolutiongaming.bootcamp.typeclass.practical.Summoner.Jsonable
+import com.evolutiongaming.bootcamp.typeclass.v2.Fp.{Jsonable, User}
+import com.evolutiongaming.bootcamp.typeclass.v2.Summoner.Jsonable
 
 final case class Json(s: String) // my very basic json class
 
