@@ -52,7 +52,7 @@ object Fp extends App {
   // the usage is the same
   printBeautifully(User("Oleg"))
 
-  object Task {
+  object InstancesTask {
     final case class Player(id: Int, login: String)
 
     implicit val playerJsonable: Jsonable[Player] = ???
@@ -91,6 +91,8 @@ object SingleAbstractMethod {
   }
 
   implicit val now: Jsonable[User] = user => Json(s"{name: ${user.name}")
+
+  // TODO: go back to your InstancesTask and change your instances to SAM
 }
 
 object ContextBound {
@@ -186,3 +188,23 @@ object Result {
 
 // having two implementations for the same type (like different ways to make json out of User) is possible
 // but considered to be bad
+
+object TypeclassTask {
+
+  // Why am I not a Typeclass?
+  // TODO: Rework me so I am a typeclass
+  trait HashCode {
+    def hash: Int
+  }
+
+  object HashCode {
+    // TODO: Implement me a summoner
+  }
+
+  implicit class HashCodeSyntax[A](x: A) {
+    // TODO: Implement syntax so I can "abc".hash
+  }
+
+  // TODO: make an instance for String
+  // TODO: write "abc".hash to check everything
+}
