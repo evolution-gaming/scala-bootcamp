@@ -409,7 +409,7 @@ object Basics {
 
   // Question. Can we make a `Set` with all possible `Byte` values? `Double` values? `String` values?
 
-  // Homework. Implement functions that calculate https://en.wikipedia.org/wiki/Lowest_common_denominator and
+  // Homework. Implement functions that calculate https://en.wikipedia.org/wiki/Least_common_multiple and
   // https://en.wikipedia.org/wiki/Greatest_common_divisor for integers.
 
   def lcm(a: Int, b: Int): Int = ???
