@@ -31,6 +31,12 @@ object HigherKindedTypes {
    */
 
   /*
+  Exercise 1. "Uncurry" the following function to make it not return other functions,
+  but accept more arguments.
+   */
+  def curriedFunction1: (Long => Boolean) => String => Int = ???
+
+  /*
   Further in this "Higher Order Functions" block we assume that we are uncurrying all our functions so they
   don't return other functions.
 
@@ -56,13 +62,13 @@ object HigherKindedTypes {
   // Example: Order 2 Function
   def func2a(a: String, bar: Int => (Boolean => Long)): Long = ???
 
-  // Exercise 1. What is order of the following function?
+  // Exercise 2. What is order of the following function?
   def funcX1(a: Int => String => Boolean): Long = ???
 
-  // Exercise 2. What is order of the following function?
+  // Exercise 3. What is order of the following function?
   def funcX2(a: String): (Long => Boolean) => String = ???
 
-  /* Exercise 3. Write an example of Order 4 function:
+  /* Exercise 4. Write an example of Order 4 function:
   def func4(???): ??? = ???
    */
 
@@ -90,7 +96,7 @@ object HigherKindedTypes {
   - * -> ((* -> *) -> *) -> *
    */
 
-  // Exercise 4. What are the kinds of `funcX1` and `funcX2`?
+  // Exercise 5. What are the kinds of `funcX1` and `funcX2`?
   // def funcX1(a: Int => String => Boolean): Long = ???
   // def funcX2(a: String): (Long => Boolean) => String = ???
 
@@ -149,7 +155,7 @@ object HigherKindedTypes {
   of `Content`, `Key`, `Value` and `Container`.
    */
 
-  /* Exercise 5. Fill out orders of the following types:
+  /* Exercise 6. Fill out orders of the following types:
 
   ┌───────────────────────┬───────┐
   │         Type          │ Order │
@@ -166,7 +172,7 @@ object HigherKindedTypes {
   └───────────────────────┴───────┘
    */
 
-  /* Exercise 6. Fill out missed kinds for the following types:
+  /* Exercise 7. Fill out missed kinds for the following types:
 
   ┌─────────────────────┬──────────────────┐
   │        Type         │       Kind       │
@@ -208,7 +214,7 @@ object HigherKindedTypes {
 
   // `Maybe` is defined for any type `A` as we don't use any specifics of A. We abstract over this type.
 
-  // Exercise 7. Implement `Disjunction` – your own version of `Either`
+  // Exercise 8. Implement `Disjunction` – your own version of `Either`
   sealed trait Disjunction[???]
   object Disjunction {
     // ???
@@ -255,7 +261,7 @@ object HigherKindedTypes {
   }
 
   // 3.2. For `List`
-  // Exercise 7. Implement for `List`
+  // Exercise 9. Implement for `List`
   implicit val listFunctor: Functor[List] = new Functor[List] {
     override def fmap[A, B](fa: List[A])(f: A => B): List[B] = ???
   }
@@ -277,7 +283,7 @@ object HigherKindedTypes {
   def funcLikeMap(key: Any, value: Any): Any = ??? // * -> * -> *
 
   /*
-  Exercise. How can we pass `funcLikeMap` into `funcLikeFunctor` so code will compile?
+  Exercise 10. How can we pass `funcLikeMap` into `funcLikeFunctor` so code will compile?
   Tip: We can have its own "functor" for each needed "key".
    */
 
@@ -303,9 +309,9 @@ object HigherKindedTypes {
 
   implicit val mapFunctor3: Functor[Map[String, *]] = ???
 
-  // Exercise. Implement Functor for `Disjunction`
-  /* implicit */
-  val disjunctionFunctor = ???
+  // Exercise 11. Implement Functor for `Map`.
+  implicit def mapFunctor4[T]: Functor[Map[T, *]] = ???
 
-//  type ??? = Nothing
+  // Exercise 12. Implement Functor for `Disjunction`
+  // implicit val disjunctionFunctor = ???
 }
