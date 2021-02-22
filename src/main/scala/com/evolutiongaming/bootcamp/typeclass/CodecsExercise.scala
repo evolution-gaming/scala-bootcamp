@@ -94,6 +94,4 @@ object CodecsExercise {
 
   // val foo3: Boolean => Int = functionFunctor.fmap(foo2)(foo1)
   // val foo4: Boolean => Int = functionContravariant.contramap(foo1)(foo2)
-
-  // Advanced Exercise. Define foo4 with `ContravariantOps` syntax.
 }
