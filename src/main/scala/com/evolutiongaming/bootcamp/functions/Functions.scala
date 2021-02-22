@@ -105,8 +105,8 @@ object Functions {
 
   // Functions composition
 
-  val strToInt: String => Int = ???
-  val intToBool: Int => Boolean = ???
+  val strToInt: String => Int = _.length
+  val intToBool: Int => Boolean = _ > 10
 
   val strToBool1: String => Boolean = t => intToBool(strToInt(t))
   val strToBool2: String => Boolean = intToBool.compose(strToInt)
