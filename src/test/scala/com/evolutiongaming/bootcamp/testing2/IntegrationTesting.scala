@@ -22,7 +22,7 @@ import org.scalatestplus.selenium.WebBrowser
 // environments using docker containers etc.
 //
 
-// *Excersise 1*
+// *Exercise 1*
 //
 // Implement a test checking that there is CrazyTime game on Evolution site.
 //
@@ -47,16 +47,16 @@ class EvolutionSiteSpec extends AnyFunSuite with WebBrowser {
 
 }
 
-// *Excersise 2*
+// *Exercise 2*
 //
-// Sometimes integration tests could be a necessety or, at least very useful.
+// Sometimes integration tests could be a necessity or, at least very useful.
 // For example, if you need to check your SQL queries are working.
 //
 // Implement the missing tests for `UserService`.
 //
 // sbt:scala-bootcamp> testOnly *testing2.UserServiceSpec
 //
-// Hint: do not use plain JDBC in Scala, there are much more convinient libraries
+// Hint: do not use plain JDBC in Scala, there are much more convenient libraries
 // for real work, i.e. Doobie, Quill, Slick etc. which provide automatic resource
 // management, class mapping etc. You will learn them later during this course.
 //

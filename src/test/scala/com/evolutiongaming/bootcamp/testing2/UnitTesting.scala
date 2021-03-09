@@ -70,14 +70,14 @@ import scala.concurrent.Promise
 //
 // The most popular build tool in Scala world uses the same idea.
 // You just put your code into `src/main/scala` and you tests into
-// `src/main/test` and it compiles and runs everything automatically
+// `src/test/scala` and it compiles and runs everything automatically
 // without a configuration.
 //
 // The classes under test for this workshop are stored in `src/main/scala/testing2`
 // and the tests themselves are stored in `src/test/scala/testing2`.
 
 
-// *Excercise 1*
+// *Exercise 1*
 //
 // Your IDE (IntelliJ or Visual Studio Code + Metals) also understands this
 // convention and already knows how to run the tests using popular testing
@@ -133,9 +133,9 @@ import scala.concurrent.Promise
 // sbt:scala-bootcamp> testQuick
 //
 
-// *Excercise 2*
+// *Exercise 2*
 //
-// There are several popular testing libraries for Scala in existence. Arugably,
+// There are several popular testing libraries for Scala in existence. Arguably,
 // the most popular and one of most flexible is called `ScalaTest`. One of the
 // reasons why it is so popular is because it supports a lot of testing styles
 // and DSLs.
@@ -147,10 +147,10 @@ import scala.concurrent.Promise
 // `Specs2` - one of the oldest libraries with opinionated Cucubmer-like DSL,
 //            made by Eric Torreborre from Zalando.
 //
-// `MUnit` - lightweight tesing library inspired by JUnit by the author of Metals,
+// `MUnit` - lightweight testing library inspired by JUnit by the author of Metals,
 //           Ólafur Páll Geirsson from Twitter.
 //
-// `Weaver-test` - tailored for integration tessting by Olivier Mélois from
+// `Weaver-test` - tailored for integration testing by Olivier Mélois from
 //                 Disney Streaming.
 //
 // `utest` - simple testing library by Li Haoyi from Databricks, authors of
@@ -164,32 +164,32 @@ import scala.concurrent.Promise
 //
 // Run the following suite using the command below:
 //
-// sbt:scala-bootcamp> testOnly *testing2.Excercise2Spec
+// sbt:scala-bootcamp> testOnly *testing2.Exercise2Spec
 //
 // Now change the suite so it outputs the following code instead,
 // while keeping all the asserts.
 //
-// [info] Excercise1Spec:
+// [info] Exercise1Spec:
 // [info] calculator
 // [info] - enters the number correctly
 // [info]   fails if incorrect number is pressed
 // [info]   does nothing
 // [info]   - when you just repeat pressing `=`
 //
-// Hint: you can recall the preivously run `sbt` commands by pressing
+// Hint: you can recall the previously run `sbt` commands by pressing
 // up arrow on a keyboard.
 //
-// Hint: you can make the development process even more convinient by
+// Hint: you can make the development process even more convenient by
 // forcing `sbt` to monitor the changes you do to the files and rerun
 // the tests automatically by adding `~` before the command. It also
 // works on other `sbt` commands.
 //
-// sbt:scala-bootcamp> ~testOnly *testing2.Excercise2Spec
+// sbt:scala-bootcamp> ~testOnly *testing2.Exercise2Spec
 //
 // Now break one of the tests, i.e. change `calculator.enter(1)` to
 // `calculator.enter(2)`. Observe the output. How did Scala manage
 // to output such a thing?
-class Excercise2Spec extends AnyFreeSpec {
+class Exercise2Spec extends AnyFreeSpec {
 
   "calculator" - {
     "enters the number correctly" in {
@@ -207,20 +207,20 @@ class Excercise2Spec extends AnyFreeSpec {
   }
 
 }
-// *Excercise 3*
+// *Exercise 3*
 //
 // Another popular way to write tests is `WordSpec` as it pushes a very strict
 // BDD style of writing the tests to the team.
 //
-// Find it in the following page and rewrite the test from Excercise 2 to
+// Find it in the following page and rewrite the test from Exercise 2 to
 // this new style:
 // https://www.scalatest.org/user_guide/selecting_a_style
 //
 // Run it using sbt again:
 //
-// sbt:scala-bootcamp> testOnly *testing2.Excercise3Spec
+// sbt:scala-bootcamp> testOnly *testing2.Exercise3Spec
 //
-class Excercise3Spec extends AnyWordSpec {
+class Exercise3Spec extends AnyWordSpec {
 }
 
 // *Note*
@@ -229,7 +229,7 @@ class Excercise3Spec extends AnyWordSpec {
 // for several days over the best style? Scala developers used to fight about
 // it a lot in early days. Not anymore though...
 
-// *Excercise 4*
+// *Exercise 4*
 //
 // What does `assert` word actually do? Can you write it differently?
 //
@@ -241,12 +241,12 @@ class Excercise3Spec extends AnyWordSpec {
 //
 // Rewrite asserts to `should be` matcher and run it using sbt again:
 //
-// sbt:scala-bootcamp> testOnly *testing2.Excercise4Spec
+// sbt:scala-bootcamp> testOnly *testing2.Exercise4Spec
 //
 // Now break one of the tests, i.e. change `calculator.enter(1)` to
 // `calculator.enter(2)`. Observe the output. Do you like the input?
-// How does it compare to what you seen in `Excercise1`?
-class Excercise4Spec extends AnyFreeSpec with Matchers {
+// How does it compare to what you seen in `Exercise1`?
+class Exercise4Spec extends AnyFreeSpec with Matchers {
 
   "calculator" - {
     "enters the number correctly" in {
@@ -265,7 +265,7 @@ class Excercise4Spec extends AnyFreeSpec with Matchers {
 
 }
 
-// *Excercise 5*
+// *Exercise 5*
 //
 // This test, arguably, now looks a bit more readable. Can we get rid
 // of these verbose `Right` and `Left` words?
@@ -275,17 +275,17 @@ class Excercise4Spec extends AnyFreeSpec with Matchers {
 //
 // There is also similar construct for `Option`, `PartialFunction` etc.
 //
-// Let's rewrite asserts from the first Excercise (or previous Excercise
+// Let's rewrite asserts from the first Exercise (or previous Exercise
 // if you prefer so) to the new way. There is one line already rewritten
 // so you can have an example.
 //
-// sbt:scala-bootcamp> testOnly *testing2.Excercise5Spec
+// sbt:scala-bootcamp> testOnly *testing2.Exercise5Spec
 //
 // Now break one of the tests, i.e. change `calculator.enter(1)` to
 // `calculator.enter(900)`. Observe the output. Do you like the input?
-// How does it compare to what you seen in Excercise 2?
+// How does it compare to what you seen in Exercise 2?
 @nowarn
-class Excercise5Spec extends AnyFreeSpec with EitherValues {
+class Exercise5Spec extends AnyFreeSpec with EitherValues {
 
   "calculator" - {
     "enters the number correctly" in {
@@ -304,7 +304,7 @@ class Excercise5Spec extends AnyFreeSpec with EitherValues {
 
 }
 
-// *Excercise 6*
+// *Exercise 6*
 //
 // To quote (Li Haoyi, author of utest):
 //
@@ -330,20 +330,20 @@ class Excercise5Spec extends AnyFreeSpec with EitherValues {
 // > other testing libraries are currently at.
 // https://github.com/lihaoyi/utest#why-utest
 //
-// ScalaTest authors took the critisism seriously and made large part of the
+// ScalaTest authors took the criticism seriously and made large part of the
 // features pluggable. The appearance of lightweight libraries such as utest
 // also made these features less popular. You will encounter them, regardless,
 // when writing the code, and, who knows, may be it will make your QA engineers
 // happier if you make the code more readable, so it is good to be familiar with
 // them.
 //
-// Rewrite the suite from Excercise 2 to `FunSuite` style, the same style
+// Rewrite the suite from Exercise 2 to `FunSuite` style, the same style
 // used by lightweight libraries and also supported by ScalaTest. Run it using
 // sbt again:
 //
-// sbt:scala-bootcamp> testOnly *testing2.Excercise6Spec
+// sbt:scala-bootcamp> testOnly *testing2.Exercise6Spec
 //
-class Excercise6Spec extends AnyFunSuite {
+class Exercise6Spec extends AnyFunSuite {
 
   test("name of the test 1") {
     // here goes your test 1
@@ -354,7 +354,7 @@ class Excercise6Spec extends AnyFunSuite {
 
 }
 
-// *Excercise 7*
+// *Exercise 7*
 //
 // As you may have noticed, there is a convention to put the tests for the
 // classes in a package located in `src/main/scala/interesting/package` under
@@ -364,9 +364,9 @@ class Excercise6Spec extends AnyFunSuite {
 // there is also another reason for that. Let's find out the reason by
 // making a test for `testing2.hal9000.HAL9000` class.
 //
-// sbt:scala-bootcamp> testOnly *testing2.Excercise7Spec
+// sbt:scala-bootcamp> testOnly *testing2.Exercise7Spec
 //
-class Excercise7Spec extends AnyFunSuite {
+class Exercise7Spec extends AnyFunSuite {
 
   test("HAL 9000 multiplies numbers correctly") {
     // assert(HAL9000.twice(7) == 14)
@@ -374,7 +374,7 @@ class Excercise7Spec extends AnyFunSuite {
 
 }
 
-// *Excercise 8*
+// *Exercise 8*
 //
 // Did you notice another method in HAL 9000? It fails! Can we test it?
 //
@@ -384,16 +384,16 @@ class Excercise7Spec extends AnyFunSuite {
 // There is also a special matcher for that, if you want to use them:
 // https://www.scalatest.org/user_guide/using_matchers#expectedExceptions
 //
-// sbt:scala-bootcamp> testOnly *testing2.Excercise8Spec
+// sbt:scala-bootcamp> testOnly *testing2.Exercise8Spec
 //
-class Excercise8Spec extends AnyFunSuite {
+class Exercise8Spec extends AnyFunSuite {
 
   test("HAL 9000 behaves as expected when asked to open the door") {
   }
 
 }
 
-// *Excercise 9*
+// *Exercise 9*
 //
 // It is the best to make the code self-documenting and readable. If we cannot,
 // we are trying to make the tests readable. If we cannot achieve test to be
@@ -405,9 +405,9 @@ class Excercise8Spec extends AnyFunSuite {
 //
 // https://www.scalatest.org/user_guide/using_assertions#gettingAClue
 //
-// sbt:scala-bootcamp> testOnly *testing2.Excercise9Spec
+// sbt:scala-bootcamp> testOnly *testing2.Exercise9Spec
 //
-class Excercise9Spec extends AnyFunSuite {
+class Exercise9Spec extends AnyFunSuite {
 
   test("HAL9000") {
     assert(HAL9000.register1 == HAL9000.register2)
@@ -415,7 +415,7 @@ class Excercise9Spec extends AnyFunSuite {
 
 }
 
-// *Excercise 10*
+// *Exercise 10*
 //
 // Let's take a more serious example now. Implement a service and
 // the tests for the service. Make sure you log the important steps using
@@ -429,7 +429,7 @@ class Excercise9Spec extends AnyFunSuite {
 // repository versus calling it directly (in other object) and is able to
 // change the implementation later.
 //
-object Excercise10 {
+object Exercise10 {
 
   case class Player(id: String, name: String, email: String, score: Int)
   trait PlayerRepository {
@@ -471,9 +471,9 @@ object Excercise10 {
   }
 
 }
-// As usual, you can run the folliowing test suite using sbt:
+// As usual, you can run the following test suite using sbt:
 //
-// sbt:scala-bootcamp> testOnly *testing2.Excercise10Spec
+// sbt:scala-bootcamp> testOnly *testing2.Exercise10Spec
 //
 // You might want to construct a stub or a mock for repository to make
 // the test possible.
@@ -482,7 +482,7 @@ object Excercise10 {
 // frameworks. This project has Mockito enabled:
 // https://www.scalatest.org/user_guide/testing_with_mock_objects#mockito
 //
-// In this excersise you are welcome to choose your own strategy, but,
+// In this exercise you are welcome to choose your own strategy, but,
 // in general, the author recommends to avoid mocks altogether.
 //
 // Mocks are very powerful, and often create an urge to cover everything with
@@ -500,9 +500,9 @@ object Excercise10 {
 //
 // Bonus question: do we need to test logging?
 //
-class Excercise10Spec extends AnyFunSuite {
+class Exercise10Spec extends AnyFunSuite {
 
-  import Excercise10._
+  import Exercise10._
 
   test("PlayerService.deleteWorst works correctly") {
 
@@ -534,29 +534,29 @@ class Excercise10Spec extends AnyFunSuite {
 
 }
 
-// *Excercise 11*
+// *Exercise 11*
 //
-// Do you see the copy-pasted code in Excersise 11? We create `repository` etc.
+// Do you see the copy-pasted code in Exercise 11? We create `repository` etc.
 // twice. Let's create a fixture for that.
 //
 // See also: https://www.scalatest.org/user_guide/sharing_fixtures
 
-// *Excercise 12*
+// *Exercise 12*
 //
 // What if the code is asynchronous? Let's implement the same service in
 // asynchronous way and write the tests for it.
 //
 // Hint: modern Scala developers rarely use `Future`. They use `IO` or similar
-// construct instead which provides a lot of benefits and is more convinient to
+// construct instead which provides a lot of benefits and is more convenient to
 // use. We are only using `Future` to keep it simple. Do not use it at home.
 //
 // Just replacing `Future` by `IO` will work most of the time (and here!). We
 // will tell you more about `IO` on another lecture. You can also try
 // self-education here: https://typelevel.org/cats-effect/datatypes/io.html.
 //
-// Hint: seriously, forget about `Future` after this excersise.
+// Hint: seriously, forget about `Future` after this exercise.
 //
-object Excercise12 {
+object Exercise12 {
 
   // We do not need to know how to create `Future` to write the implementation,
   // thanks to dependency injection, but we might want to know how to combine them.
@@ -655,11 +655,11 @@ object Excercise12 {
 // `AnyFunSuite` with `AsyncFunSuite` and make sure it returns `Future[Assertion]`:
 // https://www.scalatest.org/user_guide/async_testing
 //
-// sbt:scala-bootcamp> testOnly *testing2.Excercise12Spec
+// sbt:scala-bootcamp> testOnly *testing2.Exercise12Spec
 //
-class Excercise12Spec extends AsyncFunSuite {
+class Exercise12Spec extends AsyncFunSuite {
 
-  import Excercise12._
+  import Exercise12._
 
   test("PlayerService.deleteWorst works correctly") {
 
@@ -691,15 +691,15 @@ class Excercise12Spec extends AsyncFunSuite {
   }
 
 }
-// *Excercise 13*
+// *Exercise 13*
 //
-// What are main problems of asychronous testing? Try to name or guess them
+// What are main problems of asynchronous testing? Try to name or guess them
 // without reading further.
 //
 // One of the biggest is that we cannot really say if the test did not complete
 // because of the bug or because it is still working.
 //
-// Modify Excercise 12 code so the test fails with a timeout by forgetting
+// Modify Exercise 12 code so the test fails with a timeout by forgetting
 // to complete the Promise (a bug), or just doing a long work (by calling
 // `Thread.sleep(...)` in the code).
 //
@@ -707,7 +707,7 @@ class Excercise12Spec extends AsyncFunSuite {
 // are really sure what are you doing. We can discuss why later if we have
 // the time.
 
-// *Excercise 14*
+// *Exercise 14*
 //
 // Warning: We did not introduce you to some of the
 // concepts used below, but I really wanted you to show the trick, so you
@@ -717,7 +717,7 @@ class Excercise12Spec extends AsyncFunSuite {
 // How can we avoid the issues of asynchronous execution? We can abstract
 // over the way we execute!
 //
-object Excercise14 {
+object Exercise14 {
 
   // Remember what other structure allowed to do `map` and `flatMap`? It is
   // `Option`! What if we could replace `Future` with `Option` in our code
@@ -779,14 +779,14 @@ object Excercise14 {
   }
 
 }
-// Now let's first copy-paste the code form Excercise 12 and replace all
+// Now let's first copy-paste the code form Exercise 12 and replace all
 // `Future` calls by `F` to prove it actually works.
 //
-// sbt:scala-bootcamp> testOnly *testing2.Excercise14FutureSpec
+// sbt:scala-bootcamp> testOnly *testing2.Exercise14FutureSpec
 //
-class Excercise14FutureSpec extends AsyncFunSuite {
+class Exercise14FutureSpec extends AsyncFunSuite {
 
-  import Excercise14._
+  import Exercise14._
 
   test("PlayerService.deleteWorst works correctly") {
 
@@ -822,14 +822,14 @@ class Excercise14FutureSpec extends AsyncFunSuite {
 // Now let's copy-paste the code form above and replace all
 // `Future` calls by `Option` to enjoy rock stable tests.
 //
-// sbt:scala-bootcamp> testOnly *testing2.Excercise14OptionSpec
+// sbt:scala-bootcamp> testOnly *testing2.Exercise14OptionSpec
 //
 // Bonus task: try to break the tests with `Thread.sleep(...)` call
 // as above.
 //
-class Excercise14OptionSpec extends AnyFunSuite {
+class Exercise14OptionSpec extends AnyFunSuite {
 
-  import Excercise14._
+  import Exercise14._
 
   test("PlayerService.deleteWorst works correctly") {
 
@@ -886,7 +886,7 @@ class Excercise14OptionSpec extends AnyFunSuite {
 // hate mutable state a lot.
 //
 // Besides that, we have to go inside of the stub and take data out of it sometimes,
-// which might not always be convienient. Can we use our `Option` trick to somehow
+// which might not always be convenient. Can we use our `Option` trick to somehow
 // avoid it?
 //
 // And yes, we can, there is a special type in `cats` library mentioned above.
@@ -902,13 +902,13 @@ class Excercise14OptionSpec extends AnyFunSuite {
 //
 // Let's use it to simplify our tests a bit.
 //
-// sbt:scala-bootcamp> testOnly *testing2.Excercise14StateSpec
+// sbt:scala-bootcamp> testOnly *testing2.Exercise14StateSpec
 //
 // Bonus task: also store logging statements in `State`.
 //
-class Excercise14StateSpec extends AnyFunSuite {
+class Exercise14StateSpec extends AnyFunSuite {
 
-  import Excercise14._
+  import Exercise14._
   type F[T] = State[List[Player], T]
 
   test("PlayerService.deleteWorst works correctly") {
