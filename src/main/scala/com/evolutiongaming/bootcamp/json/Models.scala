@@ -28,9 +28,9 @@ object Models {
   )
 
   final case class Gig(
-                        venue: String,
-                        date: LocalDate,
-                        setlist: Seq[String]
+    venue: String,
+    date: LocalDate,
+    setlist: Seq[String]
   )
 
   sealed trait MusicianKind
