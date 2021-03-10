@@ -32,7 +32,6 @@ MockitoScalaSession(strictness = Strictness.StrictStubs).run {
   val _ = m.bar(1)
   val bar = m.bar(2)
 
-  m.foo wasNever called
   m.bar(*) wasCalled atLeastOnce
 
   bar
@@ -45,7 +44,6 @@ MockitoScalaSession(strictness = Strictness.StrictStubs).run {
 
   val bar = m.bar(42)
 
-  m.foo wasNever called
   m.bar(*) wasCalled atLeastOnce
 
   bar
