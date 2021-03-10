@@ -63,7 +63,7 @@ import scala.concurrent.Promise
 // *Structure*
 //
 // In Java world one of the most used build tools is called Maven. The idea
-// of Maven is to folow "Convention over Configuration" principle.
+// of Maven is to follow "Convention over Configuration" principle.
 //
 // It means that for most of the projects you just put the stuff where
 // it belongs and then it automagically compiles and builds.
@@ -358,7 +358,7 @@ class Exercise6Spec extends AnyFunSuite {
 //
 // As you may have noticed, there is a convention to put the tests for the
 // classes in a package located in `src/main/scala/interesting/package` under
-// the same directory structure also in `/src/test/scala/interesting/package`.
+// the same directory structure also in `src/test/scala/interesting/package`.
 //
 // It makes the tests easier to find and relate to the existing code. But
 // there is also another reason for that. Let's find out the reason by
@@ -400,7 +400,7 @@ class Exercise8Spec extends AnyFunSuite {
 // readable, we can add the clues into tests.
 //
 // HAL 9000 goes crazy about his mission if two registers do not match.
-// Unfortunately austronauts do not know about it. Save the austronauts
+// Unfortunately astronauts do not know about it. Save the astronauts
 // by adding a clue to the test below according to the following document:
 //
 // https://www.scalatest.org/user_guide/using_assertions#gettingAClue
