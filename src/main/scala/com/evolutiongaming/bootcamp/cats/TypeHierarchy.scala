@@ -1,8 +1,11 @@
 package com.evolutiongaming.bootcamp.cats
 
 import cats.Functor
+import cats.data.NonEmptyList
+import cats.kernel.Monoid
+import cats.implicits._
 
-object TypeHierarchy {
+trait MonoidHierarchy {
 
   /*
     Semigroup[A] {
@@ -18,7 +21,28 @@ object TypeHierarchy {
     def empty: A
    */
 
+  // NonEmptyList
 
+  type Error = String
+  type Result[T] = Either[NonEmptyList[Error], T]
+
+  // laws
+  type A
+  val anyValue: A = ???
+  val v1: A = ???
+  val v2: A = ???
+  val v3: A = ???
+
+  implicit val instance: Monoid[A]
+
+  (Monoid[A].empty |+| anyValue) == anyValue // left identity
+
+  (anyValue |+| Monoid[A].empty) == anyValue // right identity
+
+  ((v1 |+| v2) |+| v3) == (v1 |+| (v2 |+| v3)) // associativity
+}
+
+object MonadHierarchy {
   /*
     Functor[F[A]] {
       def map(f: A => B): F[B]
@@ -33,7 +57,6 @@ object TypeHierarchy {
     def pure[A](x: A): F[A]
    */
 
-
   /*
     Monad[F[A]] {
       def flatMap(f: A => F[B]): F[B]
@@ -42,8 +65,8 @@ object TypeHierarchy {
     def pure[A](x: A): F[A]
    */
 
-
-  // Laws
+  // applicative: (F[A], F[B]) => F[(A, B)]
+  // monad:        F[F[A]]     => F[A]
 }
 
 object Excercises {
@@ -52,7 +75,7 @@ object Excercises {
 
     def unit[A](a: => A): F[A]
 
-    // implement methods using other methods
+    // implement methods using each other
     def map2[A,B,C](fa: F[A], fb: F[B])(f: (A, B) => C): F[C] = ???
 
     def apply[A,B](fab: F[A => B])(fa: F[A]): F[B] = ???
@@ -65,7 +88,7 @@ object Excercises {
   trait Monad[M[_]] extends Functor[M] {
     def unit[A](a: => A): M[A]
 
-    // implement methods using other methods
+    // implement methods using each other
     def flatMap[A,B](ma: M[A])(f: A => M[B]): M[B] = ???
 
     def join[A](mma: M[M[A]]): M[A] = ???
