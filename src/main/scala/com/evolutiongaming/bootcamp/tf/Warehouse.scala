@@ -45,15 +45,30 @@ private final class ItemsImpl[F[_]: Monad](
   items: Ref[F, Map[Long, Item]]
 ) extends Items[F] {
 
-  override def all: F[Map[Long, Item]] = ???
+  override def all: F[Map[Long, Item]] = items.get
 
-  override def create(name: String, price: BigDecimal): F[Either[ValidationError, Item]] = ???
+  override def create(name: String, price: BigDecimal): F[Either[ValidationError, Item]] =
+    Items.validate(name, price).traverse { case (name, price) =>
+      for {
+        id   <- counter.updateAndGet(_ + 1)
+        item =  Item(id, name, price)
+        _    <- items.update(_.updated(id, item))
+      } yield item
+    }
 
-  override def update(item: Item): F[Either[ValidationError, Boolean]] = ???
+  override def update(item: Item): F[Either[ValidationError, Boolean]] =
+    Items.validate(item.name, item.price).traverse { _ =>
+      items.modify { items =>
+        if (items.contains(item.id)) items.updated(item.id, item) -> true
+        else items -> false
+      }
+    }
 
-  override def find(id: Long): F[Option[Item]] = ???
+  override def find(id: Long): F[Option[Item]] = items.get.map(_.get(id))
 
-  override def delete(id: Long): F[Boolean] = ???
+  override def delete(id: Long): F[Boolean] = items.modify { items =>
+    items.removed(id) -> items.contains(id)
+  }
 }
 
 
@@ -68,11 +83,17 @@ object Console {
 
   def apply[F[_]: Sync]: Console[F] = new Console[F] {
 
-    override def readStr: F[String] = ???
+    override def readStr: F[String] = Sync[F].delay(StdIn.readLine())
 
-    override def readBigDecimal: F[BigDecimal] = ???
+    override def readBigDecimal: F[BigDecimal] = readStr.flatMap { str =>
+      try {
+        BigDecimal(str).pure[F]
+      } catch {
+        case _: Throwable => readBigDecimal
+      }
+    }
 
-    override def putStrLn(str: String): F[Unit] = ???
+    override def putStrLn(str: String): F[Unit] = Sync[F].delay(println(str))
   }
 }
 
@@ -84,4 +105,12 @@ object Warehouse extends App {
       price <- console.readBigDecimal
       item  <- items.create(name, price)
     } yield item
+
+
+  val test = for {
+    items   <- Items.of[IO]
+    console =  Console[IO]
+    result  <- program(console, items)
+    _       <- console.putStrLn(result.toString)
+  } yield ()
 }
