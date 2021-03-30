@@ -73,6 +73,7 @@ libraryDependencies ++= Seq(
   "com.typesafe.slick" %% "slick" % slickVersion,
   "org.slf4j" % "slf4j-nop" % "1.6.4",
   "com.typesafe.slick" %% "slick-hikaricp" % slickVersion,
+  "com.lihaoyi" %% "requests" % "0.6.5"
 )
 
 addCompilerPlugin("org.typelevel" %% "kind-projector" % "0.11.1" cross CrossVersion.full)

@@ -1,9 +1,11 @@
 package com.evolutiongaming.bootcamp.effects
 
 import java.util.concurrent.atomic.AtomicBoolean
-import cats.effect.{ExitCode, IO, IOApp}
+import cats.effect.{Concurrent, ExitCode, IO, IOApp}
+
 import scala.io.StdIn
 import cats.implicits._
+
 import scala.annotation.tailrec
 import scala.concurrent.{Await, Future}
 import scala.concurrent.duration._
@@ -23,7 +25,7 @@ import scala.util.{Random, Try}
  *  - This turns (or captures, or encodes) them into immutable data (pure values)
  *  - Keeps referential transparency so that it is easier to refactor our programs and reason about them
  *  - We can evaluate them when we want
- *  - They can be sequentially executed
+ *  - They can be executed sequentially or in parallel
  *  - They can be used in `for`-comprehensions
  *  - They can model complex series of concurrent computations
  *
@@ -34,7 +36,7 @@ import scala.util.{Random, Try}
  *  - Monix - https://monix.io/
  *
  *  There are also ways how to write software without being tied to a particular IO Monad ("Tagless Final"
- *  pattern), but we will not discuss this in this lecture.
+ *  pattern)
  *
  * Asynchronous Effects, as opposed to Scala `Future`-s, are lazy. Nothing is run until an "unsafe" method
  * is executed (by your code, or by the `IOApp` trait) - usually at the "end of the world".
@@ -77,16 +79,16 @@ object LazyVsEagerApp extends App {
 
   Await.result(future2, Duration.Inf)
 
+  private def doTaskIO(x: String): IO[Unit] = IO {
+    println(s"Doing task $x")
+  }
+
   val io1 = for {
     _ <- doTaskIO("io1")
     _ <- doTaskIO("io1")
   } yield ()
 
   io1.unsafeRunSync()
-
-  private def doTaskIO(x: String): IO[Unit] = IO {
-    println(s"Doing task $x")
-  }
 
   val task = doTaskIO("io2")
   val io2 = for {
@@ -110,7 +112,7 @@ object LazyVsEagerApp extends App {
  *
  * `IO.unit` is just `IO.pure(())`, commonly used to signal completion of side effecting routines.
  *
- * `IO.apply` describes operations that can be evaluated immediately, on the current thread.
+ * `IO.apply` delays the execution of the passed computation to some time in future
  */
 trait Console {
   def putStrLn(value: String): IO[Unit]
@@ -169,7 +171,6 @@ object Exercise1_Imperative {
   }
 
   // Question: How do you test this?
-  // Question: How do you refactor this to retry upon empty input at most 3 times?
 }
 
 object Exercise1_Common {
