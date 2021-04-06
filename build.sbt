@@ -19,7 +19,6 @@ val catsVersion = "2.2.0"
 val catsTaglessVersion = "0.11"
 val catsEffectVersion = "2.2.0"
 val epimetheusVersion = "0.4.2"
-val catsScalacheckVersion = "0.2.0"
 
 val akkaVersion = "2.6.9"
 val akkaHttpVersion = "10.1.11"
@@ -27,7 +26,7 @@ val akkaHttpCirceVersion = "1.31.0"
 
 val log4CatsVersion = "1.1.1"
 
-val scalaTestVersion = "3.1.0.0-RC2"
+val scalaTestVersion = "3.2.7.0"
 val h2Version = "1.4.200"
 val slickVersion = "3.3.3"
 
@@ -45,9 +44,8 @@ libraryDependencies ++= Seq(
   "ch.qos.logback" % "logback-classic" % "1.2.3",
   "com.codecommit" %% "cats-effect-testing-scalatest" % "0.4.1" % Test,
   "io.chrisdavenport" %% "epimetheus-http4s" % epimetheusVersion,
-  "io.chrisdavenport" %% "cats-scalacheck" % catsScalacheckVersion % Test,
-  "org.scalatestplus" %% "scalatestplus-scalacheck" % scalaTestVersion % Test,
-  "org.scalatestplus" %% "selenium-2-45" % scalaTestVersion % Test,
+  "org.scalatestplus" %% "scalacheck-1-15" % scalaTestVersion % Test,
+  "org.scalatestplus" %% "selenium-3-141" % scalaTestVersion % Test,
   "org.typelevel" %% "simulacrum" % "1.0.0",
   "org.tpolecat" %% "atto-core" % "0.8.0",
   "io.circe" %% "circe-core" % circeVersion,

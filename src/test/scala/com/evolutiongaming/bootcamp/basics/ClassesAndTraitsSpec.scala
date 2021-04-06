@@ -7,14 +7,12 @@ import org.scalacheck.Gen._
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import cats.implicits._
-import org.scalacheck.cats.implicits._
 
 class ClassesAndTraitsSpec extends AnyFlatSpec with ScalaCheckDrivenPropertyChecks {
   "Circle" should "be correct" in {
     val intervalGen = choose(1.0, 10)
-    val gen = (intervalGen, intervalGen, intervalGen).tupled
 
-    forAll(gen) { case (x, y, r) =>
+    forAll(intervalGen, intervalGen, intervalGen) { (x, y, r) =>
       val circle = Circle(x, y, r)
       circle.minX shouldEqual x - r
       circle.maxX shouldEqual x + r
