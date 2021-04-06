@@ -62,7 +62,7 @@ libraryDependencies ++= Seq(
   "org.tpolecat" %% "doobie-h2" % doobieVersion,
   "org.tpolecat" %% "doobie-hikari" % doobieVersion,
   "com.typesafe.akka" %% "akka-testkit" % akkaVersion % Test,
-  "org.mockito" %% "mockito-scala" % "1.15.0" % Test,
+  "org.mockito" %% "mockito-scala" % "1.16.32" % Test,
   "org.scalaj" %% "scalaj-http" % "2.4.2" % Test,
   "org.tpolecat" %% "doobie-scalatest" % doobieVersion % Test,
   "org.typelevel" %% "cats-tagless-macros" % catsTaglessVersion,
