@@ -4,13 +4,11 @@ import java.time.Instant
 import java.util.concurrent.Executors
 import java.util.concurrent.atomic.AtomicReference
 
-import cats.{Id, Monad}
 import cats.effect.concurrent._
 import cats.effect.{Concurrent, ExitCode, IO, IOApp}
 import cats.implicits.{catsSyntaxMonadErrorRethrow, catsSyntaxParallelSequence}
-
-import cats.syntax.all._
-import cats.effect.syntax.all._
+import cats.syntax.flatMap._
+import cats.syntax.functor._
 import com.evolutiongaming.bootcamp.effects.IosCommon.logger
 import io.chrisdavenport.log4cats.slf4j.Slf4jLogger
 
@@ -143,32 +141,20 @@ object ExerciseZero extends IOApp {
 
   class SimpleRef[A](ar: AtomicReference[A]) extends IOAtomicRef[A] {
 
-    override def get(): IO[A] = IO.delay(ar.get())
+    override def get(): IO[A] = ???
 
-    override def set(a: A): IO[Unit] = IO.delay(ar.set(a))
+    override def set(a: A): IO[Unit] = ???
 
-    override def update(f: A => A): IO[Unit] = modify[Unit](a => (f(a), ()))
+    override def update(f: A => A): IO[Unit] = ???
 
-    override def modify[B](f: A => (A, B)): IO[B] = {
-      def run(): IO[B] = {
-        val oldValue = ar.get()
-        val (newValue, b) = f(oldValue)
-        if (ar.compareAndSet(oldValue, newValue))
-          IO.delay(b)
-        else
-          run()
-      }
-
-      run()
-
-    }
+    override def modify[B](f: A => (A, B)): IO[B] = ???
   }
 
   /*
    * Question : Why we should wrap ref creation in effect ?
    */
   object IOAtomicRef {
-    def of[A](a: A): IO[IOAtomicRef[A]] = IO.delay(new SimpleRef[A](new AtomicReference[A](a)))
+    def of[A](a: A): IO[IOAtomicRef[A]] = ???
   }
 
   override def run(args: List[String]): IO[ExitCode] = {
@@ -202,11 +188,11 @@ object ExerciseZero extends IOApp {
       _ <- logger.info(s"modify test contentState should be 21, contentState $contentState")
     } yield ()
 
-    getTest *>
-      setTest *>
-      updateTest *>
-      modifyTest *>
-      IO(ExitCode.Success)
+    //    getTest *>
+    //      setTest *>
+    //      updateTest *>
+    //      modifyTest *>
+    IO(ExitCode.Success)
   }
 }
 
@@ -278,7 +264,7 @@ object ModifyExample extends IOApp {
 
   import IosCommon.logger
 
-  def inc(ref: Ref[IO, Int]): IO[Unit] = ref.modify(s => (s + 1, s"wow $s")).flatMap(i => logger.info(i))
+  def inc(ref: Ref[IO, Int]): IO[Unit] = ref.modify(s => (s + 1, s)).flatMap(i => logger.info(i.toString))
 
   val counterRef: IO[Ref[IO, Int]] = Ref.of[IO, Int](0)
 
@@ -286,7 +272,7 @@ object ModifyExample extends IOApp {
     counter <- counterRef
     _ <- List.fill(10)(inc(counter)).parSequence.void
     counterAfter <- counter.get
-    _ <- logger.info(s"counter after modify should be 10, $counterAfter")
+    _ <- logger.info(s"counter after update should be 10, $counterAfter")
   } yield ()
 
   override def run(args: List[String]): IO[ExitCode] = program.as(ExitCode.Success)
@@ -297,12 +283,10 @@ object ModifyExample extends IOApp {
  * Try to think what will happen if we would try to implement following method ?
 */
 object RefLimitation {
-
   import ExerciseZero.IOAtomicRef
-
-  trait EffectfullRef[A] extends IOAtomicRef[A] {
+  trait EffectfullRef[A] extends IOAtomicRef[A]{
     // ....
-    def modifyM[B](f: A => IO[(A, B)]): IO[B]
+    def modifyM[B](f: A => IO[(A,B)]): IO[B]
   }
 
   class EffectfullRefImpl[A](ar: AtomicReference[A]) extends EffectfullRef[A] {
@@ -315,24 +299,8 @@ object RefLimitation {
 
     override def modify[B](f: A => (A, B)): IO[B] = ???
 
-    //impl modifyM next time
-    override def modifyM[B](f: A => IO[(A, B)]): IO[B] = {
-      def run(): IO[B] = {
-        val old = ar.get()
-        val smth: IO[(A, B)] = f(old)
-
-        smth.flatMap { case (a, b) =>
-          if (ar.compareAndSet(old, a))
-            IO.delay(b)
-          else
-            run()
-        }
-      }
-
-      run()
-    }
+    override def modifyM[B](f: A => IO[(A, B)]): IO[B] = ???
   }
-
 }
 
 /*
@@ -360,7 +328,7 @@ object SemaphoreExample extends IOApp {
 
   def someExpensiveTask: IO[Unit] =
     IO.sleep(3.second) >>
-      logger.info("expensive task took 3 seconds")
+      logger.info("expensive task took 3 second")
 
   def process1(sem: Semaphore[IO]): IO[Unit] =
     logger.info("start first process") >>
@@ -376,48 +344,11 @@ object SemaphoreExample extends IOApp {
       process2(sem)
 
 
-  def process3: IO[Unit] =
-    logger.info("start third process") >>
-      someExpensiveTask >>
-      logger.info("finish third process") >>
-      process3
-
-  def process4: IO[Unit] =
-    logger.info("start forth process") >>
-      someExpensiveTask >>
-      logger.info("finish forth process") >>
-      process4
-
-
-  def run(args: List[String]): IO[ExitCode] = {
-    val semaphore = Semaphore[IO](1)
-
-    //    semaphore.flatMap { sem =>
-    //      process1(sem).start.void *>
-    //        process2(sem).start.void
-    //    } *> IO.never.as(ExitCode.Success)
-    //
-    //    semaphore.flatMap{sem => sem.withPermit(IO.sleep(3.second))} *> IO.never.as(ExitCode.Success)
-    def helper3(semaphore: Semaphore[IO]) = for {
-      _ <- semaphore.acquire
-      _ <- process3
-      _ <- semaphore.release
-    } yield ()
-
-    def helper4(semaphore: Semaphore[IO]) = for {
-      _ <- semaphore.acquire
-      _ <- process4
-      _ <- semaphore.release
-    } yield ()
-
-    for {
-      sem <- semaphore
-      _ <- List(helper3(sem),helper4(sem)).parSequence.void
-
-    } yield (ExitCode.Success)
-
-  }
-
+  def run(args: List[String]): IO[ExitCode] =
+    Semaphore[IO](1).flatMap { sem =>
+      process1(sem).start.void *>
+        process2(sem).start.void
+    } *> IO.never.as(ExitCode.Success)
 }
 
 /*
@@ -444,16 +375,9 @@ object SerialRefExercise extends IOApp {
     } yield {
       new SerialRef[F, A] {
 
-        def get: F[A] = r.get
+        def get: F[A] = ???
 
-        def modify[B](f: A => F[(A, B)]): F[B] = s.withPermit {
-          for {
-            old <- r.get
-            ab <- f(old)
-            (newV, b) = ab
-            _ <- r.set(newV)
-          } yield b
-        }
+        def modify[B](f: A => F[(A, B)]): F[B] = ???
 
         def update(f: A => F[A]): F[Unit] = ???
       }
@@ -461,9 +385,8 @@ object SerialRefExercise extends IOApp {
   }
 
   override def run(args: List[String]): IO[ExitCode] = {
-    def modifyHelperIO(ref: SerialRef[IO, Int], duration: FiniteDuration, i: Int, returnStr: String): IO[String] =
-    //      logger.info(s"$returnStr started") *> ref.modify(x => IO.sleep(duration) *> IO((x + i, returnStr + "!!!!" ))) <* logger.info(s" $returnStr finished")
-      logger.info(s"$returnStr started") *> ref.modify(x => IO.sleep(duration) *> IO((x + i, returnStr + "!!!!"))).flatTap(s => logger.info(s"$s finished"))
+    def modifyHelperIO(ref: SerialRef[IO, Int], duration: FiniteDuration, i: Int, s: String): IO[String] =
+      logger.info(s"$s started") *> ref.modify(x => IO.sleep(duration) *> IO((x + i, s))).flatTap(s => logger.info(s"$s finished"))
 
     for {
       ref <- SerialRefExercise.of[IO, Int](1)
@@ -503,8 +426,6 @@ object EnsureOrder extends IOApp {
   def mainProcess(d: Deferred[IO, Unit]): IO[Unit] = {
     for {
       _ <- logger.info("starting main process")
-      _ <- IO.sleep(2.seconds)
-      _ <- logger.info("main process awoke")
       _ <- d.complete(())
       _ <- logger.info("completed main process")
     } yield ()
@@ -514,7 +435,7 @@ object EnsureOrder extends IOApp {
   def dependantProcess(d: Deferred[IO, Unit]): IO[Unit] = {
     for {
       _ <- logger.info("starting dependant process")
-      _ <- d.get.timeout(10.seconds)
+      _ <- d.get
       _ <- logger.info("completed dependant process")
     } yield ()
   }
@@ -523,7 +444,7 @@ object EnsureOrder extends IOApp {
     val dEff = Deferred[IO, Unit]
     for {
       d <- dEff
-      _ <- List(mainProcess(d), dependantProcess(d)).parSequence
+      _ <- List(IO.sleep(3.seconds) *> mainProcess(d), dependantProcess(d)).parSequence
     } yield ExitCode.Success
   }
 }
@@ -562,7 +483,7 @@ object HandlingErrorsWithDeferred extends IOApp {
   def dependantProcess(d: Deferred[IO, Either[Throwable, Long]]): IO[Unit] = {
     for {
       _ <- logger.info("starting dependant process")
-      _ <- d.get
+      _ <- d.get.rethrow
       _ <- logger.info("completed dependant process")
     } yield ()
   }
@@ -583,23 +504,7 @@ object HandlingErrorsWithDeferred extends IOApp {
  */
 object RefsExerciseTwo extends IOApp {
 
-
-  case class Foo(i:Int)
-
-  List(Foo(1),Foo(2)).collect{
-    case a@Foo(_) => a.i
-  }
-
-  def memoize[F[_], A](f: F[A])(implicit C: Concurrent[F]): F[F[A]] = {
-    Ref.of[F, Option[Deferred[F, A]]](None).map { ref =>
-      Deferred[F, A].flatMap { d =>
-        ref.modify {
-          case None => (Some(d) , f.flatTap(eit => d.complete(eit)))
-          case v@Some(other) => (v, other.get)
-        }.flatten
-      }
-    }
-  }
+  def memoize[F[_], A](f: F[A])(implicit C: Concurrent[F]): F[F[A]] = ???
 
   override def run(args: List[String]): IO[ExitCode] = {
 
@@ -745,11 +650,11 @@ object MySemaphoreMVarExercise extends IOApp {
   }
 
   class MySemaphoreMVar[F[_] : Concurrent](mvar: MVar2[F, Unit]) extends MySemaphore[F] {
-    override def acquire: F[Unit] = mvar.take
+    override def acquire: F[Unit] = ???
 
-    override def release: F[Unit] = mvar.put(())
+    override def release: F[Unit] = ???
 
-    override def withPermit[A](fa: F[A]): F[A] = acquire.bracket(_ =>fa)(_ => release)
+    override def withPermit[A](fa: F[A]): F[A] = ???
   }
 
   object MySemaphoreMVar {
@@ -784,7 +689,7 @@ object MySemaphoreMVarExercise extends IOApp {
 
 /*
  * Implement race method (who completed first - wins, other should be canceled) using MVar
- * Tip: Recall that we can use Fibers (IO(...).start) in order to schedule task in background
+ * Tip: Recall that we can use Fibers in order to schedule task in background
  */
 object RaceMVarExercise extends IOApp {
 
