@@ -7,7 +7,9 @@ import io.circe.generic.JsonCodec
 
 object payment {
 
-  final case class PaymentId(id: String)
+  @JsonCodec
+  final case class PaymentId(value: String)
+
   final case class Payment(userId: UserId, amount: Money, card: Card)
 
 }

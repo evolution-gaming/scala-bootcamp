@@ -9,6 +9,8 @@ trait PaymentService[F[_]] {
 
 object PaymentService {
 
-  def apply[F[_]: Applicative]: PaymentService[F] = (payment: Payment) => Applicative[F].pure(PaymentId("123"))
+  def apply[F[_]: Applicative]: PaymentService[F] = (payment: Payment) => {
+    Applicative[F].pure(PaymentId("123"))
+  }
 
 }
