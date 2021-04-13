@@ -2,7 +2,7 @@ package com.evolutiongaming.bootcamp.http
 
 import java.time.{Instant, LocalDate}
 
-import cats.data.Validated
+import cats.data.{EitherT, Validated}
 import cats.effect.{Blocker, ExitCode, IO, IOApp}
 import cats.syntax.all._
 import com.evolutiongaming.bootcamp.http.Protocol._
@@ -77,6 +77,14 @@ object HttpIntroduction {
   //
   // PATCH
   // The PATCH method applies partial modifications to a resource.
+
+  // | HTTP method | Request has Body | Safe | Idempotent | Cacheable |
+  // |-------------+------------------+------+------------+-----------|
+  // | GET         | Optional         | Yes  | Yes        | Yes       |
+  // | POST        | Yes              | No   | No         | Yes       |
+  // | PUT         | Yes              | No   | Yes        | No        |
+  // | DELETE      | Optional         | No   | Yes        | No        |
+  // | PATCH       | Yes              | No   | No         | No        |
 
   // HTTP response status codes:
   //
@@ -194,7 +202,6 @@ object HttpServer extends IOApp {
   // serialization to and from JSON, XML, other formats.
   private val jsonRoutes = {
     import io.circe.generic.auto._
-    import io.circe.syntax._
     import org.http4s.circe.CirceEntityCodec._
 
     // User JSON decoder can also be declared explicitly instead of importing from `CirceEntityCodec`:
@@ -206,8 +213,30 @@ object HttpServer extends IOApp {
       case req @ POST -> Root / "json" =>
         req.as[User].flatMap { user =>
           val greeting = Greeting(text = s"Hello, ${ user.name }!", timestamp = Instant.now())
-          Ok(greeting.asJson)
+          Ok(greeting)
         }
+    }
+  }
+
+  // BODY ENCODING/DECODING
+
+  // It is possible to write custom decoders for the HTTP body.
+  private val entityRoutes = {
+    implicit val userDecoder = EntityDecoder.decodeBy(MediaType.text.plain) { m: Media[IO] =>
+      val NameRegex = """\((.*),(\d{1,3})\)""".r
+      EitherT {
+        m.as[String].map {
+          case NameRegex(name, age) => User(name, age.toInt).asRight
+          case s => InvalidMessageBodyFailure(s"Invalid value: $s").asLeft
+        }
+      }
+    }
+
+    HttpRoutes.of[IO] {
+
+      // curl -XPOST 'localhost:9001/entity' -d '(John,18)'
+      case req @ POST -> Root / "entity" =>
+        req.as[User].flatMap(user => Ok(s"Hello ${ user.name }!"))
     }
   }
 
@@ -233,7 +262,7 @@ object HttpServer extends IOApp {
   }
 
   private[http] val httpApp = {
-    helloRoutes <+> paramsRoutes <+> headersRoutes <+> jsonRoutes <+> multipartRoutes
+    helloRoutes <+> paramsRoutes <+> headersRoutes <+> jsonRoutes <+> entityRoutes <+> multipartRoutes
   }.orNotFound
 
   override def run(args: List[String]): IO[ExitCode] =
@@ -271,14 +300,14 @@ object HttpClient extends IOApp {
         // curl "localhost:9001/params/validate?timestamp=2020-11-04T14:19:54.736Z"
         _ <- printLine()
 
-        _ <- printLine(string = "Executing requests with headers and cookies:")
+        _ <- printLine(string = "Executing request with headers and cookies:")
         _ <- client.expect[String](Method.GET(uri / "headers", Header("Request-Header", "Request header value"))) >>= printLine
 
         // Exercise 5. Call HTTP endpoint, implemented in scope of Exercise 2.
         // curl -v "localhost:9001/cookies" -b "counter=9"
         _ <- printLine()
 
-        _ <- printLine(string = "Executing requests with JSON entities:")
+        _ <- printLine(string = "Executing request with JSON entities:")
         _ <- {
           import io.circe.generic.auto._
           import org.http4s.circe.CirceEntityCodec._
@@ -288,6 +317,16 @@ object HttpClient extends IOApp {
 
           client.expect[Greeting](Method.POST(User("John", 18), uri / "json"))
             .flatMap(greeting => printLine(greeting.toString))
+        }
+        _ <- printLine()
+
+        _ <- printLine(string = "Executing request with custom encoded entities:")
+        _ <- {
+          implicit val Encoder = EntityEncoder.stringEncoder[IO].contramap { user: User =>
+            s"(${user.name},${user.age})"
+          }
+
+          client.expect[String](Method.POST(User("John", 18), uri / "entity")) >>= printLine
         }
         _ <- printLine()
 
