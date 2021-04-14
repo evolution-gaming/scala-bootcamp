@@ -11,7 +11,7 @@ scalacOptions ++= Seq(
   "-Ymacro-annotations",
 )
 
-val http4sVersion = "0.21.7"
+val http4sVersion = "0.21.22"
 val circeVersion = "0.13.0"
 val playVersion = "2.8.2"
 val doobieVersion = "0.9.0"
@@ -37,6 +37,7 @@ libraryDependencies ++= Seq(
   "org.http4s" %% "http4s-blaze-server" % http4sVersion,
   "org.http4s" %% "http4s-blaze-client" % http4sVersion,
   "org.http4s" %% "http4s-circe" % http4sVersion,
+  "org.http4s" %% "http4s-jdk-http-client" % "0.3.6",
   "com.typesafe.akka" %% "akka-http" % akkaHttpVersion,
   "de.heikoseeberger" %% "akka-http-circe" % akkaHttpCirceVersion,
   "com.typesafe.akka" %% "akka-stream" % akkaVersion,

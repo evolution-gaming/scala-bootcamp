@@ -1,15 +1,18 @@
 package com.evolutiongaming.bootcamp.http
 
-import cats.effect.{ExitCode, IO, IOApp}
+import cats.effect.{ExitCode, IO, IOApp, Resource}
+import cats.syntax.all._
 import fs2.Pipe
 import fs2.concurrent.Queue
 import org.http4s._
+import org.http4s.client.jdkhttpclient.{JdkWSClient, WSConnectionHighLevel, WSFrame, WSRequest}
 import org.http4s.dsl.io._
 import org.http4s.implicits._
 import org.http4s.server.blaze.BlazeServerBuilder
 import org.http4s.server.websocket.WebSocketBuilder
 import org.http4s.websocket.WebSocketFrame
 
+import java.net.http.HttpClient
 import scala.concurrent.ExecutionContext
 
 object WebSocketIntroduction {
@@ -79,6 +82,26 @@ object WebSocketServer extends IOApp {
 
 // Regrettably, Http4s does not yet provide a WebSocket client (contributions are welcome!):
 // https://github.com/http4s/http4s/issues/330
+// But there is an Http4s wrapper for builtin JDK HTTP client.
+object WebSocketClient extends IOApp {
+  private val uri = uri"ws://localhost:9002/echo"
+
+  private def printLine(string: String = ""): IO[Unit] = IO(println(string))
+
+  override def run(args: List[String]): IO[ExitCode] = {
+    val clientResource = Resource.eval(IO(HttpClient.newHttpClient()))
+      .flatMap(JdkWSClient[IO](_).connectHighLevel(WSRequest(uri)))
+
+    clientResource.use { client =>
+      for {
+        _ <- client.send(WSFrame.Text("hello"))
+        _ <- client.receiveStream.collectFirst {
+          case WSFrame.Text(s, _) => s
+        }.compile.string >>= printLine
+      } yield ExitCode.Success
+    }
+  }
+}
 
 // Homework. Place the solution under `http` package in your homework repository.
 //
