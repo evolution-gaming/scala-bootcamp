@@ -2,8 +2,8 @@ package com.evolutiongaming.bootcamp.http
 
 import cats.effect.{ExitCode, IO, IOApp, Resource}
 import cats.syntax.all._
-import fs2.Pipe
-import fs2.concurrent.Queue
+import fs2.{Pipe, Stream}
+import fs2.concurrent.{Queue, Topic}
 import org.http4s._
 import org.http4s.client.jdkhttpclient.{JdkWSClient, WSConnectionHighLevel, WSFrame, WSRequest}
 import org.http4s.dsl.io._
@@ -44,7 +44,7 @@ object WebSocketServer extends IOApp {
 
   // Let's build a WebSocket server using Http4s.
 
-  private val webSocketRoute = HttpRoutes.of[IO] {
+  private val echoRoute = HttpRoutes.of[IO] {
 
     // websocat "ws://localhost:9002/echo"
     case GET -> Root / "echo" =>
@@ -70,14 +70,36 @@ object WebSocketServer extends IOApp {
       } yield response
   }
 
+  // Topics provide an implementation of the publish-subscribe pattern with an arbitrary number of
+  // publishers and an arbitrary number of subscribers.
+  private def chatRoute(chatTopic: Topic[IO, String]) = HttpRoutes.of[IO] {
+
+    // websocat "ws://localhost:9002/chat"
+    case GET -> Root / "chat" =>
+      WebSocketBuilder[IO].build(
+        // Sink, where the incoming WebSocket messages from the client are pushed to.
+        receive = chatTopic.publish.compose[Stream[IO, WebSocketFrame]](_.collect {
+          case WebSocketFrame.Text(message, _) => message
+        }),
+        // Outgoing stream of WebSocket messages to send to the client.
+        send = chatTopic.subscribe(10).map(WebSocketFrame.Text(_)),
+      )
+  }
+
+  private def httpApp(chatTopic: Topic[IO, String]) = {
+    echoRoute <+> chatRoute(chatTopic)
+  }.orNotFound
+
   override def run(args: List[String]): IO[ExitCode] =
-    BlazeServerBuilder[IO](ExecutionContext.global)
+    for {
+      chatTopic <- Topic[IO, String]("Hello!")
+      _ <- BlazeServerBuilder[IO](ExecutionContext.global)
       .bindHttp(port = 9002, host = "localhost")
-      .withHttpApp(webSocketRoute.orNotFound)
+      .withHttpApp(httpApp(chatTopic))
       .serve
       .compile
       .drain
-      .as(ExitCode.Success)
+    } yield ExitCode.Success
 }
 
 // Regrettably, Http4s does not yet provide a WebSocket client (contributions are welcome!):
