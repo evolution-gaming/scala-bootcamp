@@ -14,6 +14,8 @@ import org.http4s.websocket.WebSocketFrame
 
 import java.net.http.HttpClient
 import scala.concurrent.ExecutionContext
+import cats.effect.Clock
+import java.time.Instant
 
 object WebSocketIntroduction {
 
@@ -68,6 +70,12 @@ object WebSocketServer extends IOApp {
           send = queue.dequeue.through(echoPipe),
         )
       } yield response
+
+      // Exercise 1. Send current time to user when he asks it.
+      // Note: getting current time is a side effect.
+
+      // Exercise 2. Notify user periodically how long he is connected.
+      // Tip: you can merge streams via `merge` operator.
   }
 
   // Topics provide an implementation of the publish-subscribe pattern with an arbitrary number of
@@ -84,6 +92,9 @@ object WebSocketServer extends IOApp {
         // Outgoing stream of WebSocket messages to send to the client.
         send = chatTopic.subscribe(10).map(WebSocketFrame.Text(_)),
       )
+
+      // Exercise 3. Use first message from a user as his username and prepend it to each his message.
+      // Tip: to do this you will likely need fs2.Pull.
   }
 
   private def httpApp(chatTopic: Topic[IO, String]) = {
