@@ -1,0 +1,41 @@
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: docker-example-name-v2
+  namespace: docker-example-namespace
+spec:
+#  type: NodePort
+  type: ClusterIP
+#  clusterIP: None
+  selector:
+    app: echo-docker-example-v2
+  ports:
+    - name: http
+      protocol: TCP
+      port: 8080
+      targetPort: 8080
+#    - port: 8080
+#      targetPort: 8080
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: docker-example-name-v2
+  namespace: docker-example-namespace
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: echo-docker-example-v2
+  template:
+    metadata:
+      labels:
+        app: echo-docker-example-v2
+    spec:
+      containers:
+        - name: docker-example-v2
+          image: com.example/docker-example:latest
+          imagePullPolicy: IfNotPresent
+#        - name: nginx
+#          image: nginx:1.7.9
