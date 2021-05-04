@@ -65,6 +65,7 @@ object Example2 extends App {
 
   val basket2 = system.actorOf(Props[EmployeeShoppingBasketActor]())
 
-  StdIn.readLine()
+  basket2 ! "plum"
 
+  StdIn.readLine()
 }

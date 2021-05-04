@@ -7,11 +7,18 @@ import scala.io.StdIn
 
 object Example1 extends App {
 
+  sealed trait Command
+  case object Inc extends Command
+  case object Decrease extends Command
+
+  sealed trait Event
+  case object Increased extends Event
+  case object Decreased extends Event
+
   class EmployeeShoppingBasketActor extends PersistentActor {
 
     override def receiveRecover: Receive = {
-      case event =>
-        println(s"Received $event")
+      case event => println(s"Received $event")
     }
 
     override def receiveCommand: Receive = {
@@ -22,7 +29,7 @@ object Example1 extends App {
         // persistAllAsync
         // persistAsync
         persist(message) { e =>
-          println(s"Storing event $e")
+          println(s"Stored event $e")
         }
     }
 

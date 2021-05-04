@@ -8,21 +8,22 @@ package com.evolutiongaming.bootcamp.akka_persistence_2
  */
 trait AggregateBehaviour[A, C, E, R] {
 
-  def processCommand
+  def processCommand(state: A): C => Either[R, List[E]]
 
-  def applyEvent
+  def applyEvent(state: A): E => A
 
 }
 
-// let's define our EmployeeBasked commands
+// let's define our EmployeeBasket commands
 
 sealed trait BasketCommand
+final case class AddItem(enityId: String, item: String) extends BasketCommand
 
 // And events
-
 sealed trait BasketEvent
+final case class ItemAdded(item: String) extends BasketEvent
 
 // Rejections
-
 sealed trait BasketError
+case object BasketFull extends BasketError
 
