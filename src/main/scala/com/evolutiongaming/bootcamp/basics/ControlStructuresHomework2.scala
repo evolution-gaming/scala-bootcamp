@@ -2,7 +2,7 @@ package com.evolutiongaming.bootcamp.basics
 
 import scala.io.Source
 
-object ControlStructuresHomework {
+object ControlStructuresHomework2 {
   // Homework
 
   // Create a command line application that reads various "commands" from the
