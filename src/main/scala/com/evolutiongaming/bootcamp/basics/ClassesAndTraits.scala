@@ -98,14 +98,12 @@ object ClassesAndTraits {
   // When declaring a case class, make it final. Otherwise someone may decide to inherit from it
   // case-to-case inheritance is prohibited
 
+  // calls .apply method
   val point2 = Point(1, 2)
   println(point2.x)
 
-  val shape: Shape = point2
-  val point2Description = shape match {
-    case Point(x, y) => s"x = $x, y = $y"
-    case _           => "other shape"
-  }
+  // calls .unapply method
+  val Point(x, y) = point2
 
   val point3 = point2.copy(x = 3)
   println(point3.toString) // Point(3, 2)
@@ -115,8 +113,6 @@ object ClassesAndTraits {
   //
   def minimumBoundingRectangle(objects: Set[Bounded]): Bounded =
     new Bounded {
-      implicit private val doubleOrdering: Ordering[Double] = Ordering.Double.IeeeOrdering
-
       // if needed, fix the code to be correct
       override def minX: Double = objects.map(_.minX).min
       override def maxX: Double = objects.map(_.minX).min
@@ -124,24 +120,11 @@ object ClassesAndTraits {
       override def maxY: Double = objects.map(_.minX).min
     }
 
-  // Pattern matching and exhaustiveness checking
-  def describe(x: Shape): String = x match {
-    case Point(x, y)                      => s"Point(x = $x, y = $y)"
-    case Circle(centerX, centerY, radius) => s"Circle(centerX = $centerX, centerY = $centerY, radius = $radius)"
-  }
-
   // Singleton can extend classes and mix in traits
   object Origin extends Located {
     override def x: Double = 0
     override def y: Double = 0
   }
-
-  object Bounded {
-    def minimumBoundingRectangle(objects: Set[Bounded]): Bounded = ???
-  }
-
-  // Exercise. Add another Shape class called Rectangle and check that the compiler catches that we are
-  // missing code to handle it in `describe`.
 
   // Let us come back to our `Shape`-s and add a `Movable` trait
   // which will have a method:
@@ -163,20 +146,4 @@ object ClassesAndTraits {
     def peek: A              = ???
     def pop: (A, Stack[A])   = ???
   }
-
-  // Homework
-  //
-  // Add additional 2D shapes such as triangle and square.
-  //
-  // In addition to the 2D shapes classes, add also 3D shapes classes
-  // (origin, point, sphere, cube, cuboid, 3D triangle - you can add
-  // others if you think they are a good fit).
-  //
-  // Add method `area` to 2D shapes.
-  //
-  // Add methods `surfaceArea` and `volume` to 3D shapes.
-  //
-  // If some of the implementation involves advanced math, it is OK
-  // to skip it (leave unimplemented), the primary intent of this
-  // exercise is modelling using case classes and traits, and not math.
 }
