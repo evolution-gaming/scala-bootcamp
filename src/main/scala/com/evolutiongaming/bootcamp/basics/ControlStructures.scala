@@ -10,7 +10,7 @@ object ControlStructures {
   // You can follow your progress using the tests in `ControlStructuresSpec`.
   //   sbt "testOnly com.evolutiongaming.bootcamp.basics.ControlStructuresSpec"
 
-  // The if-then-else construct is as follows:
+  // The if-else construct is as follows:
   //
   // val result =
   //   if (boolean1) {
@@ -29,14 +29,14 @@ object ControlStructures {
   //    else if (boolean2) result2
   //    else otherResult
 
-  // Exercise. Implement a "Fizz-Buzz" https://en.wikipedia.org/wiki/Fizz_buzz function using the if-then-else,
+  // Exercise. Implement a "Fizz-Buzz" https://en.wikipedia.org/wiki/Fizz_buzz function using the if-else,
   // returning "fizzbuzz" for numbers which divide with 15, "fizz" for those which divide by 3 and "buzz" for
   // those which divide with 5, and returning the input number as a string for other numbers:
   def fizzBuzz1(n: Int): String = ???
 
   // Pattern Matching
   //
-  // Using the match-case construct we can write constructs equivalent to if-then-else statements in, often,
+  // Using the match-case construct we can write constructs equivalent to if-else statements in, often,
   // a more readable and concise form:
   //
   // val result = someValue match {
@@ -84,14 +84,21 @@ object ControlStructures {
     case rectangle: Rectangle => s"Found a rectangle $rectangle."
   }
 
-  // Unapply the instance of Shape
+  // Exhaustiveness checking (pay attention to compilation warning)
   def matchOnShape2(s: Shape): String = s match {
+    case Origin               => s"Found the origin."
+    case circle: Circle       => s"Found a circle $circle."
+    //case rectangle: Rectangle => s"Found a rectangle $rectangle."
+  }
+
+  // Unapply the instance of Shape
+  def matchOnShape3(s: Shape): String = s match {
     case Origin                   => s"Found the origin."
     case Circle(radius)           => s"Found a circle with radius $radius."
     case Rectangle(width, height) => s"Found a rectangle with width $width and height $height."
   }
 
-  def matchOnShape3(s: Shape): String = s match {
+  def matchOnShape4(s: Shape): String = s match {
     case Origin                               => s"Found the origin."
     case circle @ Circle(radius)              => s"Found a circle $circle with radius $radius."
     case rectangle @ Rectangle(width, height) => s"Found a rectangle $rectangle with width $width and height $height."
