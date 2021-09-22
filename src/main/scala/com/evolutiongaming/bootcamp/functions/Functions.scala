@@ -24,10 +24,10 @@ object Functions {
   val normalize: String => String = message => message.trim.toLowerCase
   val processText: (String, String => String) => String = (message, f) => f.apply(message)
 
-  // Scala has both functions and methods. Most of the time we can ignore this distinction, however,
-  // internally they are two different things. Scala method, as in Java, is a part of a class. It has a name,
-  // a signature, optionally some annotations. Scala function is a complete object, which has its own methods:
-  // `apply`, `compose`, `andThen`, `curried`, `tupled`, etc.
+  // Scala has both functions and methods. Most of the time we can ignore this distinction (as done in this
+  // lecture), however, internally they are two different things. Scala method, as in Java, is a part of a
+  // class. It has a name, a signature, optionally some annotations. Scala function is a complete object,
+  // which has its own methods: `apply`, `compose`, `andThen`, `curried`, `tupled`, etc.
   def normalize2(message: String): String = message.trim.toLowerCase
 
   // Syntax sugar allows calling a function without typing `apply`: `f.apply()` becomes `f()`.
@@ -61,7 +61,7 @@ object Functions {
   })
 
   // Methods can be passed where functions are required, in such cases Scala automatically converts them.
-  def trimAndWrap(v: String): String = s"<${v.trim}>"
+  def trimAndWrap(v: String): String = s"<${ v.trim }>"
   processText(" abc ", trimAndWrap)
 
   // One interesting aspect of functions being traits is that we can subclass function types.
@@ -77,10 +77,8 @@ object Functions {
 
   // Polymorphic functions have at least one type parameter.
 
-  // Exercise. Implement `mapOption` function without calling `Option` methods.
-  type A
-  type B
-  val mapOption: (Option[A], A => B) => Option[B] = (option, f) => ???
+  // Exercise. Implement `mapOption` function without calling `Option` APIs.
+  def mapOption[A, B](option: Option[A], f: A => B): Option[B] = ???
 
   // FUNCTION COMPOSITION
 
@@ -122,8 +120,9 @@ object Functions {
   // However, sometimes it makes more sense to supply arguments one by one. Curring helps to achieve that.
   // It transforms a function that takes multiple arguments into a function that takes a single argument
   // and returns back another function. Currying can be done manually...
-  val translateCurried: Language => (Language => (String => String)) =
+  val translateCurried: Language => (Language => (String => String)) = {
     from => (to => (text => translate(text, from, to)))
+  }
 
   // ... or by calling `curried` method.
   val translateCurried2: Language => Language => String => String = translate.curried

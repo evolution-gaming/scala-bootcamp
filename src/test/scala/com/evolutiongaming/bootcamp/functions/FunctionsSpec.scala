@@ -17,4 +17,10 @@ class FunctionsSpec
       isEvenMethodToFunc(n) shouldBe r
     }
   }
+
+  "mapOption" should "work correctly" in {
+    forAll { n: Int =>
+      mapOption[Int, String](Some(n), _ + "!") should contain(s"$n!")
+    }
+  }
 }
