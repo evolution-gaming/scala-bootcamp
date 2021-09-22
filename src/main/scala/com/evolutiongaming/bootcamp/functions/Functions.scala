@@ -3,257 +3,200 @@ package com.evolutiongaming.bootcamp.functions
 import java.time.Instant
 
 object Functions {
-  // Functions are expressions that have parameters, and take arguments.
 
-  // Functions are first-class values:
-  // a functions can be assigned to a value, passed as a parameter and returned as a result
+  // FUNCTIONS
 
-  // first order functions take and return ordinary data types
-  // higher order functions take and/or return other functions
+  // In mathematics, a function is a relation between two sets that associates each element of the first set
+  // to exactly one element of the second set. In programming, a function is a block of code that accomplishes
+  // a specific task. A function usually takes in data (a list of arguments), processes it and returns a
+  // result (eventually).
+  //
+  // In Scala functions are first-class citizens. They can be assigned to a value, passed as a parameter and
+  // returned as a result.
 
-  // Example.
-  def clean(message: String): String = message.replaceAll("fox", "***")
+  // FIRST- AND HIGHER-ORDER FUNCTIONS
 
-  def mkUpperCase(message: String): String = message.toUpperCase
+  // First-order functions take and return only ordinary data types.
+  //
+  // Higher-order functions take and/or return other functions.
 
-  // Pass our logic as a parameter `f`
-  def processText(message: String, f: String => String): String = f.apply(message)
+  // Question. Are these first-order of higher order functions?
+  val normalize: String => String = message => message.trim.toLowerCase
+  val processText: (String, String => String) => String = (message, f) => f.apply(message)
 
-  def clean2(message: String): String = {
-    // `s` is a parameter and may be omitted
-    val f: String => String = s => s.replaceAll("fox", "***")
-    processText(message, f)
-  }
+  // Scala has both functions and methods. Most of the time we can ignore this distinction, however,
+  // internally they are two different things. Scala method, as in Java, is a part of a class. It has a name,
+  // a signature, optionally some annotations. Scala function is a complete object, which has its own methods:
+  // `apply`, `compose`, `andThen`, `curried`, `tupled`, etc.
+  def normalize2(message: String): String = message.trim.toLowerCase
 
-  def mkUpperCase2(message: String): String = {
-    val f: String => String = _.toUpperCase
-    processText(message, f)
-  }
+  // Syntax sugar allows calling a function without typing `apply`: `f.apply()` becomes `f()`.
+  def processText2(message: String, f: String => String): String = f(message)
 
-  // Exercise.
-  // Implement `isEven` a function that checks if a number is even
-  def isEven(x: Int): Boolean = ???
+  // Exercise. Implement `isEven` method that checks if a number is even.
+  def isEven(n: Int): Boolean = ???
 
-  // Implement `isEvenVal` which behaves exactly like `isEven`.
-  // val isEvenVal: Int => Boolean = ???
+  // Exercise. Implement `isEvenFunc` function that behaves exactly like `isEven` method.
+  val isEvenFunc: Int => Boolean = n => ???
 
-  // Implement `isEvenDefToVal` by transforming `isEven` def function into a val
-  // val isEvenDefToVal: Int => Boolean = ???
+  // Exercise. Implement `isEvenMethodToFunc` function by transforming `isEven` method into a function.
+  val isEvenMethodToFunc: Int => Boolean = n => ???
 
-  // --
-
-
-  // In Scala, every concrete type is a type of some class or trait
-  // `(String => String)` is the same as scala.Function1[String, String]
-  // `scala.Function1[A, B]` is a trait, where `A` and `B` are type parameters
-
-  // an instance of a function can be treated as object
-
-  // The simplified version of the scala.Function1
+  // There are traits in Scala to represent functions with various numbers of arguments: `Function0`,
+  // `Function1`, `Function2`, etc. So `(A => B)` is the same as `Function1[A, B]`. A trait, where
+  // `A` and `B` are type parameters. Here is how simplified version of `Function1[A, B]` looks like.
   object Functions {
-    trait Function1[T, R] {
-      // `apply` defines how we transform `T` to `R`
-      def apply(v1: T): R
+    trait Function1[A, B] {
+      /** Defines how to transform `A` to `B`. */
+      def apply(a: A): B
     }
   }
 
-  // More common way to define a function type is just `A => B`
-  // `A => B` is the type of a function that takes an arg of type A and return a result of type B
+  // We can write anonymous functions (functions without explicit names).
+  processText("Hello, world", _ + "!")
 
-  // Syntax sugar allows to call a function w/o typing `apply`
-  // `f.apply(..)` becomes `f(..)`
-
-  // We can write a function w/o giving a name
-  processText("some text", _ + "!!")
-
-  // Anonymous function expands to implementation of scala.Function1 trait
-  processText("some text", new Function1[String, String] {
-    override def apply(v1: String): String = v1 + "!!"
+  // Anonymous functions also expand to the implementation of the `Function1[A, B]` trait.
+  processText("Hello, world", new Function1[String, String] {
+    override def apply(a: String): String = a + "!"
   })
 
-  // Method can be passed as a function, but it is not a function value, it's just converted automatically
+  // Methods can be passed where functions are required, in such cases Scala automatically converts them.
   def trimAndWrap(v: String): String = s"<${v.trim}>"
+  processText(" abc ", trimAndWrap)
 
-  processText("xxx", trimAndWrap)
-
-
-  // Subclassing Functions
-  // One nice aspect of functions being traits is that we can subclass the function type
-
+  // One interesting aspect of functions being traits is that we can subclass function types.
   trait MyMap[K, V] extends (K => V)
 
-  // Question. What should we extend to ..
+  // Question. What function should we extend to check if an element belongs to a set?
+  trait MySet[A] // extends ???
 
-  // check if an element belongs to a set
-  // > trait MySet[A] extends ???
+  // Question. What function should we extend to return a value by its index?
+  trait MySeq[A] // extends ???
 
-  // return a value by its index
-  // > trait MySeq[A] extends ???
+  // POLYMORPHIC FUNCTIONS
 
-  // --
+  // Polymorphic functions have at least one type parameter.
 
-  // Polymorphic functions has at least one type parameter
-  // A type parameter is a form of encapsulation
+  // Exercise. Implement `mapOption` function without calling `Option` methods.
+  type A
+  type B
+  val mapOption: (Option[A], A => B) => Option[B] = (option, f) => ???
 
-  def x[T](v: T) = ???
-
-  // Exercise.
-  // Implement `mapOption` a function. Do not use scala option api
-  def mapOption[A, B](option: Option[A], f: A => B): Option[B] = ???
-
-  // --
-
-  // Functions composition
+  // FUNCTION COMPOSITION
 
   val strToInt: String => Int = _.length
   val intToBool: Int => Boolean = _ > 10
 
+  // Function traits provide handy methods to compose multiple functions into one.
   val strToBool1: String => Boolean = t => intToBool(strToInt(t))
   val strToBool2: String => Boolean = intToBool.compose(strToInt)
   val strToBool3: String => Boolean = strToInt.andThen(intToBool)
 
-  // --
+  // PARTIAL FUNCTIONS
 
-  // The pattern matching block expands to the Function1 instance
+  // Pattern matching blocks expand to `Function1` instances.
   val pingPong: String => String = {
     case "ping" => "pong"
   }
 
   // Question. What happens next?
-  // > pingPong("hi?")
+  // pingPong("hi")
 
-  // With the function type itself we cannot find out beforehand
-  // whether the function is applicable to a certain argument
-
-  // Partial functions is another trait which extends Function and has `isDefinedAt` method
-
+  // With standard functions we cannot find out beforehand whether the function is applicable to a certain
+  // argument or not. `PartialFunction` extends `Function` and helps to solve this via `isDefinedAt` method.
   val pingPongPF: PartialFunction[String, String] = {
     case "ping" => "pong"
   }
+  pingPongPF.isDefinedAt("ping") // true
+  pingPongPF.isDefinedAt("hi") // false
 
-  pingPongPF.isDefinedAt("ping") // > true
-  pingPongPF.isDefinedAt("hi") // > false
+  // CURRYING
 
-
-  // If expected type is a PF then a pattern matching block will expended to PF implementation
-
-  val pingPongPFImpl: PartialFunction[String, String] = new PartialFunction[String, String] {
-    override def isDefinedAt(x: String): Boolean = x match {
-      case "ping" => true
-      case _ => false
-    }
-
-    override def apply(v: String): String = v match {
-      case "ping" => "pong"
-    }
-  }
-
-  // Example of using partial functions:
-  val eithers: Seq[Either[String, Double]] = List("123", "456", "789o")
-    .map(x => x.toDoubleOption.toRight(s"Failed to parse $x"))
-
-  val errors: Seq[String] = eithers.collect {
-    case Left(x) => x
-  }
-
-  // We can make a function that returns another function
-  // Example.
   type Language = String
 
-  def translate(message: String, from: Language, to: Language): String = {
-    // some logic
-    if (from == to) message else message.reverse
-  }
+  // In Scala, if a function accepts multiple parameters, by default they can only be supplied all at once.
+  val translate: (Language, Language, String) => String =
+    (from, to, text) => if (from == to) text else text.reverse
+  translate("en", "lv", "Hello, world!")
 
-  val translateFromRus: (Language, String) => String =
-    (to: String, message: Language) => translate(message, "rus", to)
+  // However, sometimes it makes more sense to supply arguments one by one. Curring helps to achieve that.
+  // It transforms a function that takes multiple arguments into a function that takes a single argument
+  // and returns back another function. Currying can be done manually...
+  val translateCurried: Language => (Language => (String => String)) =
+    from => (to => (text => translate(text, from, to)))
 
-  // `=>` has right associative law
-  val translateF: Language => (Language => (String => String)) =
-    (from: Language) => (to: Language) => (message: String) => translate(message, from, to)
+  // ... or by calling `curried` method.
+  val translateCurried2: Language => Language => String => String = translate.curried
 
-  val fromRu = translateF("ru")
-  val fromRuToEn = fromRu("en")
-  val result = fromRuToEn("функция")
+  val translateEn: Language => String => String = translateCurried("en")
+  val translateEnToLv: String => String = translateEn("lv")
+  val result: String = translateEnToLv("Hello, world!")
 
-  // Multiple parameter lists ~ syntax sugar for functions returning a function
-  def translateM(from: Language)(to: Language)(message: String): String = translate(message, from, to)
+  val result2: String = translateCurried("en")("lv")("Hello, world!")
+  val result3: String = translate.curried("en")("lv")("Hello, world!")
 
-  // --
+  // PURE FUNCTIONS
 
-  // Pure functions are mappings between two sets
+  // Pure function is a computational analogue of a mathematical function.
+  //
+  // A function is pure if it:
+  // 1. returns values that are identical for identical arguments;
+  // 2. has no side effects.
+  //
+  // Examples of side effects:
+  // - throwing exceptions;
+  // - mutating state;
+  // - writing to I/O streams;
+  // - depending on the current date or time;
+  // ...
+  //
+  // Pure functions are referentially transparent. This means they can be replaced with their corresponding
+  // return values (and vice-versa) without changing the program's behavior.
 
-  // A function is impure if ..
-  // - is not defined for all values of input type
-  // - throws an exception
-  // - returns a value that depends on something else than an input value
-  // - works with mutable shared state
-  // - does something that is not present in the function signature (side effects)
-  // - relies on reflection
+  // A function is impure if it:
+  // - is not defined for all values (is partial);
+  // - throws exceptions;
+  // - returns a value that depends on something else other than input arguments;
+  // - works with shared mutable state;
+  // ...
 
-  // Why is Null bad?
-  // null causes NullPointerException
-  // null cannot be removed from the language (although Scala 3 will help handle it)
-  // `null` can be passed anywhere
+  // Question. Why usage of `null` breaks function purity?
 
-  // Exercise. Provide an example of an impure functions
-
-  // Is `plus` a pure function? Why?
+  // Question. Is `plus` a pure function? Why?
   def plus(a: Int, b: Int): Int = a + b
 
-  // Is `mapLookup` a pure function? Why?
-  def mapLookup(map: Map[String, Int], key: String): Int =
-    map(key)
+  // Question. Is `mapLookup` a pure function? Why?
+  def mapLookup(map: Map[String, Int], key: String): Int = map(key)
 
-  // Pure function should:
-  // - be deterministic
-  // - not have side effects
-  // - be total (not partial)
-  // - not throw exceptions
-  // - not do any mutation (local, non-local, reference, etc.)
-  // - not use `null`
+  // Question. If a function returns the same value for all inputs, is it pure?
 
-  // A function without side effects only returns a value
+  // Building programs with pure functions has the following benefits:
+  // - Fearless refactoring. Any function call can be replaced with its return value.
+  // - Type safety. Better compile-time error reporting. No unexpected exceptions at runtime.
+  // - Improved testability. No mutation. No randomness. No side effects.
 
+  type ??? = Nothing
 
-  // Exercise. Provide an example of pure functions
-  // Question. If a function return for all inputs the same value, is this function pure?
+  // Exercises. Convert the following functions into pure functions. Replace ??? with correct return types.
 
-  // Benefits of pure functions
-
-  // Fearless refactoring: any value can be replaced by the function that produced it (referential transparency)
-  // Documentations based on functions types
-  // Easier to test: no mutation, no randomness, no side effects
-  // Potential compiler optimisations
-  // Make parallel processing easier
-
-
-  // Exercises. Convert the following function into a pure function.
-  type ??? = Nothing // just to make it compile and indicate that return type should be changed
-
-  //
   def parseDate(s: String): Instant = Instant.parse(s)
   def parseDatePure(s: String): ??? = ???
 
-  //
   def divide(a: Int, b: Int): Int = a / b
   def dividePure(a: Int, b: Int): ??? = ???
 
-  //
   def isAfterNow(date: Instant): Boolean = date.isAfter(Instant.now())
   def isAfterNowPure(/* ??? */): Boolean = ???
 
-  //
-  case class Nel[T](head: T, rest: List[T])
-  def nel[T](list: List[T]): Nel[T] = {
-    if (list.isEmpty) println("ERROR: provide non empty list")
-    Nel(list.head, list.tail)
+  case class NonEmptyList[T](head: T, rest: List[T])
+  def makeNonEmptyList[T](list: List[T]): NonEmptyList[T] = {
+    if (list.isEmpty) println("Error: list must not be empty")
+    NonEmptyList(list.head, list.tail)
   }
-  def nelPure[T](list: List[T]): ??? = ???
+  def makeNonEmptyListPure[T](list: List[T]): ??? = ???
 
-  // --
-
-  // Additional exercises:
+  // Attributions and useful links:
+  // https://jim-mcbeath.blogspot.com/2009/05/scala-functions-vs-methods.html
   // https://www.scala-exercises.org/std_lib/higher_order_functions
   // https://www.scala-exercises.org/fp_in_scala/getting_started_with_functional_programming
 }

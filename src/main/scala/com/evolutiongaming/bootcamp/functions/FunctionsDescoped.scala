@@ -118,4 +118,25 @@ object FunctionsDescoped {
   def nestingLevel(data: Json): Int = ???
 
   // See FunctionsSpec for expected results
+
+  // If expected type is a PF then a pattern matching block will expended to PF implementation
+
+  val pingPongPFImpl: PartialFunction[String, String] = new PartialFunction[String, String] {
+    override def isDefinedAt(x: String): Boolean = x match {
+      case "ping" => true
+      case _ => false
+    }
+
+    override def apply(v: String): String = v match {
+      case "ping" => "pong"
+    }
+  }
+
+  // Example of using partial functions:
+  val eithers: Seq[Either[String, Double]] = List("123", "456", "789o")
+    .map(x => x.toDoubleOption.toRight(s"Failed to parse $x"))
+
+  val errors: Seq[String] = eithers.collect {
+    case Left(x) => x
+  }
 }
