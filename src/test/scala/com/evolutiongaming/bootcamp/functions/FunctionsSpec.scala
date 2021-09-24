@@ -20,7 +20,7 @@ class FunctionsSpec
 
   "mapOption" should "work correctly" in {
     forAll { n: Int =>
-      mapOption[Int, String](Some(n), _ + "!") should contain(s"$n!")
+      mapOption[Int, String](Some(n), _.toString + "!") should contain(s"$n!")
     }
   }
 }
