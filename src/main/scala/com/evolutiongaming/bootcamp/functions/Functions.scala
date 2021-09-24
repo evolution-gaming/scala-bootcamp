@@ -115,7 +115,7 @@ object Functions {
   // In Scala, if a function accepts multiple parameters, by default they can only be supplied all at once.
   val translate: (Language, Language, String) => String =
     (from, to, text) => if (from == to) text else text.reverse
-  translate("en", "lv", "Hello, world!")
+  val translateResult: String = translate("en", "lv", "Hello, world!")
 
   // However, sometimes it makes more sense to supply arguments one by one. Curring helps to achieve that.
   // It transforms a function that takes multiple arguments into a function that takes a single argument
@@ -129,10 +129,10 @@ object Functions {
 
   val translateEn: Language => String => String = translateCurried("en")
   val translateEnToLv: String => String = translateEn("lv")
-  val result: String = translateEnToLv("Hello, world!")
+  val translateResult2: String = translateEnToLv("Hello, world!")
 
-  val result2: String = translateCurried("en")("lv")("Hello, world!")
-  val result3: String = translate.curried("en")("lv")("Hello, world!")
+  val translateResult3: String = translateCurried("en")("lv")("Hello, world!")
+  val translateResult4: String = translate.curried("en")("lv")("Hello, world!")
 
   // PURE FUNCTIONS
 
