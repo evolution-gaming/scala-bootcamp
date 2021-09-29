@@ -50,7 +50,7 @@ object AlgebraicDataTypes {
   // define value classes, see `Name`.
   class Age(val value: Int) extends AnyVal
   final case class Name(value: String) extends AnyVal {
-  // val drString = s"Dr. $value"
+    def greeting: String = s"Hello, $value!"
   }
 
   // Type aliases may seem similar to value classes, but they provide no additional type safety. They can,
@@ -82,7 +82,7 @@ object AlgebraicDataTypes {
   // Exercise. Implement the smart constructor for `Time` that only permits values from 00:00 to 23:59 and
   // returns "Invalid hour value" or "Invalid minute value" strings in `Left` when appropriate.
 
-  // Question. Is using `String` to represent `Left` a good idea?
+  // Question. Is using `String` to represent `Left` a good idea? Why?
 
   // SUM TYPES
 
