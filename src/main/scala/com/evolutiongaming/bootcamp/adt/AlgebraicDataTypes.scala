@@ -66,7 +66,7 @@ object AlgebraicDataTypes {
 
   // Smart constructor is a pattern, which allows creating only valid instances of a class.
 
-  // Exercise. Create a smart constructor for `GameLevel` that only permits levels from 1 to 80.
+  // Exercise. Create a smart constructor for `GameLevel` that only permits levels from 1 to 80 (inclusive).
   final case class GameLevel private (value: Int) extends AnyVal
   object GameLevel {
     def create(value: Int): Option[GameLevel] = ???
@@ -123,7 +123,7 @@ object AlgebraicDataTypes {
     def processPayment(amount: BigDecimal, accountNumber: AccountNumber): PaymentStatus
   }
   trait CreditCardService {
-    def processPayment(amount: BigDecimal, cardNumber: CreditCard): PaymentStatus
+    def processPayment(amount: BigDecimal, creditCard: CreditCard): PaymentStatus
   }
   trait CashService {
     def processPayment(amount: BigDecimal): PaymentStatus
