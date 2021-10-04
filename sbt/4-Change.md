@@ -15,14 +15,14 @@ the internal map of the settings and tasks to something else in special `build.s
 file.
 
 Why such ceremony is required? Because it allows sbt to detect the required
-sequence of build steps automatically and execute as much things as possible
+sequence of build steps automatically and execute as many things as possible
 in parallel.
 
 Let's have a look on the syntax of `build.sbt` file in a simple example.
 
-If you ever seen `build.sbt` before you might have noticed some strange
+If you have ever seen `build.sbt` before, you might have noticed some strange
 operators there like `:=`, but in reality `build.sbt` uses Scala as its
-syntax, no XML, no JSON and no YAML. These operators are just convinience
+syntax, no XML, no JSON and no YAML. These operators are just convenience
 functions or macros made in Scala. Everything is compiled and errors are
 reported.
 
@@ -32,13 +32,14 @@ How one does it in `build.sbt`?
 
 Add the following line into `build.sbt` in our `5-inspect` project:
 ```
-scalaVersion := "2.13.4"
+scalaVersion := "2.13.6"
 ```
 Here we have `scalaVersion`, which is a setting key, `:=` which is an operator,
-and `"2.13.4"` which is a definition body.
+and `"2.13.6"` which is a definition body.
 
 If you have sbt running from a previous session, you will need to reload
-`build.sbt` so the changes are take into account.
+`build.sbt` so the changes are take into account either by restarting an SBT
+session or by calling `reload` command.
 
 Let's have a look at our new Scala version now and then inspect it:
 ```
@@ -85,13 +86,13 @@ I.e. like this:
 run := println(s"Project version: ${version.value}")
 ```
 
-Excercise: define `run` task which outputs current scala version.
+Exercise: define `run` task which outputs current scala version.
 
 # Scopes
 
 As you may have noticed when using `inspect` command, sbt does not only have the
-keys, it also have the scope for these keys. I.e. every task or setting could be
-be also in the scope.
+keys, it also has the scope for these keys. I.e. every task or setting could be 
+also in the scope.
 
 Let's see what it means in practice:
 ```
@@ -145,9 +146,9 @@ not specify the order. I.e. we can write something like this:
 ```
 And this does not guarantee anyhow that the first task will run before a second
 one. This is a mechanism behind ability of sbt to run the tasks in parallel.
-It _will_ run everything it can in paralell.
+It _will_ run everything it can in parallel.
 
-Excercise: define `Compile / run` task that:
+Exercise: define `Compile / run` task that:
 
 1. Prints used Scala version when started (consider using `scalaVersion.value`).
 2. Runs a normal `Compile / run` task (consider using `(Compile / run).evaluated`).
@@ -160,18 +161,19 @@ sbt interactive console? This is a default project id.
 
 In real life projects, this may often be redefined like this:
 ```
-lazy val root = (project in file("."))
+lazy val root = project
+  .in(file("."))
   .settings(
     name := "inspect",
-    scalaVersion := "2.13.4",
+    scalaVersion := "2.13.6",
     libraryDependencies ++= Seq(
-      "org.typelevel" %% "cats-effect" % "2.2.0",
-      "org.scalatest" %% "scalatest" % "3.2.2" % "test"
+      "org.typelevel" %% "cats-effect" % "2.5.4",
+      "org.scalatest" %% "scalatest" % "3.2.10" % Test
     )
   )
 ```
 Why would anyone want to do this? Actually, if we do not write `root` project
-then `sbt` will genereate the one for us, silently and use our settings to pass
+then `sbt` will generate the one for us, silently and use our settings to pass
 to the project.
 
 The key part is that allows us defining several projects in one `build.sbt` file
@@ -181,30 +183,33 @@ also call such projects "modules".
 One cool feature that you can do when having multiple modules is _different_
 set of libraries you depend on. I.e. you could put your business logic into
 really clean project without any dependencies and this will protect you against
-accidenital usage of the library.
+accidental usage of the library.
 
 Let's define the new structure for our `inspect` project:
 ```
-lazy val root = (project in file("."))
+lazy val root = project
+  .in(file("."))
   .aggregate(domain, services)
-  .dependsOn(services)
   .settings(name := "inspect")
+  .settings(run := (services / Compile / run).evaluated)
 
-lazy val services = (project in file("services"))
+lazy val services = project 
+  .in(file("services"))
   .dependsOn(domain)
   .settings(
     name := "inspect-services",
     libraryDependencies ++= Seq(
-      "org.typelevel" %% "cats-effect" % "2.2.0",
-      "org.scalatest" %% "scalatest" % "3.2.2" % "test"
+      "org.typelevel" %% "cats-effect" % "2.5.4",
+      "org.scalatest" %% "scalatest" % "3.2.10" % Test
     )
   )
 
-lazy val domain = (project in file("domain"))
+lazy val domain = project
+  .in(file("domain"))
   .settings(
     name := "inspect-domain",
     libraryDependencies ++= Seq(
-      "org.scalatest" %% "scalatest" % "3.2.2" % "test"
+      "org.scalatest" %% "scalatest" % "3.2.10" % Test
     )
   )
 ```
