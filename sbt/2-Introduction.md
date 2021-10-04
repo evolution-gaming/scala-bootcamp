@@ -49,7 +49,7 @@ scala Knuth
 # I got an error? Why did I? How to fix it?
 ```
 
-This felt like a real pain to me. Did it feel to to you? The real Scala or Java
+This felt like a real pain to me. Did you feel it too? The real Scala or Java
 applications may have hundreds of dependencies. Downloading them manually,
 copying in the right place and running could be a huge pain without the appropriate
 tools.
@@ -57,7 +57,7 @@ tools.
 # Build tools
 
 There are plenty of the builds tools in the programming world. One of most known
-is, arugable, `make` and derivatives, which is very well known to `C/C++` crowd.
+is, arguably, `make` and derivatives, which is very well known to `C/C++` crowd.
 
 In JVM world, one of the first very popular tools was
 [`Apache Ant`](https://ant.apache.org/), which allowed developers to specify the
@@ -67,9 +67,9 @@ say to Ant where to take the files and where to put them like this:
 <copy file="myfile.txt" todir="../some/other/dir"/>
 ```
 
-The presecriptive tools went out of fashion, because the people tend to create
+The prescriptive tools went out of fashion, because the people tend to create
 the very different projects, without own conventions etc., which are hard to
-follow and reuse outside of specific teams.
+follow and reuse outside specific teams.
 
 One of the first and very popular tool was Maven, which I mentioned before.
 
@@ -84,16 +84,16 @@ testing etc. the code would be about putting it to the right directories.
 
 # Working with sbt
 
-`sbt`, which used to mean "Simple Build Tool` is a continuation of this
+`sbt`, which used to mean "Simple Build Tool" is a continuation of this
 tradition. Despite the name, `sbt` used to be really hard to use and understand
-with awkwards symbols, conventions and ideas. This is _not_ the case anymore,
-it is really simplified and easy to use these days but I am sharing this,
-because you might encounter such an opinion based on an experience of old years.
+with awkward symbols, conventions and ideas. This is _not_ the case anymore,
+it has been simplified and is easy to use these days, but I am sharing this,
+because you might encounter such an opinion based on an experience of previous versions of SBT.
 
 Because it was so infamous, and out of strive to innovate, other tools appeared
-in Scala word since that. Most people still use sbt though.
+in Scala word since then. Most people still use sbt though.
 - http://www.lihaoyi.com/mill/ by Li Haoyi, from Databricks, whom I mentioned before,
-- https://github.com/propensive/fury by Jon Pretty from Propensive, a famous andv
+- https://github.com/propensive/fury by Jon Pretty from Propensive, a famous and
   very respected Scala developer.
 
 In large mixed corporate environments where Scala is not the only backend
@@ -140,7 +140,7 @@ though it can guess about the transitive dependencies.
 Let's specify the libraries we want to use. For that create `build.sbt`
 file in `4-sbt-libs` directory and add the following line into it:
 ```
-libraryDependencies += "org.typelevel" %% "cats-effect" % "2.2.0"
+libraryDependencies += "org.typelevel" %% "cats-effect" % "2.5.4"
 ```
 
 Let's try to run it again?
@@ -149,7 +149,7 @@ sbt run
 ```
 It works! Note that when we run `scala` directly, we could not get it working
 because of transitive dependencies. In this case, actually, sbt detected by
-itself that additional libraries are requires, download them and put them
+itself that additional libraries are requires, downloaded and put them
 into the right place.
 
 Have a look at generate `project/build.properties` file. What does it contain?

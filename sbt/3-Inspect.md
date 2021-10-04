@@ -1,4 +1,4 @@
-# Inspect the exisiting project
+# Inspect the existing project
 
 We will now investigate how sbt knew where to take the files from, where to take
 the libraries for running etc. For that we will use another, `5-inspect` project.
@@ -33,7 +33,7 @@ sbt:root-5-inspect> sourceDirectories
 sbt:root-5-inspect> target
 
 # this is not fun though, I was cheating, because I knew the names of the propreties
-# what is we do not know the names, and cannot find them in documentation?
+# what if we do not know the names, and cannot find them in documentation?
 #
 # let's dissect a `run` command a little bit:
 sbt:root-5-inspect> inspect run
