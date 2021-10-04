@@ -35,7 +35,7 @@ scalac Knuth.scala
 
 Got errors? We need cats-effect. Where we take the artifact?
 Let's go Maven central: https://search.maven.org/
-Search for `cats-effect_2.13-2.2.0.jar` and press `Download` arrow
+Search for `cats-effect_2.13-2.5.4.jar` and press `Download` arrow
 at the right of the row.
 
 Select `jar`, download it and put it to `scala-bootstrap/sbt/2-scalac-libs` near
