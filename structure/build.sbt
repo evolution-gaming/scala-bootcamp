@@ -5,9 +5,11 @@ version := "1.0"
 libraryDependencies ++= Dependencies.All
 
 lazy val root = project
-  .enablePlugins(JUnitXmlReportPlugin)
   .in(file("."))
-  .settings(name := "App Structure")
+  .settings(
+    name := "App Structure",
+    normalizedName := "app-structure",
+  )
 
 /*
 
