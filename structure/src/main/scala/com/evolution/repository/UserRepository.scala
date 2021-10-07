@@ -8,8 +8,13 @@ class UserRepository extends AbstractRepository {
   def userGroups(id: UserId): List[Group] = Nil
 
   def addUser(value: User): Unit = ()
+  def deleteUser(value: User): Unit = ()
+
   def addPermission(value: Permission): Unit = ()
+  def deletePermission(value: Permission): Unit = ()
+
   def addGroup(value: Group): Unit = ()
+  def deleteGroup(value: Group): Unit = ()
 
   def casinoUsersCount(casinoId: CasinoId): Int = 0
 }

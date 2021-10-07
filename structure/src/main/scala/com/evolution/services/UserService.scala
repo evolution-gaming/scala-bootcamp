@@ -15,4 +15,7 @@ class UserService(
       group: GroupName,
       permissions: List[PermissionName]
   ): Unit = ()
+  def userGroups(user: User): List[Group] = userRepository.userGroups(user.id)
+  def userPermissions(user: User): List[Permission] =
+    userRepository.userPermissions(user.id)
 }

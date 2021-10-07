@@ -6,11 +6,11 @@ final case class Request(body: String = "", url: String)
 final case class Response(body: String = "")
 
 class HttpClient {
-  def get(request: Request): Response = RandomCasinoResponse()
-  def post(request: Request): Response = RandomCasinoResponse()
+  def get(request: Request): Response = RandomResponse()
+  def post(request: Request): Response = RandomResponse()
 }
 
-object RandomCasinoResponse {
+object RandomResponse {
   def apply(): Response = {
     val json =
       s"""{ "id": "id$rnd", "name": "Casino$rnd", "status": $status },"""

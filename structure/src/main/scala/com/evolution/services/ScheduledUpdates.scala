@@ -1,13 +1,13 @@
 package com.evolution.services
 
 import akka.actor.ActorSystem
-import com.evolution.clients.CasinoClient
+import com.evolution.clients.AppHttpClient
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._
 
 class ScheduledUpdates(
-    client: CasinoClient,
+    client: AppHttpClient,
     casinoService: CasinoService,
     system: ActorSystem
 ) {
