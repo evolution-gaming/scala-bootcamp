@@ -29,7 +29,7 @@ object Main extends App {
     config
   )
   val permissionService = new PermissionService(userRepository)
-  val groupService = new GroupService(userRepository, config)
+  val groupService = new GroupService(userRepository)
   val casinoRepository = new CasinoRepository
   val casinoService = new CasinoService(casinoRepository, config)
 

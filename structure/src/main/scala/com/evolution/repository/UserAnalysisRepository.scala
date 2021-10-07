@@ -4,5 +4,5 @@ import com.evolution.domain.{Analysis, UserId}
 
 class UserAnalysisRepository(repository: UserRepository)
     extends AbstractRepository {
-  def analyse(userId: UserId): Option[Analysis] = None
+  def analysis(userId: UserId): Option[Analysis] = None
 }

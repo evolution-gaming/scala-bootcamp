@@ -18,4 +18,10 @@ class UserService(
   def userGroups(user: User): List[Group] = userRepository.userGroups(user.id)
   def userPermissions(user: User): List[Permission] =
     userRepository.userPermissions(user.id)
+
+  def report(user: User, reportId: ReportId): Option[Report] =
+    userReportsRepository.report(user.id, reportId)
+
+  def analysis(user: User): Option[Analysis] =
+    userAnalysisRepository.analysis(user.id)
 }

@@ -1,8 +1,8 @@
-scalaVersion := "2.13.6"
+ThisBuild / scalaVersion := "2.13.6"
 
-version := "1.0"
+ThisBuild / version := "1.0"
 
-libraryDependencies ++= Dependencies.All
+ThisBuild / libraryDependencies ++= Dependencies.All
 
 lazy val root = project
   .in(file("."))

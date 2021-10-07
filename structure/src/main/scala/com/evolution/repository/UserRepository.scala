@@ -18,3 +18,17 @@ class UserRepository extends AbstractRepository {
 
   def casinoUsersCount(casinoId: CasinoId): Int = 0
 }
+
+/*
+
+class GroupRepository extends AbstractRepository {
+  def addGroup(value: Group): Unit = ()
+  def deleteGroup(value: Group): Unit = ()
+}
+
+class PermissionRepository extends AbstractRepository {
+  def addPermission(value: Permission): Unit = ()
+  def deletePermission(value: Permission): Unit = ()
+}
+
+ */
