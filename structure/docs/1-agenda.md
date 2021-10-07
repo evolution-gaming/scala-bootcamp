@@ -7,4 +7,5 @@
     4. Package by feature/component (Live coding session)
     5. Q&A
 
-- https://github.com/evolution-gaming/scala-bootcamp/structure 
+- https://github.com/evolution-gaming/scala-bootcamp/ `pull updates`
+- https://github.com/evolution-gaming/scala-bootcamp/tree/master/structure `lecture code`
