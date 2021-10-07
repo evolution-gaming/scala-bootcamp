@@ -13,7 +13,7 @@ class CasinoController(casinoService: CasinoService) extends Controller {
   def update(casino: CasinoDto): Unit =
     casinoService.casinoById(CasinoId(casino.id)).foreach { c =>
       casinoService.save(
-        c.copy(name = CasinoName(casino.name))
+        Casino(c.id, CasinoName(casino.name))
       )
     }
 }

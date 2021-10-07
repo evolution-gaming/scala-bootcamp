@@ -13,3 +13,5 @@
 - modules
   - [app](../app/src/main/scala)
   - [domain](../domain)
+
+- https://www.scala-sbt.org/1.x/docs/Directories.html

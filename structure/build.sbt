@@ -13,6 +13,19 @@ lazy val root = project
 
 /*
 
+lazy val controllers = project
+  .dependsOn(domain, infra, service, dto)
+
+lazy val service = project
+  .dependsOn(repos, infra)
+
+lazy val repos = project
+  .dependsOn(domain, infra)
+
+lazy val domain = project
+lazy val infra = project
+lazy val dto = project
+
 // boot, application
 lazy val app = project
   .aggregate(user, group, permission, casino)

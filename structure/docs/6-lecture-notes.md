@@ -2,12 +2,10 @@
 
     0. Introduction
     1. SBT project
-    2. Package by type/layer
-    3. Package by feature/component
-
-- Format:
-    - Live coding session
-    - Q&A
+    2. Package by type/layer (Live coding session)
+    3. Break?
+    4. Package by feature/component (Live coding session)
+    5. Q&A
 
 - https://github.com/evolution-gaming/scala-bootcamp/structure
 
@@ -73,11 +71,11 @@
      - wrong abstractions
      - merge conflicts
 5. Fat/monolith structure
-   - fat compilation (no parallelization)
-   - packages are tightly coupled, can't "ship" in isolation (monolith)
+   - fat compilation (poor parallelization)
+   - packages are tightly coupled, can't "ship" in isolation
 6. Pros
     - Easy to start with
-    - MVP - minimal viable project
+    - MVP - minimal viable product
 
 ### Can we do better?
 

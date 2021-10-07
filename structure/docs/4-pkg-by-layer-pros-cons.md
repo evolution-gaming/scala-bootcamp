@@ -11,7 +11,7 @@
     - dependency magnets, code gravity
     - always see redundant code (other features in packages)
     - packages are tightly coupled, can't "ship" in isolation (monolith)
-    - fat compilation (no parallelization)
+    - fat compilation (poor parallelization)
 - Pros
     - Easy to start with
-    - MVP - minimal viable project
+    - MVP - minimal viable product
