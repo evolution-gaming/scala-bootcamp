@@ -38,8 +38,14 @@ class UserController(
     )
 
   // get: api/user/$userId/report/$reportId
-  def report(userId: String, reportId: String): Option[_] = None
+  def report(userId: String, reportId: String): Option[_] =
+    userService.userById(UserId(userId)).flatMap { user =>
+      userService.report(user, ReportId(reportId))
+    }
 
   // get: api/user/$userId/analysis
-  def analysis(userId: String): Option[_] = None
+  def analysis(userId: String): Option[_] =
+    userService.userById(UserId(userId)).flatMap { user =>
+      userService.analysis(user)
+    }
 }

@@ -1,10 +1,8 @@
 package com.evolution.repository
 
-import com.evolution.domain.{Report, UserId}
+import com.evolution.domain.{Report, ReportId, UserId}
 
 class UserReportsRepository(repository: UserRepository)
     extends AbstractRepository {
-  def report1(userId: UserId): Option[Report] = None
-  def report2(userId: UserId): Option[Report] = None
-  def report3(userId: UserId): Option[Report] = None
+  def report(userId: UserId, reportId: ReportId): Option[Report] = None
 }
