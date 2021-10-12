@@ -4,7 +4,10 @@ import org.scalatest.funsuite.AnyFunSuite
 
 import ImplicitClasses._
 
-class ImplicitsSpec extends AnyFunSuite {
+class ImplicitClassesSpec extends AnyFunSuite {
+
+  // we will not use tests these time, but you are welcome to implement them
+  // and do a pull request
 
   test("Excersise 1: pow") {
     assert(EvolutionUtils0.pow(2, 0) == 1)
