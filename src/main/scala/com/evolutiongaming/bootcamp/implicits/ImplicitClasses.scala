@@ -31,7 +31,7 @@ import java.time.Instant
 //
 object ImplicitClasses {
 
-  // *Extension methods (implicit classes)*
+  // *Implicit classes (extensions methods in Scala 3)*
   //
   // One of the common recognized issues with the classical programming
   // languages and their standard or common libraries is that these might be
@@ -217,6 +217,8 @@ object ImplicitClasses {
     RichInt(72).concat(456)
     RichListInt((List(1, 2, 3, 4, 5))).mean
 
+    // Do you find this way more convenient? More readable?
+
   }
 
 }
@@ -224,5 +226,33 @@ object ImplicitClasses {
 // How does this actually work? We will discuss this in the last section of this
 // lecture. For now we can assume for all means and purposes that it just adds
 // the wrapper class around the call.
-
+//
+// Note: your IDE can help you to identify where the method comes from.
+// Metals: "Toggle showing implicit conversions and classes".
+// IntelliJ: "Ctrl + Alt + Shift + "+" (I have no IntelliJ, check it yourself)
+//
 // See also: https://docs.scala-lang.org/overviews/core/implicit-classes.html
+//
+// We will discuss how Scala compiler finds the implicit classes (or does
+// implicit resolution) later today if we have enough time.
+
+// *Summary*
+//
+// Extension methods using implicit classes is a powerful technique allowing
+// one to add the useful methods to existing libraries and improving the
+// readability of the code.
+//
+// It should be noted though, that by adding the methods to _existing_ code,
+// you are changing the language and increasing the knowledge that needs to
+// be absorbed by the the incoming developer.
+//
+// That why it should be used sparsely. I.e. if you can avoid extending the
+// classes this way, please make a favour to your colleagues and do avoid it.
+// Make it as simple as possible: just add a new method to class if class
+// is possible to edit.
+//
+// There are the reasons when extending the classes should be preferred and
+// also the ways to minimize the discoverability issues arising from the new
+// added methods. This discussion is out of scope of this lecture and will
+// be touched more heavily during a typeclass lecture instead.
+
