@@ -2,7 +2,7 @@ package com.evolutiongaming.bootcamp.implicits
 
 import org.scalatest.funsuite.AnyFunSuite
 
-import Implicits._
+import ImplicitClasses._
 
 class ImplicitsSpec extends AnyFunSuite {
 
