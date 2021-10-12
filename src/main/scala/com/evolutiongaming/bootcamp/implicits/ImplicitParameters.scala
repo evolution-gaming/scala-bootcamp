@@ -195,5 +195,8 @@ object ImplicitParameters {
   // is advanced patterns of using these two techniques separately or together,
   // and some syntax sugar arround these techniques to make certain patterns
   // easier to use.
+  //
+  // Note: I will tell you about advanced pattern shortly, no need to demand
+  // your money back.
 
 }
