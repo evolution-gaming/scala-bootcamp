@@ -141,8 +141,12 @@ object HKT {
         | - https://www.youtube.com/watch?v=EFK4UC5PONw
         | - https://www.youtube.com/watch?v=b1ftkK1zhxI
         |
+        |Functional programming in Scala (Red book)
+        |
         |Generics of a Higher Kind, paper, Adriaan Moors Frank Piessens
         | - http://adriaanm.github.io/files/higher.pdf
+        |
+        | Kind projector plugin: https://github.com/typelevel/kind-projector
         |""".stripMargin)
 
 
