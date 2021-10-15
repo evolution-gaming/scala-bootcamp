@@ -115,6 +115,9 @@
 1. Extract features to sbt modules
 2. Cycle dependencies
 3. `AssignmentController`
+4. Sources
+    - https://www.youtube.com/watch?v=DuK4dKH0zOA - modular design short intro video
+    - https://dzone.com/refcardz/patterns-modular-architecture - modularity patterns
 
 ### Package by screens (views)
 
