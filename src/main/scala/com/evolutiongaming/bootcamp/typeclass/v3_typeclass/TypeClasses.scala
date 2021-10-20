@@ -134,22 +134,22 @@ object FPJsonSugared extends App {
   prettyPrint(Game(123))
 }
 
-object FPJsonMacros extends App {
-  import simulacrum._
-
-  @typeclass trait Jsonable[T] {
-    def toJson(entity: T): Json
-  }
-
-  import Jsonable.ops._
-  def prettyPrint[A: Jsonable](a: A): Unit = println(a.toJson)
-
-  final case class Game(id: Int)
-
-  implicit val gameJsonable: Jsonable[Game] = (game: Game) => Json(s"{${'"'}id${'"'}:${game.id}}")
-
-  prettyPrint(Game(123))
-}
+//object FPJsonMacros extends App {
+//  import simulacrum._
+//
+//  @typeclass trait Jsonable[T] {
+//    def toJson(entity: T): Json
+//  }
+//
+//  import Jsonable.ops._
+//  def prettyPrint[A: Jsonable](a: A): Unit = println(a.toJson)
+//
+//  final case class Game(id: Int)
+//
+//  implicit val gameJsonable: Jsonable[Game] = (game: Game) => Json(s"{${'"'}id${'"'}:${game.id}}")
+//
+//  prettyPrint(Game(123))
+//}
 
 object HashCodeTask {
 
