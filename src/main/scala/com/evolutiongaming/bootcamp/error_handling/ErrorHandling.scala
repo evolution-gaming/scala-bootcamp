@@ -109,7 +109,9 @@ object ErrorHandling extends App {
   // Otherwise UX would struggle. The user would have to resubmit the form multiple times and only see one
   // particular error on each iteration. Here is where Validated from Cats library can help.
 
-  final case class Student(username: String, age: Int)
+  final case class Username(value: String) extends AnyVal
+  final case class Age(value: Int) extends AnyVal
+  final case class Student(username: Username, age: Age)
 
   sealed trait ValidationError
   object ValidationError {
@@ -144,7 +146,7 @@ object ErrorHandling extends App {
     // usage with Validated, where errors are often accumulated by appending them.
     type AllErrorsOr[A] = ValidatedNec[ValidationError, A]
 
-    private def validateUsername(username: String): AllErrorsOr[String] = {
+    private def validateUsername(username: String): AllErrorsOr[Username] = {
 
       def validateUsernameLength: AllErrorsOr[String] =
         if (username.length >= 3 && username.length <= 30) username.validNec
@@ -157,13 +159,13 @@ object ErrorHandling extends App {
       // `productR` method (can also be written as *>) accumulates both username related errors into a single
       // `AllErrorsOr[String]`. However, it ignores the result of the validator on the left and uses only the
       // result of the validator on the right (hence the `R` suffix).
-      validateUsernameLength.productR(validateUsernameContents)
+      validateUsernameLength.productR(validateUsernameContents).map(Username)
     }
 
     // Exercise. Implement `validateAge` method, so that it returns `AgeIsNotNumeric` if the age string is not
     // a number and `AgeIsOutOfBounds` if the age is not between 18 and 75. Otherwise the age should be
     // considered valid and returned inside `AllErrorsOr`.
-    private def validateAge(age: String): AllErrorsOr[Int] = ???
+    private def validateAge(age: String): AllErrorsOr[Age] = ???
 
     // `validate` method takes raw username and age values (for example, as received via POST request),
     // validates them, transforms as needed and returns `AllErrorsOr[Student]` as a result. `mapN` method
