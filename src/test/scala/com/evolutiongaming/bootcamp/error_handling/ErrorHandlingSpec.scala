@@ -54,7 +54,7 @@ class ErrorHandlingSpec
     StudentValidator.validate(
       username = "username",
       age = "33",
-    ) shouldBe Student("username", 33).validNec
+    ) shouldBe Student(Username("username"), Age(33)).validNec
 
     def checkInvalid(username: String, age: String, errors: Set[ValidationError]): Assertion =
       StudentValidator.validate(
