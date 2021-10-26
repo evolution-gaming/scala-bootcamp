@@ -1,9 +1,9 @@
-package com.evolutiongaming.bootcamp.cats
+package com.evolutiongaming.bootcamp.cats.v1
 
 import cats.Functor
 import cats.data.NonEmptyList
-import cats.kernel.Monoid
 import cats.implicits._
+import cats.kernel.Monoid
 
 trait MonoidHierarchy {
 

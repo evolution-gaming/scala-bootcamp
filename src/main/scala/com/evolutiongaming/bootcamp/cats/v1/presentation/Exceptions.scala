@@ -1,4 +1,4 @@
-package com.evolutiongaming.bootcamp.cats.presentation
+package com.evolutiongaming.bootcamp.cats.v1.presentation
 
 object Exceptions {
 
