@@ -66,7 +66,7 @@ object Example4 extends App {
 
 
   val system = ActorSystem("AkkaPersistenceSystem")
-  val basket = system.actorOf(Props[EmployeeShoppingBasketActor])
+  val basket = system.actorOf(Props[EmployeeShoppingBasketActor]())
 
   basket ! AddItem("1", "banana")
   basket ! AddItem("1", "apple")

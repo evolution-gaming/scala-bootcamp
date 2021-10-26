@@ -80,7 +80,7 @@ object EffectExercises extends IOApp {
     object Exercise_6 {
       val fixedThreadPool = IO.contextShift(ExecutionContext.fromExecutorService(Executors.newFixedThreadPool(1)))
       def fib(n: Int, a: Long = 0, b: Long = 1): IO[Long] =
-        IO.suspend {
+        IO.defer {
           if (n > 0) fib(n - 1, b, a + b)
           else IO.pure(a)
         }

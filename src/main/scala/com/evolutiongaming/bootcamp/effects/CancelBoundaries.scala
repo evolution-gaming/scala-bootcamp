@@ -1,7 +1,7 @@
 package com.evolutiongaming.bootcamp.effects
 
 import cats.effect.{ExitCode, IO, IOApp}
-import cats.implicits.catsSyntaxParallelSequence
+import cats.syntax.parallel._
 import com.evolutiongaming.bootcamp.effects.Console.Real.putStrLn
 
 import scala.concurrent.duration._
@@ -37,7 +37,7 @@ object CancelBoundaries extends IOApp  {
     def nonCancellableTimes(rec: Int): IO[Unit] = for {
       _ <- putStrLn(s"Running remaining iterations: ${rec}")
       _ <- IO.sleep(1.seconds).uncancelable
-      _ <- if(rec > 0) IO.suspend(nonCancellableTimes(rec - 1)) else IO.unit
+      _ <- if(rec > 0) IO.defer(nonCancellableTimes(rec - 1)) else IO.unit
     } yield ()
 
     for {
@@ -56,7 +56,7 @@ object CancelBoundaries extends IOApp  {
     def cancellableTimes(rec: Int): IO[Unit] = for {
       _ <- putStrLn(s"Running remaining iterations: ${rec}")
       _ <- IO.sleep(1.seconds).uncancelable
-      _ <- if(rec > 0) IO.cancelBoundary *> IO.suspend(cancellableTimes(rec - 1)) else IO.unit
+      _ <- if(rec > 0) IO.cancelBoundary *> IO.defer(cancellableTimes(rec - 1)) else IO.unit
     } yield ()
 
     for {
@@ -90,7 +90,7 @@ object CancelBoundariesExercises extends IOApp {
           .handleErrorWith {
             case NonFatal(e) =>
               putStrLn(s"$id Retrying... retries left: $maxRetries") *> (if(maxRetries <= 0) IO.raiseError(e)
-              else delay(interval) *> IO.suspend(task.retry(id, maxRetries-1, interval)))
+              else delay(interval) *> IO.defer(task.retry(id, maxRetries-1, interval)))
           }
     }
 
@@ -112,7 +112,7 @@ object CancelBoundariesExercises extends IOApp {
   val computeExercise = {
     def cpuBoundCompute(value: BigInt, multiplier: BigInt): IO[BigInt] = {
       val log = IO.delay(println(s"${Thread.currentThread().toString} Calculating... ${multiplier}"))
-      log *> IO.suspend(cpuBoundCompute(value * multiplier, multiplier + 1))
+      log *> IO.defer(cpuBoundCompute(value * multiplier, multiplier + 1))
     }
     for {
       _ <- putStrLn("Starting program")

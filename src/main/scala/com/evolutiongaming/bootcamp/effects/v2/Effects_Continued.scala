@@ -15,7 +15,7 @@ object Cats_Resource_Example1 extends IOApp {
     val pureIO = IO.pure(intValue)
 
     Resource.pure[IO, Int](intValue)
-    Resource.liftF(pureIO)
+    Resource.eval(pureIO)
 
     Resource.make(pureIO)(_ => IO.unit)
     Resource.makeCase(pureIO)((_, exitCase) =>

@@ -37,7 +37,7 @@ import scala.concurrent.duration.DurationInt
  */
 object ContextShifts extends IOApp {
 
-  def logLine(s: => String): IO[Unit] = IO.suspend(putStrLn(s"${Thread.currentThread().toString} $s"))
+  def logLine(s: => String): IO[Unit] = IO.defer(putStrLn(s"${Thread.currentThread().toString} $s"))
 
   def newThreadFactory(name: String): ThreadFactory = new ThreadFactory {
     val ctr = new AtomicInteger(0)
@@ -64,7 +64,7 @@ object ContextShifts extends IOApp {
 
     def cpuBound(i: Int): IO[Int] =
       if (i == Int.MaxValue) IO.pure(i)
-      else IO.shift *> (if(i % 1000000 == 0) logLine(s"Reached $i") else IO.unit) *> IO.suspend(cpuBound(i+1))
+      else IO.shift *> (if(i % 1000000 == 0) logLine(s"Reached $i") else IO.unit) *> IO.defer(cpuBound(i+1))
 
     for {
       _ <- logLine("Staring on default cs")

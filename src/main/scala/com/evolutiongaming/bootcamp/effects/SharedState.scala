@@ -9,8 +9,9 @@ import cats.effect.{Concurrent, ExitCode, IO, IOApp}
 import cats.implicits.{catsSyntaxMonadErrorRethrow, catsSyntaxParallelSequence}
 import cats.syntax.flatMap._
 import cats.syntax.functor._
+import cats.syntax.parallel._
 import com.evolutiongaming.bootcamp.effects.IosCommon.logger
-import io.chrisdavenport.log4cats.slf4j.Slf4jLogger
+import org.typelevel.log4cats.slf4j.Slf4jLogger
 
 import scala.concurrent.duration.{DurationInt, FiniteDuration}
 

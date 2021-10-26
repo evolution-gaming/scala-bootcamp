@@ -8,8 +8,8 @@ import org.http4s.dsl.io._
 import org.http4s.implicits._
 import io.chrisdavenport.epimetheus._
 import io.chrisdavenport.epimetheus.http4s.EpimetheusOps
-import io.chrisdavenport.log4cats.Logger
-import io.chrisdavenport.log4cats.slf4j.Slf4jLogger
+import org.typelevel.log4cats.Logger
+import org.typelevel.log4cats.slf4j.Slf4jLogger
 import org.http4s.server.middleware.Metrics
 import cats.implicits._
 
