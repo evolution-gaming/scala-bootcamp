@@ -1,4 +1,4 @@
-package com.evolutiongaming.bootcamp.cats
+package com.evolutiongaming.bootcamp.cats.v1
 
 import cats.effect.IO
 import scala.concurrent.Future

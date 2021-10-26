@@ -1,9 +1,7 @@
-package com.evolutiongaming.bootcamp.cats
+package com.evolutiongaming.bootcamp.cats.v1
 
 import cats.Monad
-import cats.data.EitherT
 import cats.effect.IO
-import cats.implicits._
 
 object For {
 
