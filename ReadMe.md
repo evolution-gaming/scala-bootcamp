@@ -69,4 +69,5 @@ All resources are listed in no particular order.
 * The [2020 Q1-Q2 bootcamp](https://evolution-gaming.timepad.ru/event/1106949/) has concluded
 * The [2020 Q3-Q4 bootcamp](/presentations/2020-q3-q4/Schedule.md) has concluded
 * The [2021 Q1-Q2 bootcamp](/presentations/2021-q1-q2/Schedule.md) has concluded
-* The [2021 Q3-Q4 bootcamp](Schedule.md) will start on 2021-09-14, applications are open at [https://scala-bootcamp.evolution.com/](https://scala-bootcamp.evolution.com/).
+* The [2021 Q3-Q4 bootcamp](Schedule.md) started on 2021-09-14 and is in progress
+* The 2022 Q1-Q2 bootcamp will start on 2022-02-22, applications will open at [https://scala-bootcamp.evolution.com/](https://scala-bootcamp.evolution.com/)
