@@ -1,8 +1,8 @@
 package com.evolutiongaming.bootcamp.tf.v2
 
-import cats.{Monad, catsInstancesForId}
-import cats.effect.{IO, Sync}
+import cats.Monad
 import cats.effect.concurrent.Ref
+import cats.effect.{IO, Sync}
 import cats.syntax.all._
 import com.evolutiongaming.bootcamp.tf.v2.Items.ValidationError.{EmptyName, NegativePrice}
 import com.evolutiongaming.bootcamp.tf.v2.Items.{Item, ValidationError}
