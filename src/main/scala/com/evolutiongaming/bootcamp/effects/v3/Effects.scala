@@ -1,7 +1,7 @@
 package com.evolutiongaming.bootcamp.effects.v3
 
 import cats.Monad
-import cats.effect.{Async, ExitCode, IO, IOApp, Sync}
+import cats.effect.{Async, ExitCode, IO, IOApp, MonadThrow, Sync}
 import cats.syntax.all._
 
 import java.util.concurrent.Executors
@@ -154,7 +154,7 @@ import com.evolutiongaming.bootcamp.effects.v3.ConsoleIO._
  */
 object HelloWorldIO extends IOApp {
 
-  private val nameProgram = for {
+  private val nameProgram: IO[Unit] = for {
     _    <- putString("What's your name?")
     name <- readString
     _    <- putString(s"Hi, $name!")
@@ -165,7 +165,28 @@ object HelloWorldIO extends IOApp {
 }
 
 object HelloWorldTF extends IOApp {
-  def run(args: List[String]): IO[ExitCode] = ???
+
+  trait Console[F[_]] {
+    def putString(value: String): F[Unit]
+    def readString: F[String]
+  }
+
+  object Console {
+    def apply[F[_]: Sync]: Console[F] =
+      new Console[F] {
+        def putString(value: String): F[Unit] = Sync[F].delay(println(value))
+        def readString: F[String]             = Sync[F].delay(StdIn.readLine())
+      }
+  }
+
+  def nameProgram[F[_]: Monad](console: Console[F]): F[Unit] =
+    for {
+      _    <- console.putString("What's your name?")
+      name <- console.readString
+      _    <- console.putString(s"Hi, $name!")
+    } yield ()
+
+  def run(args: List[String]): IO[ExitCode] = nameProgram(Console[IO]).as(ExitCode.Success)
 }
 
 object Exercise1_Common {
@@ -217,8 +238,26 @@ object Exercise1_Imperative {
  *  - Tests in `EffectsSpec` to check your work
  */
 object Exercise1_Functional extends IOApp {
+  import com.evolutiongaming.bootcamp.effects.Exercise1_Common.response
 
-  def process(console: Console, counter: Int = 0): IO[ExitCode] = ???
+  def process(console: Console, counter: Int = 0): IO[ExitCode] =
+    for {
+      _        <- console.putString("What is your favourite animal?")
+      animal   <- console.readString
+      output    = response(animal)
+      exitCode <- output
+                    .map { result => console.putString(result).map(_ => ExitCode.Success) } // .as *>
+                    .getOrElse {
+                      if (counter >= 2)
+                        console
+                          .putString("I am disappointed. You have failed to answer too many times.")
+                          .as(ExitCode.Error)
+                      else
+                        console
+                          .putString("Empty input is not valid, try again...")
+                          .flatMap(_ => process(console, counter + 1))
+                    }
+    } yield exitCode
 
   def run(args: List[String]): IO[ExitCode] = process(ConsoleIO)
 }
@@ -242,7 +281,7 @@ object SuspendApp extends IOApp {
   ): IO[Long] =
     n match {
       case 0 => IO.pure(a)
-      case _ => fib(n - 1, b, a + b).map(_ + 0) // Question: Why did I add this useless `.map` here?
+      case _ => IO(fib(n - 1, b, a + b).map(_ + 0)).flatten // Question: Why did I add this useless `.map` here?
     }
 
   def run(args: List[String]): IO[ExitCode] =
@@ -267,7 +306,7 @@ object Sequence extends IOApp {
       .flatMap(_ => putString(a.toString))
       .as(a)
 
-  private val tasks: List[IO[Int]] =
+  private val tasks: List[IO[Int]] = // List[IO[Int]] -> IO[List[Int]]
     listOfInts.map(printWithDelayAndReturn)
 
   private val sequenceProgram: IO[Unit] =
@@ -277,17 +316,33 @@ object Sequence extends IOApp {
       _         <- putString(s"end sequence, results: $sequenced")
     } yield ()
 
+  private val traverseProgram: IO[Unit] =
+    for {
+      _         <- putString("start traverse")
+      traversed <- listOfInts.traverse(printWithDelayAndReturn)
+      _         <- putString(s"end traverse, results: $traversed")
+    } yield ()
+
   private val parSequenceProgram: IO[Unit] =
     for {
       _         <- putString("start parSequence")
-      sequenced <- tasks.parUnorderedSequence
+      sequenced <- tasks.parSequence
       _         <- putString(s"end parSequence, results: $sequenced")
+    } yield ()
+
+  private val parTraverseProgram: IO[Unit] =
+    for {
+      _         <- putString("start traverse")
+      traversed <- listOfInts.parTraverse(printWithDelayAndReturn)
+      _         <- putString(s"end traverse, results: $traversed")
     } yield ()
 
   def run(args: List[String]): IO[ExitCode] =
     for {
-      _ <- sequenceProgram
-      _ <- parSequenceProgram
+//      _ <- sequenceProgram
+      _ <- traverseProgram
+//      _ <- parSequenceProgram
+      _ <- parTraverseProgram
     } yield ExitCode.Success
 }
 
@@ -393,16 +448,41 @@ object ErrorsExercise extends IOApp {
     override def toString: String = s"This is $name and he is $age years old"
   }
 
-  def readPerson[F[_]](console: Console[F]): F[Person] = {
+  def readPerson[F[_]: MonadThrow](console: Console[F]): F[Person] = {
 
-    val readName: F[Name] = ???
+    val readName: F[Name] =
+      for {
+        _          <- console.putString("Enter person name:")
+        nameString <- console.readString
+        name       <- Name
+                        .from(nameString)
+                        .fold(
+                          validationError => validationError.raiseError[F, Name],
+                          value => value.pure[F]
+                        )
+      } yield name
 
-    val readAge: F[Age] = ???
+    val readAge: F[Age] =
+      for {
+        _         <- console.putString("Enter person age:")
+        ageString <- console.readString
+        ageInt    <- Try(ageString.toInt).toOption
+                       .map(_.pure[F])
+                       .getOrElse(new IllegalArgumentException("Age should be an Integer").raiseError[F, Int])
+        age       <- Age
+                       .from(ageInt)
+                       .liftTo[F]
+      } yield age
 
-    ???
+    (readName, readAge).mapN(Person)
   }
 
-  def program[F[_]: Monad](console: Console[F]): F[Unit] = ??? // read person and print it
+  def program[F[_]: MonadThrow](console: Console[F]): F[Unit] =
+    readPerson(console)
+      .flatMap(person => console.putString(person.toString))
+      .handleErrorWith { error =>
+        console.putString(s"Reading person data failed with an error: ${error.getMessage}")
+      }
 
   def run(args: List[String]): IO[ExitCode] =
     program(Console[IO]).as(ExitCode.Success)
@@ -423,7 +503,7 @@ object AsyncApp extends IOApp {
   private val ec = Executors.newFixedThreadPool(4)
 
   def request(url: String, callback: Either[Throwable, Int] => Unit): Unit = {
-    val thread = new Thread() {
+    val thread = new Thread() { // TODO It could be not a thread
       override def run(): Unit = {
         println(s"Thread from pool: ${Thread.currentThread().getName}")
         val status = Try(requests.get(url).statusCode)
@@ -431,20 +511,20 @@ object AsyncApp extends IOApp {
       }
     }
 
-    ec.execute(thread)
+    ec.execute(thread) // <-
   }
 
   def requestF[F[_]: Async](url: String): F[Int] =
     Async[F].async { cb =>
       println(s"Starting async: ${Thread.currentThread().getName}")
-      val status = Try(requests.get(url).statusCode)
-      cb(status.toEither)
-//      request(url, cb)
+//      val status = Try(requests.get(url).statusCode)
+//      cb(status.toEither)
+      request(url, cb) // <-
     }
 
   override def run(args: List[String]): IO[ExitCode] = {
     val app = for {
-      response <- IO(StdIn.readLine()) >>= requestF[IO]
+      response <- IO(StdIn.readLine()) >>= requestF[IO] // .flatMap(a => requestF[IO](a))
       _        <- IO(println(s"Finished: ${Thread.currentThread().getName}"))
       _        <- IO(println(response))
     } yield ()

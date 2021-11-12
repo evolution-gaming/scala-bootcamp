@@ -1,9 +1,9 @@
 package com.evolutiongaming.bootcamp.effects.v3
 
-import cats.effect.{ExitCode, IO, IOApp}
+import cats.effect.{Concurrent, ExitCode, IO, IOApp, Sync, Timer}
 import cats.syntax.all._
 
-import java.util.concurrent.Executors
+import java.util.concurrent.{Executors, TimeoutException}
 import java.util.concurrent.atomic.AtomicBoolean
 import scala.annotation.tailrec
 import scala.concurrent.duration._
@@ -57,7 +57,7 @@ object FutureTimeout extends IOApp {
                )
              )
            )
-      //      _ <- IO.sleep(5.seconds)
+//            _ <- IO.sleep(5.seconds)
     } yield ExitCode.Success
 }
 
@@ -79,7 +79,7 @@ object IOTimeout extends IOApp {
     for {
       _ <- runTask(10).timeout(5.seconds).attempt
       _ <- IO.delay(println(s"${Thread.currentThread().toString} Cancelled"))
-      //      _ <- IO.sleep(5.seconds)
+      _ <- IO.sleep(5.seconds)
     } yield ExitCode.Success
 }
 
@@ -97,8 +97,9 @@ object RaceApp extends IOApp {
   def run(args: List[String]): IO[ExitCode] =
     for {
       _ <- IO.race(tick, workThatDoesFaster).void
-      //      _ <- IO.sleep(5.seconds)
-      _ <- IO.delay(println("Terminating"))
+      _ <- IO.sleep(5.seconds)
+      _ <- IO.delay(println("Terminating")) // Sync[F].delay
+      _ <- IO(println("Terminating"))
     } yield ExitCode.Success
 }
 
@@ -111,10 +112,32 @@ object SelfMadeTimeoutExercise extends IOApp {
       .foreverM
       .void
 
-  def timeoutIO[A](task: IO[A], timeout: FiniteDuration): IO[A] = ???
+  def tickF[F[_]](implicit F: Sync[F], T: Timer[F]): F[Unit] =
+    F
+      .delay(println("Working work long long never terminating"))
+      .flatMap(_ => T.sleep(1.second))
+      .foreverM
+      .void
+
+  def timeoutIO[A](task: IO[A], timeout: FiniteDuration): IO[A] =
+    IO
+      .race(
+        IO.sleep(timeout).as(new TimeoutException(s"Timeout of $timeout reached")),
+        task
+      )
+      .flatMap(IO.fromEither)
+
+  def timeoutF[F[_] : Concurrent : Timer, A](task: F[A], timeout: FiniteDuration): F[A] =
+    Concurrent[F]
+      .race(
+        Timer[F].sleep(timeout).as(new TimeoutException(s"Timeout of $timeout reached")),
+        task
+      )
+      .flatMap(Concurrent[F].fromEither)
 
   def run(args: List[String]): IO[ExitCode] =
-    timeoutIO(tick, 5.seconds).as(ExitCode.Success)
+//    timeoutIO(tick, 5.seconds).as(ExitCode.Success)
+    timeoutF[IO, Unit](tickF[IO], 5.seconds).as(ExitCode.Success)
 }
 
 /* When writing your cancellable code, be aware that cancellation is a concurrent action.
@@ -161,11 +184,11 @@ object Cancellable extends IOApp {
 
     val program = for {
       _     <- IO.delay(println("Launching cancelable"))
-      io     = IO.cancelable[Long] { cb =>
+      io     = IO.cancelable[Long] { cb => // IO.async
                  val legacy = new LegacyCode
                  legacy.compute(2L, Long.MaxValue)(res => cb(Right(res)), e => cb(Left(e)))
 //                 legacy.compute(2L, 100)(res => cb(Right(res)), e => cb(Left(e)))
-                 IO.delay(legacy.cancel())
+                 IO.delay(legacy.cancel()) // IO[Unit]
                }
       fiber <- io.start
       _     <- IO.delay(println(s"Started $fiber"))
@@ -176,7 +199,7 @@ object Cancellable extends IOApp {
                )
     } yield ExitCode.Success
 
-    program.guarantee(IO(ec.shutdown()))
+    program.guarantee(IO(ec.shutdown())) // try + catch + finalize
   }
 }
 
@@ -210,13 +233,13 @@ object CancelBoundaries extends IOApp {
     def nonCancellableTimes(rec: Int): IO[Unit] =
       for {
         _ <- IO.delay(println(s"Running remaining iterations: $rec"))
-        _ <- IO.sleep(1.seconds).uncancelable
+        _ <- IO.sleep(1.seconds)
         _ <- if (rec > 0) IO.suspend(nonCancellableTimes(rec - 1)) else IO.unit
       } yield ()
 
     for {
       _   <- IO.delay(println("Starting nonCancelableProgram"))
-      fib <- nonCancellableTimes(10).start
+      fib <- nonCancellableTimes(10).uncancelable.start
       _   <- IO.sleep(5.seconds)
       _   <- fib.cancel
       _   <- IO.delay(println("Cancelled nonCancelableProgram"))
@@ -249,7 +272,7 @@ object CancelBoundaries extends IOApp {
   def run(args: List[String]): IO[ExitCode] =
     for {
       _ <- cancelableProgram
-      _ <- nonCancelableProgram
+//      _ <- nonCancelableProgram
     } yield ExitCode.Success
 }
 
@@ -268,7 +291,7 @@ object CancelBoundariesExercise extends IOApp {
         maxRetries: Int,
         interval: FiniteDuration
       ): IO[A] =
-        task
+        IO.cancelBoundary *> task
           .handleErrorWith {
             case NonFatal(e) =>
               IO
@@ -309,7 +332,7 @@ object CancelBoundariesExercise extends IOApp {
 
     def cpuBoundCompute(value: BigInt, multiplier: BigInt): IO[BigInt] = {
       val log = IO.delay(println(s"${Thread.currentThread().toString} Calculating... $multiplier"))
-      log *> IO.suspend(cpuBoundCompute(value * multiplier, multiplier + 1))
+      IO.cancelBoundary *> log *> IO.suspend(cpuBoundCompute(value * multiplier, multiplier + 1))
     }
 
     for {
@@ -324,7 +347,7 @@ object CancelBoundariesExercise extends IOApp {
 
   def run(args: List[String]): IO[ExitCode] =
     for {
-      _ <- retryExercise
+//      _ <- retryExercise
       _ <- computeExercise
     } yield ExitCode.Success
 }
