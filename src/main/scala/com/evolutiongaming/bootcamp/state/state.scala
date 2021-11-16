@@ -480,6 +480,16 @@ object BankTransferDemo extends IOApp {
   *  - use STM
   */
 
+/**
+  * Software Transactional Memory (STM) is a modular composable concurrency data structure.
+  * It allows us to combine and compose a group of memory operations and perform all of them in one single atomic operation.
+  *
+  * It supports ACI properties:
+  * Atomicity - all updates either run once or not at all
+  * Consistency - reads always get consistent view of the state, no partial updates
+  * Isolation - multiple transactional updates are isolated and don't interfere with each other
+  */
+
 object STMDemo extends App {
 
   def withdraw(account: TRef[Long], amount: Long): STM[String, Unit] =
@@ -510,4 +520,27 @@ object STMDemo extends App {
 
   zio.Runtime.default.unsafeRun(program)
 }
+
+/**
+  * Transactional data structures:
+  *  - TRef
+  *  - TArray
+  *  - TSet
+  *  - TSemaphore
+  *  ...
+  *
+  *
+  * Benefits of STM:
+  *
+  * 1. Composable
+  * 2. Declarative
+  * 3. Optimistic Concurrency
+  * 4. Lock-free
+  * 5. Fine-grained locking
+  *
+  * Implications of STM:
+  *
+  * 1. Can't do effects inside STM
+  * 2. Large allocations
+  */
 
