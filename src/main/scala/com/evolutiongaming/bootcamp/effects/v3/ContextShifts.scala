@@ -46,13 +46,22 @@ object ContextShifts extends IOApp {
 
   def basicShiftingProgram: IO[Unit] = {
 
+    val cpuExecutionContext: ExecutionContext = ExecutionContext.fromExecutor(
+      Executors.newFixedThreadPool(2, newThreadFactory("cpu-bound"))
+    )
+
+    val cpuShift: ContextShift[IO] = IO.contextShift(cpuExecutionContext)
+
     def cpuBoundTask(i: Int): IO[Int] =
       if (i == 100_000_000) IO.pure(i)
-      else (if (i % 10_000_000 == 0) logLine(s"Reached $i") else IO.unit) *> IO.suspend(cpuBoundTask(i + 1))
+      else cpuShift.shift *> (if (i % 10_000_000 == 0) logLine(s"Reached $i") else IO.unit) *> IO.suspend(cpuBoundTask(i + 1))
 
     for {
       _ <- logLine("Started")
+      _ <- cpuShift.shift // <- different thread pool
       _ <- cpuBoundTask(1)
+      _ <- ContextShift[IO].shift // == IO.shift
+//        _ <- ContextShift[IO].evalOn(cpuExecutionContext)(cpuBoundTask(1))
       _ <- logLine("Finished")
     } yield ()
   }
@@ -66,16 +75,30 @@ object ContextShifts extends IOApp {
     */
   def blockingProgram: IO[Unit] = {
 
+    val blocker = Blocker.fromExecutorService(
+      IO.delay(Executors.newCachedThreadPool(newThreadFactory("blocker-pool")))
+    )
+
     def blockingCall(id: Int): Unit = {
       println(s"${Thread.currentThread().toString} Starting blocking work id:$id")
       Thread.sleep(5000)
       println(s"${Thread.currentThread().toString} Finished blocking work id:$id")
     }
 
-    ???
+    blocker.use { blocker =>
+            (0 to 100).toList.map(i => blocker.blockOn(IO.delay(blockingCall(i)))).parSequence.void
+//      (0 to 100).toList.parTraverse(i => blocker.blockOn(IO.delay(blockingCall(i)))).void
+//      (0 to 100).toList.parTraverse(i => ContextShift[IO].blockOn(blocker)(IO.delay(blockingCall(i)))).void
+    }
   }
 
   def threadStarvationProgram: IO[Unit] = {
+
+    val cpuExecutionContext: ExecutionContext = ExecutionContext.fromExecutor(
+      Executors.newFixedThreadPool(2, newThreadFactory("cpu-bound"))
+    )
+
+    val cpuShift: ContextShift[IO] = IO.contextShift(cpuExecutionContext)
 
     def blockingCall(id: Int): Unit = {
       println(s"${Thread.currentThread().toString} Starting blocking work id:$id")
@@ -85,14 +108,16 @@ object ContextShifts extends IOApp {
 
     for {
       _ <- logLine("Started")
-      _ <- logLine("Finished")
+      fiber <- (0 to 9).toList.parTraverse(i => cpuShift.shift *> IO.delay(blockingCall(i))).void.start
+      _ <- cpuShift.shift *> logLine("Finished")
+      _ <- fiber.join
     } yield ()
   }
 
   def run(args: List[String]): IO[ExitCode] =
-    basicShiftingProgram.as(ExitCode.Success)
+//    basicShiftingProgram.as(ExitCode.Success)
 //    blockingProgram.as(ExitCode.Success)
-//    threadStarvationProgram.as(ExitCode.Success)
+    threadStarvationProgram.as(ExitCode.Success)
 }
 
 object ContextShiftsExercise extends IOApp {
@@ -132,5 +157,4 @@ object ContextShiftsExercise extends IOApp {
       _ <- singleThreadProgram
 //      _ <- blockingProgram
     } yield ExitCode.Success
-
 }

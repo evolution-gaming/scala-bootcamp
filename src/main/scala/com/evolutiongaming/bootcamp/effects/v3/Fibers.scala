@@ -17,5 +17,13 @@ object Fibers extends IOApp {
 
   def logLine(s: => String): IO[Unit] = IO.suspend(IO.delay(println(s"${Thread.currentThread().toString} $s")))
 
-  def run(args: List[String]): IO[ExitCode] = ???
+//  val io: IO[Unit] = (IO.sleep(10.seconds) *> logLine("Delayed")) // Fiber[IO, Unit]
+
+  def run(args: List[String]): IO[ExitCode] =
+    for {
+      _ <- logLine("Started")
+      fiber <- (IO.sleep(10.seconds) *> logLine("Delayed")).start
+      _ <- fiber.join
+      _ <- logLine("Finished")
+    } yield ExitCode.Success
 }
