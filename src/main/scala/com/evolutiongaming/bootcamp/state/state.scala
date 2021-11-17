@@ -10,6 +10,10 @@ import fs2.concurrent.Queue
 import zio.ZIO
 import zio.stm.{STM, TRef}
 
+import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.atomic.{AtomicLong, AtomicReference}
+import java.util.function.UnaryOperator
+import scala.annotation.tailrec
 import scala.collection.mutable.ArrayBuffer
 import scala.concurrent.duration._
 
@@ -123,15 +127,23 @@ trait Counter[F[_]] {
 
 object Counter {
   // the outer IO wrapping is necessary to suspend creation of mutable variable `count`
-  def create: IO[Counter[IO]] = IO {
-    var count: Long = 0
+  /*def create: IO[Counter[IO]] = IO {
+    var count: AtomicLong = new AtomicLong(0)
 
     new Counter[IO] {
-      override def inc: IO[Unit] = IO(count += 1)
+      override def inc: IO[Unit] = IO(count.incrementAndGet())
 
-      override def get: IO[Long] = IO(count)
+      override def get: IO[Long] = IO(count.get())
     }
-  }
+  }*/
+  def create: IO[Counter[IO]] =
+    Ref.of[IO, Long](0).map { ref =>
+      new Counter[IO] {
+        override def inc: IO[Unit] = ref.update(_ + 1)
+
+        override def get: IO[Long] = ref.get
+      }
+    }
 
   def createUnsafe: Counter[IO] =
     new Counter[IO] {
@@ -143,7 +155,7 @@ object Counter {
     }
 }
 
-object CounterDemo {
+object CounterDemo extends IOApp {
   val counter = Counter.create
 
   // Question 0: what does it print?
@@ -152,6 +164,9 @@ object CounterDemo {
     c <- counter.flatMap(_.get)
     _ <- IO(println(c))
   } yield ()
+
+  override def run(args: List[String]): IO[ExitCode] =
+    program.as(ExitCode.Success)
 }
 
 object StateSharingAndIsolationDemo extends App {
@@ -253,6 +268,30 @@ trait AtomicRef[F[_], A] {
 
 object AtomicRef {
   // Exercise 0: let's implement it
+
+  import cats.syntax.functor._
+
+  def create[F[_] : Sync, A](initialValue: A): F[AtomicRef[F, A]] =
+    Sync[F].delay(new AtomicReference[A](initialValue)).map { ref =>
+      new AtomicRef[F, A] {
+        override def get: F[A] = Sync[F].delay(ref.get())
+
+        override def set(a: A): F[Unit] = Sync[F].delay(ref.set(a))
+
+        override def update(f: A => A): F[Unit] = {
+          @tailrec
+          def loop(): Unit = {
+            val current = ref.get()
+            val next = f(current)
+            if (ref.compareAndSet(current, next)) ()
+            else loop()
+          }
+
+          Sync[F].delay(loop())
+        }
+        //Sync[F].delay(ref.updateAndGet(a => f(a))).void
+      }
+    }
 }
 
 object MutableVsImmutableStateDemo extends IOApp {
@@ -268,9 +307,12 @@ object MutableVsImmutableStateDemo extends IOApp {
   }
 
   val mutableEventLog: IO[EventLog[IO]] =
-    Ref.of[IO, ArrayBuffer[String]](ArrayBuffer.empty).map { ref =>
+    Ref.of[IO, ConcurrentHashMap[String, Int]](new ConcurrentHashMap[String, Int]()).map { ref =>
       new EventLog[IO] {
-        override def append(event: String): IO[Unit] = ref.update(_.addOne(event))
+        override def append(event: String): IO[Unit] = ref.update { map =>
+          map.put(event, 42)
+          map
+        }
 
         override def count: IO[Int] = ref.get.map(_.size)
       }
@@ -362,7 +404,7 @@ object SemaphoreDemo extends IOApp {
 
   object PreciousResource {
     def create: IO[PreciousResource] =
-      Semaphore[IO](1).map(new PreciousResource(_))
+      Semaphore[IO](3).map(new PreciousResource(_))
   }
 
   override def run(args: List[String]): IO[ExitCode] =
@@ -382,7 +424,13 @@ trait RateLimiter[F[_]] {
 
 object RateLimiter {
   // Exercise 1: implement it
-  def create(n: Long): IO[RateLimiter[IO]] = IO(sys.error("implement me"))
+  def create(n: Long)(implicit C: Concurrent[IO]): IO[RateLimiter[IO]] =
+    Semaphore[IO](n).map { sem =>
+      new RateLimiter[IO] {
+        override def apply[A](fa: IO[A]): IO[A] =
+          sem.withPermit(fa)
+      }
+    }
 }
 
 object RateLimiterDemo extends IOApp {
@@ -408,8 +456,8 @@ object QueueDemo extends IOApp {
 
   def producer(n: Int, delay: FiniteDuration, queue: Queue[IO, Int]): IO[Unit] =
     List.range(1, n)
-      .traverse(queue.offer1(_).delayBy(delay)) *>
-      queue.offer1(-1) *>
+      .traverse(queue.enqueue1(_).delayBy(delay)) *>
+      queue.enqueue1(-1) *>
       IO(println("Producer done"))
 
   def consumer(delay: FiniteDuration, queue: Queue[IO, Int]): IO[Unit] =
@@ -422,7 +470,7 @@ object QueueDemo extends IOApp {
     for {
       queue <- Queue.bounded[IO, Int](10)
       prod <- producer(50, 10.millis, queue).start
-      _ <- consumer(100.millis, queue)
+      _ <- consumer(30.millis, queue)
       _ <- prod.join
     } yield ExitCode.Success
 }
@@ -445,11 +493,19 @@ object BankTransferDemo extends IOApp {
 
   // Exercise 2: make it atomic
   def withdraw(account: Ref[IO, Long], amount: Long): IO[Unit] =
-    for {
-      balance <- account.get
-      _ <- if (balance < amount) IO.raiseError(new Exception("Insufficient funds")) else IO.unit
-      _ <- account.update(_ - amount)
-    } yield ()
+    account.access.flatMap {
+      case (balance, setter) =>
+        if (balance < amount) IO.raiseError(new Exception("Insufficient funds"))
+        else setter(balance - amount).flatMap {
+          case true => IO.pure(())
+          case false => withdraw(account, amount)
+        }
+    }
+  /*for {
+    balance <- account.get
+    _ <- if (balance < amount) IO.raiseError(new Exception("Insufficient funds")) else IO.unit
+    _ <- account.update(_ - amount)
+  } yield ()*/
 
   def deposit(account: Ref[IO, Long], amount: Long): IO[Unit] =
     account.update(_ + amount)
@@ -502,8 +558,8 @@ object STMDemo extends App {
   def transfer(from: TRef[Long], to: TRef[Long], amount: Long): zio.IO[String, Unit] =
     STM.atomically {
       for {
-        _ <- withdraw(from, amount)
         _ <- deposit(to, amount)
+        _ <- withdraw(from, amount)
       } yield ()
     }
 
