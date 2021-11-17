@@ -3,10 +3,10 @@ package com.evolutiongaming.bootcamp.state
 import cats.Monad
 import cats.effect._
 import cats.effect.concurrent.{Deferred, Ref, Semaphore}
-import fs2.concurrent.Queue
 import cats.implicits.toTraverseOps
 import cats.instances.list._
 import cats.syntax.parallel._
+import fs2.concurrent.Queue
 import zio.ZIO
 import zio.stm.{STM, TRef}
 
@@ -31,9 +31,12 @@ import scala.concurrent.duration._
   */
 
 /**
-  * Referential transparency is the core of pure FP.
-  * It means that any variable in the program can be substituted with the expression it is bound to without changing
-  * the meaning of the program (substitution model, just like in math).
+  * Referential transparency is the core of pure FP, it enables:
+  *  - substitution model
+  *  - functional composition (no statements, only expressions)
+  *  - local reasoning
+  *
+  * Side effects break referential transparency
   */
 object ReferentialTransparencyDemo extends App {
   // this is pure
@@ -42,12 +45,6 @@ object ReferentialTransparencyDemo extends App {
   val y1 = "hello".reverse ++ "hello".reverse
   println(s"y = $y, y1 = $y1")
 }
-
-/**
-  * Referential transparency is king, it enables functional composition - referentially transparent programs compose
-  * nicely into larger referentially transparent programs.
-  * It also enables local reasoning - to understand how a piece of code works you don't need to understand the surrounding.
-  */
 
 /**
   * Immutable shared state is referentially transparent.
@@ -117,6 +114,7 @@ object MutableSharedStateDemo extends App {
   *
   * Rule: access, modification and creation of mutable state needs suspension in effect.
   */
+
 trait Counter[F[_]] {
   def inc: F[Unit]
 
@@ -527,7 +525,7 @@ object STMDemo extends App {
   *  - TArray
   *  - TSet
   *  - TSemaphore
-  *  ...
+  *    ...
   *
   *
   * Benefits of STM:
