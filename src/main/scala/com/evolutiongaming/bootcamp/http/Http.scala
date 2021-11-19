@@ -78,7 +78,7 @@ object HttpIntroduction {
   // PATCH
   // The PATCH method applies partial modifications to a resource.
 
-  // | HTTP method | Request has Body | Safe | Idempotent | Cacheable |
+  // | HTTP Method | Request Has Body | Safe | Idempotent | Cacheable |
   // |-------------+------------------+------+------------+-----------|
   // | GET         | Optional         | Yes  | Yes        | Yes       |
   // | POST        | Yes              | No   | No         | Yes       |
@@ -96,7 +96,7 @@ object HttpIntroduction {
 
   // 2. HTTP is easily extensible. For example, via custom HTTP headers.
 
-  // 3. HTTP is stateless, but not sessionless. Each HTTP request is independent, it has no links to other
+  // 3. HTTP is stateless, but not sessionless. Each HTTP request is independent. It has no links to other
   // requests sent over the same connection. However, HTTP supports cookies (small pieces of data stored by
   // the client and passed alongside related HTTP requests), which allow the use of stateful sessions.
 
@@ -205,7 +205,7 @@ object HttpServer extends IOApp {
     import org.http4s.circe.CirceEntityCodec._
 
     // User JSON decoder can also be declared explicitly instead of importing from `CirceEntityCodec`:
-    // implicit val userDecoder = org.http4s.circe.jsonOf[IO, User]
+    // implicit val userDecoder: EntityDecoder[IO, User] = org.http4s.circe.jsonOf[IO, User]
 
     HttpRoutes.of[IO] {
 
@@ -218,25 +218,27 @@ object HttpServer extends IOApp {
     }
   }
 
-  // BODY ENCODING/DECODING
+  // CUSTOM ENTITY DECODERS
 
-  // It is possible to write custom decoders for the HTTP body.
+  // It is possible to define custom entity decoders for HTTP request bodies.
   private val entityRoutes = {
-    implicit val userDecoder = EntityDecoder.decodeBy(MediaType.text.plain) { m: Media[IO] =>
-      val NameRegex = """\((.*),(\d{1,3})\)""".r
-      EitherT {
-        m.as[String].map {
-          case NameRegex(name, age) => User(name, age.toInt).asRight
-          case s => InvalidMessageBodyFailure(s"Invalid value: $s").asLeft
+
+    implicit  val userDecoder: EntityDecoder[IO, User] = EntityDecoder
+      .decodeBy(MediaType.text.plain) { m: Media[IO] =>
+        val NameRegex = """\((.*),(\d{1,3})\)""".r
+        EitherT {
+          m.as[String].map {
+            case NameRegex(name, age) => User(name, age.toInt).asRight
+            case s => InvalidMessageBodyFailure(s"Invalid value: $s").asLeft
+          }
         }
       }
-    }
 
     HttpRoutes.of[IO] {
 
       // curl -XPOST 'localhost:9001/entity' -d '(John,18)'
       case req @ POST -> Root / "entity" =>
-        req.as[User].flatMap(user => Ok(s"Hello ${ user.name }!"))
+        req.as[User].flatMap(user => Ok(s"Hello, ${ user.name }!"))
     }
   }
 
@@ -261,9 +263,14 @@ object HttpServer extends IOApp {
       }
   }
 
-  private[http] val httpApp = {
-    helloRoutes <+> paramsRoutes <+> headersRoutes <+> jsonRoutes <+> entityRoutes <+> multipartRoutes
-  }.orNotFound
+  private[http] val httpApp = Seq(
+    helloRoutes,
+    paramsRoutes,
+    headersRoutes,
+    jsonRoutes,
+    entityRoutes,
+    multipartRoutes,
+  ).reduce(_ <+> _).orNotFound
 
   override def run(args: List[String]): IO[ExitCode] =
     BlazeServerBuilder[IO](ExecutionContext.global)
@@ -300,8 +307,24 @@ object HttpClient extends IOApp {
         // curl "localhost:9001/params/validate?timestamp=2020-11-04T14:19:54.736Z"
         _ <- printLine()
 
-        _ <- printLine(string = "Executing request with headers and cookies:")
-        _ <- client.expect[String](Method.GET(uri / "headers", Header("Request-Header", "Request header value"))) >>= printLine
+        _ <- for {
+          _ <- printLine(string = "Executing request with headers and cookies:")
+          request <- Method.GET(uri / "headers", Header("Request-Header", "Request header value"))
+
+          // `client.run()` provides more flexibility than `client.expect()`, since the entire response
+          // becomes available for consumption and processing as `Resource[IO, Response[IO]]`.
+          response <- client.run(request).use { response =>
+            response.bodyText.compile.string.map { bodyString =>
+              s"""
+                |Response body is:
+                |$bodyString
+                |
+                |Response headers are:
+                |${response.headers}""".stripMargin
+            }
+          }
+          _ <- printLine(response)
+        } yield ()
 
         // Exercise 5. Call HTTP endpoint, implemented in scope of Exercise 2.
         // curl -v "localhost:9001/cookies" -b "counter=9"
@@ -322,9 +345,10 @@ object HttpClient extends IOApp {
 
         _ <- printLine(string = "Executing request with custom encoded entities:")
         _ <- {
-          implicit val Encoder = EntityEncoder.stringEncoder[IO].contramap { user: User =>
-            s"(${user.name},${user.age})"
-          }
+          implicit val encoder: EntityEncoder[IO, User] = EntityEncoder.stringEncoder[IO]
+            .contramap { user: User =>
+              s"(${user.name},${user.age})"
+            }
 
           client.expect[String](Method.POST(User("John", 18), uri / "entity")) >>= printLine
         }
