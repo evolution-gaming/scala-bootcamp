@@ -253,9 +253,9 @@ object HttpServer extends IOApp {
     // 1. character - contains a single character;
     // 2. file - contains a text file.
     //
-    // The endpoint should count how many times the given letter is present in the file and return that number
-    // back in OK 200 response. 400 Bad Request response with an empty body is expected if the request is
-    // invalid for any reason.
+    // The endpoint should count how many times the given character is present in the file (case-sensitive)
+    // and return that number back in OK 200 response. 400 Bad Request response with an empty body is
+    // expected if the request is invalid for any reason.
     // curl -XPOST "localhost:9001/multipart" -F "character=n" -F file=@text.txt
     case req @ POST -> Root / "multipart" =>
       req.as[Multipart[IO]].flatMap { multipart =>
@@ -315,12 +315,10 @@ object HttpClient extends IOApp {
           // becomes available for consumption and processing as `Resource[IO, Response[IO]]`.
           response <- client.run(request).use { response =>
             response.bodyText.compile.string.map { bodyString =>
-              s"""
-                |Response body is:
-                |$bodyString
-                |
-                |Response headers are:
-                |${response.headers}""".stripMargin
+              s"""Response body is:
+              |$bodyString
+              |Response headers are:
+              |${response.headers}""".stripMargin
             }
           }
           _ <- printLine(response)
