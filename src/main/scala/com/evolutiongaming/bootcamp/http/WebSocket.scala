@@ -5,7 +5,7 @@ import cats.syntax.all._
 import fs2.{Pipe, Stream}
 import fs2.concurrent.{Queue, Topic}
 import org.http4s._
-import org.http4s.client.jdkhttpclient.{JdkWSClient, WSConnectionHighLevel, WSFrame, WSRequest}
+import org.http4s.client.jdkhttpclient.{JdkWSClient, WSFrame, WSRequest}
 import org.http4s.dsl.io._
 import org.http4s.implicits._
 import org.http4s.server.blaze.BlazeServerBuilder
@@ -14,8 +14,6 @@ import org.http4s.websocket.WebSocketFrame
 
 import java.net.http.HttpClient
 import scala.concurrent.ExecutionContext
-import cats.effect.Clock
-import java.time.Instant
 
 object WebSocketIntroduction {
 
@@ -80,7 +78,7 @@ object WebSocketServer extends IOApp {
 
   // Topics provide an implementation of the publish-subscribe pattern with an arbitrary number of
   // publishers and an arbitrary number of subscribers.
-  private def chatRoute(chatTopic: Topic[IO, String]) = HttpRoutes.of[IO] {
+  private def chatRoute(chatTopic: Topic[IO, String]): HttpRoutes[IO] = HttpRoutes.of[IO] {
 
     // websocat "ws://localhost:9002/chat"
     case GET -> Root / "chat" =>
@@ -97,7 +95,7 @@ object WebSocketServer extends IOApp {
       // Tip: to do this you will likely need fs2.Pull.
   }
 
-  private def httpApp(chatTopic: Topic[IO, String]) = {
+  private def httpApp(chatTopic: Topic[IO, String]): HttpApp[IO] = {
     echoRoute <+> chatRoute(chatTopic)
   }.orNotFound
 
@@ -113,10 +111,12 @@ object WebSocketServer extends IOApp {
     } yield ExitCode.Success
 }
 
-// Regrettably, Http4s does not yet provide a WebSocket client (contributions are welcome!):
-// https://github.com/http4s/http4s/issues/330
-// But there is an Http4s wrapper for builtin JDK HTTP client.
+// Http4s does not yet provide a full-fledged WebSocket client (contributions are welcome):
+// https://github.com/http4s/http4s/issues/330.
+//
+// However, there is a purely functional wrapper for the built-in JDK 11+ HTTP client available.
 object WebSocketClient extends IOApp {
+
   private val uri = uri"ws://localhost:9002/echo"
 
   private def printLine(string: String = ""): IO[Unit] = IO(println(string))
@@ -127,7 +127,7 @@ object WebSocketClient extends IOApp {
 
     clientResource.use { client =>
       for {
-        _ <- client.send(WSFrame.Text("hello"))
+        _ <- client.send(WSFrame.Text("Hello, world!"))
         _ <- client.receiveStream.collectFirst {
           case WSFrame.Text(s, _) => s
         }.compile.string >>= printLine
