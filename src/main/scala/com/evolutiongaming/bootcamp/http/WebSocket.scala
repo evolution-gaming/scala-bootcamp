@@ -112,9 +112,8 @@ object WebSocketServer extends IOApp {
 }
 
 // Http4s does not yet provide a full-fledged WebSocket client (contributions are welcome):
-// https://github.com/http4s/http4s/issues/330.
-//
-// However, there is a purely functional wrapper for the built-in JDK 11+ HTTP client available.
+// https://github.com/http4s/http4s/issues/330. However, there is a purely functional wrapper
+// for the built-in JDK 11+ HTTP client available.
 object WebSocketClient extends IOApp {
 
   private val uri = uri"ws://localhost:9002/echo"
