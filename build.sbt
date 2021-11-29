@@ -77,7 +77,8 @@ libraryDependencies ++= Seq(
   "org.slf4j" % "slf4j-nop" % "1.6.4",
   "com.typesafe.slick" %% "slick-hikaricp" % slickVersion,
   "com.lihaoyi" %% "requests" % "0.6.5",
-  "dev.zio" %% "zio" % "2.0.0-M4"
+  "dev.zio" %% "zio" % "2.0.0-M4",
+  "io.monix" %% "monix-reactive" % "3.4.0",
 )
 
 addCompilerPlugin("org.typelevel" %% "kind-projector" % "0.11.1" cross CrossVersion.full)
