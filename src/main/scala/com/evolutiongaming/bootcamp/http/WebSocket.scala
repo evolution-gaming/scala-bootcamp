@@ -69,11 +69,12 @@ object WebSocketServer extends IOApp {
         )
       } yield response
 
-      // Exercise 1. Send current time to user when he asks it.
-      // Note: getting current time is a side effect.
+    // Exercise 1. Change the echo route to respond with the current time, when the client sends "time". Allow
+    // whitespace characters before and after the command, so " time " should also be considered valid. Note
+    // that getting the current time is a side effect.
 
-      // Exercise 2. Notify user periodically how long he is connected.
-      // Tip: you can merge streams via `merge` operator.
+    // Exercise 2. Change the echo route to notify the client every 5 seconds how long it is connected.
+    // Tip: you can merge streams via `merge` operator.
   }
 
   // Topics provide an implementation of the publish-subscribe pattern with an arbitrary number of
@@ -88,11 +89,11 @@ object WebSocketServer extends IOApp {
           case WebSocketFrame.Text(message, _) => message
         }),
         // Outgoing stream of WebSocket messages to send to the client.
-        send = chatTopic.subscribe(10).map(WebSocketFrame.Text(_)),
+        send = chatTopic.subscribe(maxQueued = 10).map(WebSocketFrame.Text(_)),
       )
 
-      // Exercise 3. Use first message from a user as his username and prepend it to each his message.
-      // Tip: to do this you will likely need fs2.Pull.
+    // Exercise 3. Change the chat route to use the first message from a client as its username and prepend
+    // it to every follow-up message. Tip: you will likely need to use fs2.Pull.
   }
 
   private def httpApp(chatTopic: Topic[IO, String]): HttpApp[IO] = {
@@ -101,7 +102,7 @@ object WebSocketServer extends IOApp {
 
   override def run(args: List[String]): IO[ExitCode] =
     for {
-      chatTopic <- Topic[IO, String]("Hello!")
+      chatTopic <- Topic[IO, String](initial = "Welcome to the chat!")
       _ <- BlazeServerBuilder[IO](ExecutionContext.global)
       .bindHttp(port = 9002, host = "localhost")
       .withHttpApp(httpApp(chatTopic))
