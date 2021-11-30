@@ -303,7 +303,7 @@ object HttpClient extends IOApp {
         _ <- client.expect[String](uri / "params" / "2020-11-10") >>= printLine
         _ <- client.expect[String]((uri / "params").withQueryParam(key = "date", value = "2020-11-10")) >>= printLine
 
-        // Exercise 4. Call HTTP endpoint, implemented in scope of Exercise 1.
+        // Exercise 4. Call HTTP endpoint, implemented in scope of Exercise 1, and print the response body.
         // curl "localhost:9001/params/validate?timestamp=2020-11-04T14:19:54.736Z"
         _ <- printLine()
 
@@ -324,7 +324,7 @@ object HttpClient extends IOApp {
           _ <- printLine(response)
         } yield ()
 
-        // Exercise 5. Call HTTP endpoint, implemented in scope of Exercise 2.
+        // Exercise 5. Call HTTP endpoint, implemented in scope of Exercise 2, and print the response cookie.
         // curl -v "localhost:9001/cookies" -b "counter=9"
         _ <- printLine()
 
