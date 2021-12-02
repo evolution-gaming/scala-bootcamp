@@ -1,0 +1,30 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: todo-list-svc
+spec:
+  selector:
+    app: todo-list
+  type: LoadBalancer
+  ports:
+    - protocol: TCP
+      port: 8080
+      targetPort: 8080
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: todo-list-depl
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: todo-list
+  template:
+    metadata:
+      labels:
+        app: todo-list
+    spec:
+      containers:
+        - name: todo-list
+          image: riblestrype/todo-list-fs

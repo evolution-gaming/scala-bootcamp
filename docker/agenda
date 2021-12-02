@@ -1,0 +1,12 @@
+1. What is Docker and containers
+2. First example
+3. Some basic operations
+4. Layers
+5. Volumes
+6. Second example
+7. Docker Compose
+8. Kubernetes intro
+9. Kubernetes imperative deployments
+10. Kubernetes declarative deployments
+    a. Restarts
+    b. Scaling

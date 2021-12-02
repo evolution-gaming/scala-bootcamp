@@ -1,0 +1,13 @@
+docker run -d --rm \
+    --name todo-postgres \
+    -e POSTGRES_PASSWORD=secret \
+    -e POSTGRES_DB=todos \
+    -p 5432:5432 \
+    -v /Users/eharcevs/Work/scala-bootcamp/docker/todo-list-pg/pg-init:/docker-entrypoint-initdb.d \
+    postgres
+
+docker run -d --rm \
+    --name todo-app \
+    -p 3000:8080 \
+    -e DB_HOST=host.docker.internal \
+    todo-list-pg

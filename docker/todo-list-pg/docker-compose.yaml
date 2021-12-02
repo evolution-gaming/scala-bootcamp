@@ -1,0 +1,21 @@
+version: "3.8"
+services:
+  postgres:
+    image: "postgres"
+    volumes:
+      - /Users/eharcevs/Work/scala-bootcamp/docker/todo-list-pg/pg-init:/docker-entrypoint-initdb.d:ro
+      - data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_PASSWORD: secret
+      POSTGRES_DB: todos
+  app:
+    build: .
+    ports:
+      - "3000:8080"
+    environment:
+      DB_HOST: postgres
+    depends_on:
+      - postgres
+
+volumes:
+  data:
