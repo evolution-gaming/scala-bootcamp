@@ -21,7 +21,7 @@ object DbCommon {
       |  id UUID PRIMARY KEY,
       |  author UUID NOT NULL,
       |  title VARCHAR(100) NOT NULL,
-      |  year INT,
+      |  year_published INT,
       |  FOREIGN KEY (author) REFERENCES authors(id));""".stripMargin
 
   val populateDataSql: String =
@@ -30,14 +30,14 @@ object DbCommon {
        |  ('$authorOdersky', 'Martin Odersky', '1958-09-05'),
        |  ('$authorRowling', 'J.K. Rowling', '1965-07-31');
        |
-       |INSERT INTO books (id, author, title, year) VALUES
+       |INSERT INTO books (id, author, title, year_published) VALUES
        |  ('$bookScala', '$authorOdersky', 'Programming in Scala', 2016),
        |  ('$bookHPStone', '$authorRowling', 'Harry Potter and Philosopher''s Stone', 1997),
        |  ('$bookHPSecrets', '$authorRowling', 'Harry Potter and the Chamber of Secrets', 1998);
        |""".stripMargin
 
   val fetchBooksCommonSql: String =
-    """SELECT b.id, a.id, a.name, a.birthday, b.title, b.year FROM books b
+    """SELECT b.id, a.id, a.name, a.birthday, b.title, b.year_published FROM books b
       |INNER JOIN authors a ON b.author = a.id """.stripMargin
 
   val fetchHarryPotterBooksSql: String = fetchBooksCommonSql + s"WHERE b.author = '$authorRowling';"

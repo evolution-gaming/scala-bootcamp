@@ -61,13 +61,13 @@ object FragmentsUsage extends IOApp {
     fr"SELECT id, name, birthday FROM authors"
 
   val books: Fragment =
-    fr"SELECT id, author, title, year FROM books"
+    fr"SELECT id, author, title, year_published FROM books"
 
   def fetchAuthorById(id: UUID): doobie.Query0[Author] =
     (authors ++ fr"WHERE id = $id").query[Author]
 
   val fetchBooksAndAuthor: Fragment =
-    fr"""SELECT b.id, a.id, a.name, a.birthday, b.title, b.year FROM books b
+    fr"""SELECT b.id, a.id, a.name, a.birthday, b.title, b.year_published FROM books b
             INNER JOIN authors a ON b.author = a.id"""
 
   val fetchHarryPotterBooks: doobie.Query0[BookWithAuthor] = {

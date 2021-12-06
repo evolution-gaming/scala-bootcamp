@@ -11,7 +11,7 @@ to known primitive data types.
 
 # Lifespan of connection and its usage
 
-When application wants to talk with DB, it asks connection pool for available connection and, in scope of 
+When application wants to talk with DB, it opens a new connection and, in scope of 
 connection, application prepares data, statements etc, opens and closes transactions, executes queries, 
 gets result set, parses it and, when done, closes connection.
 
@@ -38,12 +38,12 @@ From the Book:
 
 Basic building blocks:
 * `sql"..."`, `fr0"..."` and `fr"..."` - complete query "fragment" with ability to interpolate variables, 
-   similar to `s".."`
+   similar to `s"..."`
 * `Get`, `Put`, `Meta`, `Read`, `Write` - implicit mappers between JDBC and Scala types
 * `transactor` - SQL statement interpreter 
 
-`doobie` programs usually are `ConnectionIO[A]` which can computed in context of `java.sql.Connection` and 
-which returns value of type `A` as a result (or fails with an error).
+`doobie` programs usually are `ConnectionIO[A]` which can be computed in context of `java.sql.Connection` and 
+which return value of type `A` as a result (or fails with an error).
 
 Usually `doobie` programs are interpreted by `transactor`, which takes care of:
 * providing `Connection`

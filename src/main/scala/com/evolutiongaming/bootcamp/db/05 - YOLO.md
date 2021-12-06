@@ -8,7 +8,7 @@ import java.util.UUID
 import doobie._
 import doobie.implicits._
 import doobie.util.ExecutionContexts
-import doobie.implicits.javatime._
+import doobie.implicits.javatimedrivernative._
 import cats._
 import cats.data._
 import cats.effect._
@@ -79,11 +79,10 @@ sql"select name from authors"
 ```
 
 ```scala
-val names = sql"select name from authors"
+sql"select name from authors"
     .query[String]
     .stream
     .transact(xa)
-names
     .take(5)
     .compile
     .toVector
@@ -142,4 +141,3 @@ sql"select id, name, birthday from authors where id = $authorOdersky"
     .map(println)
     .unsafeRunSync()
 ```
-

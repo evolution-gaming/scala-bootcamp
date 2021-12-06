@@ -1,7 +1,7 @@
 package com.evolutiongaming.bootcamp.effects
 
 import cats.effect.{ExitCode, IO, IOApp}
-import cats.implicits.catsSyntaxParallelSequence
+import cats.implicits.catsSyntaxParallelSequence1
 import com.evolutiongaming.bootcamp.effects.Console.Real.putStrLn
 
 import scala.concurrent.duration._

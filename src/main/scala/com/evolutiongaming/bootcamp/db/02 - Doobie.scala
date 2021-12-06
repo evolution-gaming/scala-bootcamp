@@ -45,13 +45,13 @@ object Doobie extends IOApp {
 
     /** `create`, `insert` and `update` */
 //    val rng: doobie.ConnectionIO[(String, String)] = {
-//      val create = sql"CREATE table kv(key VARCHAR(100) PRIMARY KEY, value VARCHAR(100))"
+//      val create = sql"CREATE table kv(k VARCHAR(100) PRIMARY KEY, v VARCHAR(100))"
 //      val key = "key"
 //      val value = "value"
-//      val insert = sql"INSERT INTO kv (key, value) VALUES ($key, $value)"
+//      val insert = sql"INSERT INTO kv (k, v) VALUES ($key, $value)"
 //      val newValue = "fixed value"
-//      val update = sql"UPDATE kv SET value = $newValue WHERE key = $key"
-//      val select = sql"SELECT key, value FROM kv"
+//      val update = sql"UPDATE kv SET v = $newValue WHERE k = $key"
+//      val select = sql"SELECT k, v FROM kv"
 //
 //      create.update.run *>
 //        insert.update.run *>
