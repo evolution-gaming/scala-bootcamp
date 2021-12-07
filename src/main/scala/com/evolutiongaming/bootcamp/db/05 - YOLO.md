@@ -8,7 +8,7 @@ import java.util.UUID
 import doobie._
 import doobie.implicits._
 import doobie.util.ExecutionContexts
-import doobie.implicits.javatime._
+import doobie.implicits.javatimedrivernative._
 import cats._
 import cats.data._
 import cats.effect._
@@ -21,6 +21,9 @@ import com.evolutiongaming.bootcamp.db.Book
 // We need a ContextShift[IO] before we can construct a Transactor[IO]. The passed ExecutionContext
 // is where nonblocking operations will be executed. For testing here we're using a synchronous EC.
 implicit val cs = IO.contextShift(ExecutionContexts.synchronous)
+
+// enable implicit diagnostic logging
+// implicit val han = LogHandler.jdkLogHandler
 
 implicit val uuidMeta: Meta[UUID] = Meta[String].timap(UUID.fromString)(_.toString)
 implicit val yearMeta: Meta[Year] = Meta[Int].timap(Year.of)(_.getValue)
@@ -71,24 +74,35 @@ sql"select name from authors"
 
 ```scala
 sql"select name from authors"
-   .query[String]
-   .stream
-   .take(1)
-   .quick
-   .unsafeRunSync()
-```
-
-```scala
-val names = sql"select name from authors"
     .query[String]
     .stream
     .transact(xa)
-names
-    .take(5)
+    .take(1) // get all result set and take 1 row from resultset on client side
     .compile
     .toVector
     .unsafeRunSync()
     .foreach(println(_))
+```
+
+```scala
+sql"select name from authors"
+    .query[String]
+    .stream
+    .take(1) // take 1 row from resultset on DB side
+    .compile
+    .toVector
+    .transact(xa)
+    .unsafeRunSync()
+    .foreach(println(_))
+```
+
+```scala
+sql"select name from authors"
+    .query[String]
+    .stream
+    .take(1) // take 1 from resultset on DB side
+    .quick
+    .unsafeRunSync() 
 ```
 
 ## using Shapeless
@@ -142,4 +156,3 @@ sql"select id, name, birthday from authors where id = $authorOdersky"
     .map(println)
     .unsafeRunSync()
 ```
-

@@ -6,11 +6,12 @@ import doobie.implicits._
 
 object Transactions extends IOApp {
 
-  private val setup = sql"CREATE TABLE crud (id SERIAL PRIMARY KEY, value VARCHAR)"
-  private val count = sql"SELECT id, value FROM crud"
-  private val insert = sql"INSERT INTO crud(value) VALUES ('value')"
+  // CRUD: Create, Read, Update and Delete
+  private val setup = sql"CREATE TABLE crud (id INT AUTO_INCREMENT PRIMARY KEY, v VARCHAR)"
+  private val count = sql"SELECT id, v FROM crud"
+  private val insert = sql"INSERT INTO crud(v) VALUES ('value')"
 
-  private val transactor = DbTransactor.make[IO]
+  private val transactor = DbTransactor.make[IO] // or `pooled`
 
   override def run(args: List[String]): IO[ExitCode] =
     for {
@@ -26,7 +27,7 @@ object Transactions extends IOApp {
           ).transact(xa)
         }
         .handleErrorWith { e =>
-          println(s"threw: $e"); IO.unit
+          IO.delay(println(s"threw: $e"))
         }
       _ <- printTable()
       _ <- transactor.use(xa => insert.update.run.transact(xa))

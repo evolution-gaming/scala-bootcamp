@@ -56,7 +56,7 @@ object Jdbc {
         if (rs.next()) {
           val bookId = UUID.fromString(rs.getString("books.id"))
           val title = rs.getString("books.title")
-          val year = Year.of(rs.getInt("books.year"))
+          val year = Year.of(rs.getInt("books.year_published"))
           val author = Author(
             id = UUID.fromString(rs.getString("authors.id")),
             name = rs.getString("authors.name"),

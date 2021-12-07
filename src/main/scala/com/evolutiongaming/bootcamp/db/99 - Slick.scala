@@ -1,6 +1,6 @@
 package com.evolutiongaming.bootcamp.db
-import com.typesafe.config.ConfigFactory
 
+import com.typesafe.config.ConfigFactory
 import scala.concurrent.{Await, Future}
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration.Duration

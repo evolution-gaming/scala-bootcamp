@@ -3,10 +3,9 @@ package com.evolutiongaming.bootcamp.effects
 import java.time.Instant
 import java.util.concurrent.Executors
 import java.util.concurrent.atomic.AtomicReference
-
 import cats.effect.concurrent._
 import cats.effect.{Concurrent, ExitCode, IO, IOApp}
-import cats.implicits.{catsSyntaxMonadErrorRethrow, catsSyntaxParallelSequence}
+import cats.implicits.{catsSyntaxMonadErrorRethrow, catsSyntaxParallelSequence1}
 import cats.syntax.flatMap._
 import cats.syntax.functor._
 import com.evolutiongaming.bootcamp.effects.IosCommon.logger

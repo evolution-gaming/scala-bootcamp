@@ -14,10 +14,10 @@ scalacOptions ++= Seq(
 val http4sVersion = "0.21.22"
 val circeVersion = "0.13.0"
 val playVersion = "2.8.2"
-val doobieVersion = "0.9.0"
-val catsVersion = "2.2.0"
+val doobieVersion = "0.13.4"
+val catsVersion = "2.6.1"
 val catsTaglessVersion = "0.11"
-val catsEffectVersion = "2.2.0"
+val catsEffectVersion = "2.5.1"
 val epimetheusVersion = "0.4.2"
 
 val akkaVersion = "2.6.9"
@@ -27,8 +27,9 @@ val akkaHttpCirceVersion = "1.31.0"
 val log4CatsVersion = "1.1.1"
 
 val scalaTestVersion = "3.2.7.0"
-val h2Version = "1.4.200"
+val h2Version = "2.0.202"
 val slickVersion = "3.3.3"
+val munitVersion = "0.7.29"
 
 libraryDependencies ++= Seq(
   "org.typelevel" %% "cats-core" % catsVersion,
@@ -59,15 +60,18 @@ libraryDependencies ++= Seq(
   "com.typesafe.akka" %% "akka-cluster" % akkaVersion,
   "com.typesafe.akka" %% "akka-cluster-sharding" % akkaVersion,
   "org.fusesource.leveldbjni" % "leveldbjni-all" % "1.8",
+  "org.scalameta" %% "munit" % munitVersion % Test,
+  "org.typelevel" %% "munit-cats-effect-2" % "1.0.7" % Test,
   "org.tpolecat" %% "doobie-core" % doobieVersion,
   "org.tpolecat" %% "doobie-h2" % doobieVersion,
   "org.tpolecat" %% "doobie-hikari" % doobieVersion,
+  "org.tpolecat" %% "doobie-munit" % doobieVersion % Test,
   "com.typesafe.akka" %% "akka-testkit" % akkaVersion % Test,
   "org.mockito" %% "mockito-scala" % "1.16.32" % Test,
   "org.scalaj" %% "scalaj-http" % "2.4.2" % Test,
   "org.tpolecat" %% "doobie-scalatest" % doobieVersion % Test,
   "org.typelevel" %% "cats-tagless-macros" % catsTaglessVersion,
-  "com.h2database" % "h2" % "1.4.200",
+  "com.h2database" % "h2" % h2Version,
   "eu.timepit" %% "refined" % "0.9.17",
   "com.typesafe.slick" %% "slick" % slickVersion,
   "org.slf4j" % "slf4j-nop" % "1.6.4",
