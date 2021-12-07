@@ -29,6 +29,7 @@ val log4CatsVersion = "1.1.1"
 val scalaTestVersion = "3.2.7.0"
 val h2Version = "2.0.202"
 val slickVersion = "3.3.3"
+val munitVersion = "0.7.29"
 
 libraryDependencies ++= Seq(
   "org.typelevel" %% "cats-core" % catsVersion,
@@ -59,9 +60,12 @@ libraryDependencies ++= Seq(
   "com.typesafe.akka" %% "akka-cluster" % akkaVersion,
   "com.typesafe.akka" %% "akka-cluster-sharding" % akkaVersion,
   "org.fusesource.leveldbjni" % "leveldbjni-all" % "1.8",
+  "org.scalameta" %% "munit" % munitVersion % Test,
+  "org.typelevel" %% "munit-cats-effect-2" % "1.0.7" % Test,
   "org.tpolecat" %% "doobie-core" % doobieVersion,
   "org.tpolecat" %% "doobie-h2" % doobieVersion,
   "org.tpolecat" %% "doobie-hikari" % doobieVersion,
+  "org.tpolecat" %% "doobie-munit" % doobieVersion % Test,
   "com.typesafe.akka" %% "akka-testkit" % akkaVersion % Test,
   "org.mockito" %% "mockito-scala" % "1.16.32" % Test,
   "org.scalaj" %% "scalaj-http" % "2.4.2" % Test,
