@@ -8,7 +8,7 @@ import cats.effect._
 import cats.implicits._
 import doobie._
 import doobie.implicits._
-import doobie.implicits.javatime._
+import doobie.implicits.javatimedrivernative._
 import doobie.h2._
 import com.evolutiongaming.bootcamp.db.DbCommon._
 
@@ -45,7 +45,7 @@ object FragmentsUsage extends IOApp {
   implicit val uuidMeta: Meta[UUID] = Meta[String].timap(UUID.fromString)(_.toString)
   implicit val yearMeta: Meta[Year] = Meta[Int].timap(Year.of)(_.getValue)
 
-  // setup
+  // setup, `const` doesn't escape SQL, there is an "injection" risk!
   val ddl1 = Fragment.const(createTableAuthorsSql)
   val ddl2 = Fragment.const(createTableBooksSql)
   val dml = Fragment.const(populateDataSql)
@@ -72,15 +72,15 @@ object FragmentsUsage extends IOApp {
 
   val fetchHarryPotterBooks: doobie.Query0[BookWithAuthor] = {
 //    val queryAllBooks = Fragment.const(
-//      """SELECT b.id, a.id, a.name, a.birthday, b.title, b.year FROM books b
+//      """SELECT b.id, a.id, a.name, a.birthday, b.title, b.year_published FROM books b
 //          INNER JOIN authors a ON b.author = a.id WHERE b.author = '$authorId2';""".stripMargin,
 //    )
-    val queryHPBooks = fetchBooksAndAuthor ++ fr"WHERE b.author = $authorRowling;"
+    val queryHPBooks = fetchBooksAndAuthor ++ Fragments.whereAnd(fr"b.author = $authorRowling")
     queryHPBooks.query[BookWithAuthor]
   }
 
   def fetchBooksByAuthors(ids: NonEmptyList[UUID]): doobie.Query0[BookWithAuthor] = {
-    val queryBooks = fetchBooksAndAuthor ++ fr"WHERE" ++ Fragments.in(fr"author", ids)
+    val queryBooks = fetchBooksAndAuthor ++ Fragments.whereAnd(Fragments.in(fr"author", ids))
     queryBooks.query[BookWithAuthor]
   }
 

@@ -4,6 +4,9 @@ import cats.effect._
 import cats.implicits._
 import doobie._
 import doobie.implicits._
+import shapeless._
+
+import java.sql.SQLException
 
 object Doobie extends IOApp {
 
@@ -12,7 +15,7 @@ object Doobie extends IOApp {
     /** simplest possible `doobie` program */
     val rng: ConnectionIO[String] = "42".pure[ConnectionIO]
 
-    /** simple queries */
+    /** simple queries, run query on DB, interpret resultset as stream, yield result */
 //    val rng = sql"SELECT random()".query[Double].unique // expects exactly one line as response
 //    val rng = sql"SELECT random()".query[Double].option // expects zero or one results
 //    val rng = sql"SELECT random()".query[Double].nel // expects at least 1 result
@@ -21,12 +24,15 @@ object Doobie extends IOApp {
 //    val rng = sql"SELECT random()".query[Double].stream // stream result
 
     /** transformation of result to complex structures */
-//    val rng = sql"SELECT random(), 42, 'random roll'".query[(Double, Int, String)].unique
+//    val rng = sql"SELECT random(), 42, 'random roll'".query[(Double, Int, Option[String])].unique
 
-//    type RS = (Double, Int, String) // #1
-//    final case class RS(rng: Double, answer: Int, description: String) // #2
+//    type RS = (Double, Int, Option[String]) // #1
+//    final case class RS(rng: Double, answer: Int, description: Option[String]) // #2
 //    final case class R(rng: Double, answer: Int) // #3
-//    final case class RS(result: R, description: String) // #3
+//    final case class RS(result: R, description: Option[String]) // #3
+//    type RS = Double :: Int :: Option[String] :: HNil // #4
+//    import shapeless.record.Record // #5
+//    type RS = Record.`'random -> Double, 'AoUQ -> Int, 'txt -> Option[String]`.T // #5
 //    val rng = sql"SELECT random(), 42, 'random roll'".query[RS].unique
 
     /** composition of several queries in monadic style */
@@ -58,6 +64,10 @@ object Doobie extends IOApp {
 //        update.update.run *>
 //        select.query[(String, String)].unique
 //    }
+
+    /** simple error handling */
+//    val rng: doobie.ConnectionIO[Either[Throwable, String]] = "42".pure[ConnectionIO].attempt
+//    val rng: doobie.ConnectionIO[Either[SQLException, String]] = sql"WRONG QUERY".query[String].unique.attemptSql
 
     DbTransactor
       .make[IO]
