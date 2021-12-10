@@ -1,0 +1,167 @@
+= Introduction to streaming libraries
+
+== What are they
+
+[cols="h,2,2"]
+|===
+||Single |Multiple
+
+|Synchronous
+|`A`
+|`Iterable[A]`
+
+|Asynchronous
+|`Future[A]`, `IO[A]`
+|Streaming libraries
+|===
+// Table borrowed from Monix documentation
+
+* A kind of collection, with focus on not storing all elements at once
+* Support asynchronous transformations
+* Potentially infinite
+* Handle backpressure
+
+== Backpressure
+
+Consider a system with a producer continually sending data to a consumer.
+
+[mermaid]
+....
+graph LR
+Producer -- Data --> Consumer
+....
+
+Those can be chained.
+
+[mermaid]
+....
+graph LR
+Producer --> Consumer/Producer --> Consumer
+....
+
+What if producer can generate more data than consumer can process?
+
+[mermaid]
+....
+graph LR
+P["Produces 100 items/second"] --> C["Can process 75 items/second"]
+....
+
+Extra 25 items/second have to be dealt with.
+
+Backpressure refers to the ability of producer to slow down
+to match downstream processing speed.
+
+== Typical architectures
+=== Push-based
+[mermaid]
+....
+sequenceDiagram
+participant P as Producer
+participant C as Consumer
+activate P
+P ->> C: Data
+P ->> C: Data
+C --) P: Slow down, I can't keep up
+deactivate P
+C --) P: I'm done, send more
+activate P
+P ->> C: Data
+deactivate P
+....
+
+Producer keeps sending data to consumer, and there's a way for consumer to slow down producer.
+
+* Easier buffering/throttling
+* Easier time-based operations, e.g. "take elements in first 10 seconds of stream"
+
+=== Pull-based
+[mermaid]
+....
+sequenceDiagram
+participant P as Producer
+participant C as Consumer
+C ->>+ P: Give me data
+P -->>- C: Data
+C ->>+ P: Give me data
+P -->>- C: More data
+....
+
+Producer does nothing until consumer explicitly requests data.
+
+* Backpressured by definition
+* Producer is essentially `F[Seq[Data]]`
+* Generally easier to reason about
+
+== Akka Streams
+* Push-based
+* Streams internally run on akka actors
+* Favors fixed topology
+
+== FS2
+* Pull-based
+* Runs on cats-effect `IO` or other IO monads
+* 99% Pure API
+
+== Monix
+* Push-based
+* `Future`-based internals, mostly pure user-facing API
+* Integrates with cats-effect
+
+There's more to monix project:
+
+* `monix-eval` `Task` - alternate IO monad, compatible with cats-effect
+* `monix-catnap` optimized concurrency utilities: queues, semaphores, etc. Tagless-final, usable with `cats.effect.IO`
+
+== Format
+
+* Word-count example
+* Inputs
+* Processing
+** Asynchronous transformations
+** Running FSMs, stateful transformations
+* Outputs
+* Non-linear pipelines
+
+== Which library to use
+
+* *The one already in classpath*
+** `http4s` uses FS2
+** `akka-http` uses Akka Streams
+* Consider integrations with other systems, e.g. Kafka clients.
+
+== Interop
+
+http://www.reactive-streams.org[Reactive Streams] - set of interfaces,
+specifically for interoperation between streaming libraries while preserving backpressure.
+
+All three covered libraries implement that.
+
+
+== Learning more
+
+* All covered libraries have excellent scaladocs
+* Online documentation
+** https://doc.akka.io/docs/akka/current/stream/index.html[Akka Streams]
+** https://fs2.io/#/getstarted/install[FS2]
+** https://monix.io/docs/current/[Monix]
+
+
+== Finite-state Machines
+https://en.wikipedia.org/wiki/Finite-state_machine[Finite-state machine] is defined by
+
+* Set of inputs `I`
+* Set of states `S`, with designated initial state `S0`
+* Transition function `(S, I) => S`, "when in state S and receiving input I, transition to another state"
+
+Why:
+
+* Processes inputs one at time
+* Needs to keep only one element of state `S` in memory
+
+Common subtypes:
+
+* Acceptors: either accept input, or not. Also known as "regular expressions".
+* Transducers: produce output depending on state/input
+** There's an additional set of outputs `O`
+** Transition function becomes `(S, I) => (S, O)`
