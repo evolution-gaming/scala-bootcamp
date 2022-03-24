@@ -56,6 +56,6 @@ object EffectsHomework1 {
     def raiseWhen(cond: Boolean)(e: => Throwable): IO[Unit] = ???
     def unlessA(cond: Boolean)(action: => IO[Unit]): IO[Unit] = ???
     def whenA(cond: Boolean)(action: => IO[Unit]): IO[Unit] = ???
-    val unit: IO[Unit] = ???
+    def unit: IO[Unit] = ???
   }
 }

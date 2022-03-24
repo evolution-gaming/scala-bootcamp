@@ -2,7 +2,7 @@ name := "scala-bootcamp"
 
 version := "0.2"
 
-scalaVersion := "2.13.4"
+scalaVersion := "2.13.8"
 
 // From https://tpolecat.github.io/2017/04/25/scalac-flags.html
 scalacOptions ++= Seq(
@@ -81,7 +81,7 @@ libraryDependencies ++= Seq(
   "io.monix" %% "monix-reactive" % "3.4.0",
 )
 
-addCompilerPlugin("org.typelevel" %% "kind-projector" % "0.11.1" cross CrossVersion.full)
+addCompilerPlugin("org.typelevel" %% "kind-projector" % "0.13.2" cross CrossVersion.full)
 
 run / fork := true
 run / connectInput := true
