@@ -1,7 +1,8 @@
 package com.evolutiongaming.bootcamp.basics
 
 import java.io.FileNotFoundException
-
+import java.time.Month
+import java.time.format.TextStyle
 import scala.annotation.tailrec
 import scala.io.Source
 import scala.util.{Failure, Success, Try}
@@ -29,11 +30,17 @@ object ControlStructures {
   //    else if (boolean2) result2
   //    else otherResult
 
+  val abc = if(1>0) "cool" else "not cool"
+
   // Exercise. Implement a "Fizz-Buzz" https://en.wikipedia.org/wiki/Fizz_buzz function using the if-else,
   // returning "fizzbuzz" for numbers which divide with 15, "fizz" for those which divide by 3 and "buzz" for
   // those which divide with 5, and returning the input number as a string for other numbers:
-  def fizzBuzz1(n: Int): String = ???
+  //def fizzBuzz1(n: Int): String = ???
 
+  def fizzBuzz1(n: Int): String = if (n % 15 == 0) "fizzbuzz"
+  else if (n % 3 == 0) "fizz"
+  else if (n % 5 == 0) "buzz"
+  else n.toString //s"$n"
   // Pattern Matching
   //
   // Using the match-case construct we can write constructs equivalent to if-else statements in, often,
@@ -60,12 +67,29 @@ object ControlStructures {
       case 10          => Right("October")
       case 11          => Right("November")
       case 12          => Right("December")
-      case x if x <= 0 => Left(s"Month $x is too small")
-      case x           => Left(s"Month $x is too large")
+      case _x if _x <= 0 => Left(s"Month $_x is too small")
+      case _x           => Left(s"Month $_x is too large")
     }
 
   // Question. How would you improve `monthName`?
+
+  type ErrorMessage = String
+  def monthName(x: Int): Either[ErrorMessage, String] =
+    x match {
+      case _x if _x <= 0 => Left(s"Month $_x is too small")
+      case _x if _x > 12 => Left(s"Month $_x is too large")
+      case x => Right(Month.of(x).toString)
+    }
+
   // Question. What would you use in its place if you wanted to more properly handle multiple locales?
+
+  type ErrorMessage = String
+  def monthName(x: Int): Either[ErrorMessage, String] =
+    x match {
+      case _x if _x <= 0 => Left(s"Month $_x is too small")
+      case _x if _x > 12 => Left(s"Month $_x is too large")
+      case x => Right(Month.of(x).getDisplayName(TextStyle.FULL, locale))
+    }
 
   sealed trait Shape
 
