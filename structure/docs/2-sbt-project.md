@@ -1,4 +1,4 @@
-## SBT project
+## SBT project structure basics
 
 - `$ sbt`
 - sbt files
@@ -11,7 +11,7 @@
   - [src/test/scala](../src/test/scala)
   - [target](../target)
 - modules
-  - [app](../app/src/main/scala)
+  - [api](../api/src/main/scala)
   - [domain](../domain)
 
 - https://www.scala-sbt.org/1.x/docs/Directories.html
