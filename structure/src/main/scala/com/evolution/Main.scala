@@ -1,4 +1,4 @@
-package com.evolution.services
+package com.evolution
 
 import akka.actor.ActorSystem
 import com.evolution.clients.AppHttpClient
@@ -12,6 +12,7 @@ import com.evolution.repository.{
   UserReportsRepository,
   UserRepository
 }
+import com.evolution.services._
 
 object Main extends App {
 

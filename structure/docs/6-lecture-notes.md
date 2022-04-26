@@ -121,11 +121,4 @@
 
 ### Package by screens (views)
 
-1. Applicable for apps with UI only
-
-## 4. Other
-
-- These are not only about package structure but rather about architecture:
-    - Domain driven design
-    - Hexagonal architecture (ports & adapters)
-    - Clean/Onion architecture
+1. Applicable for apps with user interface only
