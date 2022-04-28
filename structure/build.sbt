@@ -2,26 +2,28 @@ ThisBuild / scalaVersion := "2.13.8"
 
 ThisBuild / version := "1.1"
 
-ThisBuild / libraryDependencies ++= Dependencies.All
-
 lazy val root = project
   .in(file("."))
   .settings(
     name := "App Structure",
     normalizedName := "app-structure",
+    libraryDependencies ++= Dependencies.All,
     Test / testForkedParallel := true,
     Compile / packageDoc / publishArtifact := false,
     Compile / doc / sources := Seq.empty,
     Test / publishArtifact := false
   )
-  .enablePlugins(DockerPlugin)
-  .aggregate(domain, api) // sbt test
-  .dependsOn(api)
+  .enablePlugins(DockerPlugin, JavaServerAppPackaging)
+  .aggregate(domain, api) // `sbt test` will execute tests of root + domain and api modules
 
 lazy val api = project
-  .dependsOn(domain)
+  .enablePlugins(DockerPlugin, JavaServerAppPackaging)
+  .dependsOn(domain, utils) // transitive dependencies
 
 lazy val domain = project
+  .settings(libraryDependencies ++= Seq(Dependencies.PlayJson))
+
+lazy val utils = project
 
 /*
 // packaged by type application
@@ -29,7 +31,7 @@ lazy val domain = project
 lazy val app = project
   .enablePlugins(DockerPlugin)
   .aggregate(controllers, services, repos, domain, infra, dto)
-  .dependsOn(services, controllers)
+  .dependsOn(controllers)
 
 lazy val controllers = project
   .dependsOn(domain, infra, services, dto)

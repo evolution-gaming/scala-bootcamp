@@ -1,16 +1,16 @@
 # Scala application structure
 
     0. Introduction
-    1. SBT project
-    2. Package by type/layer (Live coding session)
-    3. Break?
-    4. Package by feature/component (Live coding session)
+    1. SBT project structure basics
+    2. Code structure: package by type/layer (Live coding session)
+    3. Break
+    4. Code structure: Package by feature/component (Live coding session)
     5. Q&A
 
 - https://github.com/evolution-gaming/scala-bootcamp/ `pull updates`
 - https://github.com/evolution-gaming/scala-bootcamp/tree/master/structure `lecture code`
 
-## 1. SBT project
+## 1. SBT project structure basics
 
 - `$ sbt`
 - sbt files
@@ -28,15 +28,7 @@
 
 ## 2. Package by type/layer
 
-1. By layer:
-    - application
-    - model
-    - persistence
-    - api
-    - ui
-    - utils/config
-
-2. By type:
+1. By type:
     - controllers
     - models
     - repositories
@@ -45,6 +37,14 @@
     - commands
     - actors
     - activities
+
+2. By layer:
+    - application
+    - model
+    - persistence
+    - api
+    - ui
+    - utils/config
 
 ### Tasks:
 
@@ -57,10 +57,10 @@
       - forgot about ScheduledUpdates
     - update find user by id
       - how can we be sure we found all places?
-      - need to check all packages
+      - need to check all packages (understand everything in order to work with anything)
       - actually always see redundant code (other features in packages)
-      - inexpressive - hard to identify dependencies
-      - https://phauer.com/2020/package-by-feature/#package-by-layer
+      - inexpressive - we see layers dependencies, but hard to identify dependencies within features
+        - https://phauer.com/2020/package-by-feature/#package-by-layer
       - cyclic dependencies
 4. Delete casino management (extracted to separate service)
    - some parts in wrong abstraction `UserRepository`
@@ -85,6 +85,7 @@
 ### Tasks:
 
 1. Try to identify features
+   - Common Closure Principle - classes that change together must be packaged together
 2. Extract features to packages
 3. Decouple services/controllers/repositories
    - read only dependencies

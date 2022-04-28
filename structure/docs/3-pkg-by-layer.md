@@ -1,14 +1,6 @@
 ## Package by type/layer
 
-1. By layer:
-   - application
-   - model
-   - persistence
-   - api
-   - ui
-   - utils/config
-
-2. By type:
+1. By type:
     - controllers
     - models
     - repositories
@@ -17,6 +9,15 @@
     - commands
     - actors
     - activities
+
+
+2. By layer:
+   - application
+   - model
+   - persistence
+   - api
+   - ui
+   - utils/config
 
 - Live coding
 
