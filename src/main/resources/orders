@@ -1,1 +1,28 @@
-[]
+[
+  {
+    "id" : {
+      "value" : "6078b6c3-1ec2-432b-a0b5-a9373786087d"
+    },
+    "userId" : {
+      "value" : "b02308c4-b7dc-4f29-9a5f-d9c90c981a40"
+    },
+    "paymentId" : {
+      "id" : "paymentId"
+    },
+    "items" : [
+      {
+        "itemId" : {
+          "value" : "be4b67de-db89-4f10-92cc-612c5fe338a7"
+        },
+        "quantity" : {
+          "amount" : 10
+        },
+        "price" : 25
+      }
+    ],
+    "total" : {
+      "amount" : 250,
+      "currency" : "USD"
+    }
+  }
+]
