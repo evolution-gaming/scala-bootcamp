@@ -18,7 +18,7 @@
 
 * A kind of collection, with focus on not storing all elements at once
 * Support asynchronous transformations
-* Potentially infinite
+* Potentially and usually infinite
 * Handle backpressure
 
 == Backpressure
@@ -28,7 +28,7 @@ Consider a system with a producer continually sending data to a consumer.
 [mermaid]
 ....
 graph LR
-Producer -- Data --> Consumer
+Producer -- Data --> c[Consumer]
 ....
 
 Those can be chained.
@@ -58,16 +58,19 @@ to match downstream processing speed.
 ....
 sequenceDiagram
 participant P as Producer
+participant CP as Consumer/Producer
 participant C as Consumer
+
 activate P
-P ->> C: Data
-P ->> C: Data
-C --) P: Slow down, I can't keep up
+P ->> CP: Data
 deactivate P
-C --) P: I'm done, send more
-activate P
-P ->> C: Data
-deactivate P
+activate CP
+CP ->> C: Data
+deactivate CP
+activate C
+C --) CP: I'm done
+deactivate C
+CP --) P: I'm done
 ....
 
 Producer keeps sending data to consumer, and there's a way for consumer to slow down producer.
@@ -80,38 +83,52 @@ Producer keeps sending data to consumer, and there's a way for consumer to slow 
 ....
 sequenceDiagram
 participant P as Producer
+participant CP as Consumer/Producer
 participant C as Consumer
-C ->>+ P: Give me data
-P -->>- C: Data
-C ->>+ P: Give me data
-P -->>- C: More data
+
+C ->> CP: Give me data
+CP ->> P: Give me data
+activate P
+P -->> CP: Data
+deactivate P
+activate CP
+CP -->> C: Data
+deactivate CP
 ....
 
 Producer does nothing until consumer explicitly requests data.
 
-* Backpressured by definition
+* Backpressured by construction
 * Producer is essentially `F[Seq[Data]]`
 * Generally easier to reason about
 
-== Akka Streams
-* Push-based
-* Streams internally run on akka actors
-* Favors fixed topology
+== Libraries
 
-== FS2
+=== FS2
 * Pull-based
 * Runs on cats-effect `IO` or other IO monads
 * 99% Pure API
 
-== Monix
+=== Monix
 * Push-based
 * `Future`-based internals, mostly pure user-facing API
 * Integrates with cats-effect
 
 There's more to monix project:
 
-* `monix-eval` `Task` - alternate IO monad, compatible with cats-effect
+* `monix-eval` `Task` - alternate CE2-compatible IO monad
 * `monix-catnap` optimized concurrency utilities: queues, semaphores, etc. Tagless-final, usable with `cats.effect.IO`
+
+=== Others
+* `akka-streams` - runs streams on akka actors
+* A number of java libraries: RxJava, Project Reactor, etc.
+
+=== Interop
+
+http://www.reactive-streams.org[Reactive Streams] - set of interfaces,
+specifically for interoperation between streaming libraries while preserving backpressure.
+
+All covered libraries implement that.
 
 == Format
 
@@ -123,6 +140,7 @@ There's more to monix project:
 * Outputs
 * Non-linear pipelines
 
+
 == Which library to use
 
 * *The one already in classpath*
@@ -130,21 +148,14 @@ There's more to monix project:
 ** `akka-http` uses Akka Streams
 * Consider integrations with other systems, e.g. Kafka clients.
 
-== Interop
-
-http://www.reactive-streams.org[Reactive Streams] - set of interfaces,
-specifically for interoperation between streaming libraries while preserving backpressure.
-
-All three covered libraries implement that.
-
 
 == Learning more
 
 * All covered libraries have excellent scaladocs
 * Online documentation
-** https://doc.akka.io/docs/akka/current/stream/index.html[Akka Streams]
 ** https://fs2.io/#/getstarted/install[FS2]
 ** https://monix.io/docs/current/[Monix]
+** https://doc.akka.io/docs/akka/current/stream/index.html[Akka Streams]
 
 
 == Finite-state Machines
