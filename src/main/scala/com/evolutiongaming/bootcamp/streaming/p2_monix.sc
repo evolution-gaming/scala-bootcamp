@@ -37,7 +37,7 @@ val wordCount: Task[Map[String, Int]] = lines
 
 wordCount.runSyncUnsafe()
 
-// TODO: comment
+// Task[T] can be converted to other CE-compatible F[_]s, e.g. IO
 val wordCountIO: IO[Map[String, Int]] = wordCount.to[IO]
 
 
@@ -97,13 +97,13 @@ def callbackyToObservable[T](api: AsyncCallbackyApi[T]): Observable[T] = {
 
 // A => Task[B]
 words.mapEval(word => Task(word.toLowerCase))
-// For generic F, e.g. IO
+// For generic F[_], e.g. IO
 words.mapEvalF(word => IO {
   println(s"Processing $word")
   word.toLowerCase
 })
 
-// "generic F" includes Either
+// "generic F[_]" includes Either
 Observable("{}", "[1, 2, 3]")
   .mapEvalF(io.circe.parser.parse)
   .toListL.runSyncUnsafe()
@@ -189,7 +189,7 @@ duellingInts.delayOnNext(25.millis)
   .switch
   .toListL.runSyncUnsafe()
 
-// There are version of those combined with map()
+// There are versions of those combined with map()
 // Those take A => Observable[B] argument and combine results in corresponding way
 words.mergeMap(_ => Observable.empty)
 words.concatMap(_ => Observable.empty)
@@ -249,14 +249,3 @@ Observable.range(1, 10)
       hot.filter(_ % 2 == 0).map(even => s"Even: $even")
     ).merge
   }
-
-
-// Other useful combinators
-words.distinctUntilChanged
-words.bufferIntrospective(1)
-
-words.debounce(1.second)
-words.echoRepeated(1.second)
-words.sample(1.second)
-
-words.whileBusyDropEvents
