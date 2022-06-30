@@ -60,13 +60,13 @@ object WebSocketServer extends IOApp {
         // Unbounded queue to store WebSocket messages from the client, which are pending to be processed.
         // For production use bounded queue seems a better choice. Unbounded queue may result in out of
         // memory error, if the client is sending messages quicker than the server can process them.
-        queue <- Queue.unbounded[IO, WebSocketFrame]
+        queue    <- Queue.unbounded[IO, WebSocketFrame]
         response <- WebSocketBuilder[IO].build(
-          // Sink, where the incoming WebSocket messages from the client are pushed to.
-          receive = queue.enqueue,
-          // Outgoing stream of WebSocket messages to send to the client.
-          send = queue.dequeue.through(echoPipe),
-        )
+                      // Sink, where the incoming WebSocket messages from the client are pushed to.
+                      receive = queue.enqueue,
+                      // Outgoing stream of WebSocket messages to send to the client.
+                      send = queue.dequeue.through(echoPipe)
+                    )
       } yield response
 
     // Exercise 1. Change the echo route to respond with the current time, when the client sends "time". Allow
@@ -79,22 +79,23 @@ object WebSocketServer extends IOApp {
 
   // Topics provide an implementation of the publish-subscribe pattern with an arbitrary number of
   // publishers and an arbitrary number of subscribers.
-  private def chatRoute(chatTopic: Topic[IO, String]): HttpRoutes[IO] = HttpRoutes.of[IO] {
+  private def chatRoute(chatTopic: Topic[IO, String]): HttpRoutes[IO] =
+    HttpRoutes.of[IO] {
 
-    // websocat "ws://localhost:9002/chat"
-    case GET -> Root / "chat" =>
-      WebSocketBuilder[IO].build(
-        // Sink, where the incoming WebSocket messages from the client are pushed to.
-        receive = chatTopic.publish.compose[Stream[IO, WebSocketFrame]](_.collect {
-          case WebSocketFrame.Text(message, _) => message
-        }),
-        // Outgoing stream of WebSocket messages to send to the client.
-        send = chatTopic.subscribe(maxQueued = 10).map(WebSocketFrame.Text(_)),
-      )
+      // websocat "ws://localhost:9002/chat"
+      case GET -> Root / "chat" =>
+        WebSocketBuilder[IO].build(
+          // Sink, where the incoming WebSocket messages from the client are pushed to.
+          receive = chatTopic.publish.compose[Stream[IO, WebSocketFrame]](_.collect {
+            case WebSocketFrame.Text(message, _) => message
+          }),
+          // Outgoing stream of WebSocket messages to send to the client.
+          send = chatTopic.subscribe(maxQueued = 10).map(WebSocketFrame.Text(_))
+        )
 
-    // Exercise 3. Change the chat route to use the first message from a client as its username and prepend
-    // it to every follow-up message. Tip: you will likely need to use fs2.Pull.
-  }
+      // Exercise 3. Change the chat route to use the first message from a client as its username and prepend
+      // it to every follow-up message. Tip: you will likely need to use fs2.Pull.
+    }
 
   private def httpApp(chatTopic: Topic[IO, String]): HttpApp[IO] = {
     echoRoute <+> chatRoute(chatTopic)
@@ -103,12 +104,12 @@ object WebSocketServer extends IOApp {
   override def run(args: List[String]): IO[ExitCode] =
     for {
       chatTopic <- Topic[IO, String](initial = "Welcome to the chat!")
-      _ <- BlazeServerBuilder[IO](ExecutionContext.global)
-      .bindHttp(port = 9002, host = "localhost")
-      .withHttpApp(httpApp(chatTopic))
-      .serve
-      .compile
-      .drain
+      _         <- BlazeServerBuilder[IO](ExecutionContext.global)
+                     .bindHttp(port = 9002, host = "localhost")
+                     .withHttpApp(httpApp(chatTopic))
+                     .serve
+                     .compile
+                     .drain
     } yield ExitCode.Success
 }
 
@@ -122,15 +123,19 @@ object WebSocketClient extends IOApp {
   private def printLine(string: String = ""): IO[Unit] = IO(println(string))
 
   override def run(args: List[String]): IO[ExitCode] = {
-    val clientResource = Resource.eval(IO(HttpClient.newHttpClient()))
+    val clientResource = Resource
+      .eval(IO(HttpClient.newHttpClient()))
       .flatMap(JdkWSClient[IO](_).connectHighLevel(WSRequest(uri)))
 
     clientResource.use { client =>
       for {
         _ <- client.send(WSFrame.Text("Hello, world!"))
-        _ <- client.receiveStream.collectFirst {
-          case WSFrame.Text(s, _) => s
-        }.compile.string >>= printLine
+        _ <- client.receiveStream
+               .collectFirst {
+                 case WSFrame.Text(s, _) => s
+               }
+               .compile
+               .string >>= printLine
       } yield ExitCode.Success
     }
   }
