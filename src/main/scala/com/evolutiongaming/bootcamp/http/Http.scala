@@ -1,7 +1,7 @@
 package com.evolutiongaming.bootcamp.http
 
-import cats.data.{EitherT, Validated}
-import cats.effect.{Blocker, ExitCode, IO, IOApp}
+import cats.data.{EitherT, Kleisli, Validated, ValidatedNel}
+import cats.effect.{Blocker, ExitCode, IO, IOApp, Resource}
 import cats.syntax.all._
 import com.evolutiongaming.bootcamp.http.Protocol._
 import org.http4s._
@@ -13,6 +13,7 @@ import org.http4s.implicits._
 import org.http4s.multipart.{Multipart, Part}
 import org.http4s.server.blaze.BlazeServerBuilder
 
+import java.net.URL
 import java.time.{Instant, LocalDate}
 import scala.concurrent.ExecutionContext
 import scala.util.Try
@@ -157,22 +158,42 @@ object HttpServer extends IOApp {
         .leftMap(t => ParseFailure(s"Failed to decode LocalDate", t.getMessage))
         .toValidatedNel
     }
-    object LocalDateMatcher extends QueryParamDecoderMatcher[LocalDate](name = "date")
+//    object LocalDateMatcher extends QueryParamDecoderMatcher[LocalDate](name = "date")
+    object LocalDateMatcher extends ValidatingQueryParamDecoderMatcher[LocalDate](name = "date")
+
+    implicit val instantDecoder: QueryParamDecoder[Instant] =
+      (param: QueryParameterValue) =>
+        Validated
+          .catchNonFatal(Instant.parse(param.value))
+          .leftMap(t => ParseFailure(s"Failed to decode Instant", t.getMessage))
+          .toValidatedNel
+    object InstantMatcher extends ValidatingQueryParamDecoderMatcher[Instant](name = "timestamp")
 
     HttpRoutes.of[IO] {
 
       // curl "localhost:9001/params/2020-11-10"
-      case GET -> Root / "params" / LocalDateVar(localDate)      =>
+      case GET -> Root / "params" / LocalDateVar(localDate)                 =>
         Ok(s"Matched path param: $localDate")
 
       // curl "localhost:9001/params?date=2020-11-10"
-      case GET -> Root / "params" :? LocalDateMatcher(localDate) =>
-        Ok(s"Matched query param: $localDate")
+      case GET -> Root / "params" :? LocalDateMatcher(localDate)            => // +& LocalDateMatcher(localDate2) =>
+//        Ok(s"Matched query param: $localDate")
+        localDate.fold(
+          _ => BadRequest("Failed"),
+          localDate => Ok(s"Matched query param: $localDate")
+        )
 
       // Exercise 1. Implement HTTP endpoint that validates the provided timestamp in ISO-8601 format. If valid,
       // 200 OK status must be returned with "Timestamp is valid" string in the body. If not valid,
       // 400 Bad Request status must be returned with "Timestamp is invalid" string in the body.
       // curl "localhost:9001/params/validate?timestamp=2020-11-04T14:19:54.736Z"
+      // Instant.parse
+
+      case GET -> Root / "params" / "validate" :? InstantMatcher(timestamp) =>
+        timestamp.fold(
+          _ => BadRequest("Timestamp is invalid"),
+          _ => Ok("Timestamp is valid")
+        )
     }
   }
 
@@ -192,6 +213,13 @@ object HttpServer extends IOApp {
     // present and contains an integer value, it should add 1 to the value and request the client to update
     // the cookie. Otherwise it should request the client to store "1" in the "counter" cookie.
     // curl -v "localhost:9001/cookies" -b "counter=9"
+    case req @ GET -> Root / "cookies" =>
+      val counterValue =
+        req.cookies
+          .find(_.name == "counter")
+          .flatMap(_.content.toIntOption)
+          .fold(1)(_ + 1)
+      Ok().map(_.addCookie("counter", counterValue.toString))
   }
 
   // JSON ENTITIES
@@ -258,11 +286,29 @@ object HttpServer extends IOApp {
     // curl -XPOST "localhost:9001/multipart" -F "character=n" -F file=@text.txt
     case req @ POST -> Root / "multipart" =>
       req.as[Multipart[IO]].flatMap { multipart =>
-        ???
+        val partContents: Option[IO[(String, String)]] = for {
+          character <- multipart.parts.find(_.name.contains("character"))
+          file      <- multipart.parts.find(_.name.contains("file"))
+        } yield (character.as[String], file.as[String]).tupled
+
+        partContents.sequence
+          .map { partContentsOpt =>
+            partContentsOpt.flatMap {
+              case (character, file) =>
+                Some(character)
+                  .filter(_.length == 1)
+                  .flatMap(_.headOption)
+                  .map(char => file.count(_ == char))
+            }
+          }
+          .flatMap {
+            case None        => BadRequest()
+            case Some(count) => Ok(count.toString)
+          }
       }
   }
 
-  private[http] val httpApp = Seq(
+  private[http] val httpApp: Kleisli[IO, Request[IO], Response[IO]] = Seq(
     helloRoutes,
     paramsRoutes,
     headersRoutes,
@@ -271,11 +317,13 @@ object HttpServer extends IOApp {
     multipartRoutes
   ).reduce(_ <+> _).orNotFound
 
+  // Kleisli[IO, Request[IO], Response[IO]] -> Request[IO] => IO[Response[IO]]
+
   override def run(args: List[String]): IO[ExitCode] =
     BlazeServerBuilder[IO](ExecutionContext.global)
       .bindHttp(port = 9001, host = "localhost")
       .withHttpApp(httpApp)
-      .serve
+      .serve // .resource
       .compile
       .drain
       .as(ExitCode.Success)
@@ -295,10 +343,11 @@ object HttpClient extends IOApp {
       .use {
         case (client, blocker) =>
           for {
-            _ <- printLine(string = "Executing simple GET and POST requests:")
-            _ <- client.expect[String](uri / "hello" / "world") >>= printLine
-            _ <- client.expect[String](Method.POST("world", uri / "hello")) >>= printLine
-            _ <- printLine()
+            _       <- printLine(string = "Executing simple GET and POST requests:")
+            _       <- client.expect[String](uri / "hello" / "world").flatMap(response => printLine(response))
+            request <- Method.POST("world", uri / "hello")
+            _       <- client.expect[String](request) >>= printLine
+            _       <- printLine()
 
             _ <- printLine(string = "Executing requests with path and query parameters:")
             _ <- client.expect[String](uri / "params" / "2020-11-10") >>= printLine
@@ -310,17 +359,19 @@ object HttpClient extends IOApp {
             _ <- printLine()
 
             _ <- for {
-                   _       <- printLine(string = "Executing request with headers and cookies:")
-                   request <- Method.GET(uri / "headers", Header("Request-Header", "Request header value"))
+                   _        <- printLine(string = "Executing request with headers and cookies:")
+                   request  <- Method
+                                 .GET(uri / "headers", Header("Request-Header", "Request header value"))
+//                                 .map(_.addCookie("name", "value"))
 
                    // `client.run()` provides more flexibility than `client.expect()`, since the entire response
                    // becomes available for consumption and processing as `Resource[IO, Response[IO]]`.
                    response <- client.run(request).use { response =>
                                  response.bodyText.compile.string.map { bodyString =>
                                    s"""Response body is:
-              |$bodyString
-              |Response headers are:
-              |${response.headers}""".stripMargin
+                                    |$bodyString
+                                    |Response headers are:
+                                    |${response.headers}""".stripMargin
                                  }
                                }
                    _        <- printLine(response)
@@ -328,6 +379,16 @@ object HttpClient extends IOApp {
 
             // Exercise 5. Call HTTP endpoint, implemented in scope of Exercise 2, and print the response cookie.
             // curl -v "localhost:9001/cookies" -b "counter=9"
+            cookieRequest: IO[Request[IO]#Self] = Method.GET(uri / "cookies").map(_.addCookie("counter", "9"))
+            _ <- cookieRequest
+                   .flatMap { request =>
+                     val responseResource: Resource[IO, Response[IO]] = client.run(request)
+                     val a: IO[Unit] = responseResource.use { response =>
+                       printLine(s"Response cookie is: ${response.cookies.find(_.name == "counter")}")
+                     }
+                     a
+                   }
+
             _ <- printLine()
 
             _ <- printLine(string = "Executing request with JSON entities:")
@@ -358,7 +419,7 @@ object HttpClient extends IOApp {
 
             _ <- printLine(string = "Executing multipart requests:")
             _ <- {
-              val file      = getClass.getResource("/text.txt")
+              val file: URL = getClass.getResource("/text.txt")
               val multipart = Multipart[IO](
                 Vector(
                   Part.formData("character", "n"),

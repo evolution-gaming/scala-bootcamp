@@ -1,8 +1,8 @@
 package com.evolutiongaming.bootcamp.http
 
-import cats.effect.{ExitCode, IO, IOApp, Resource}
+import cats.effect.{Clock, ExitCode, IO, IOApp, Resource}
 import cats.syntax.all._
-import fs2.{Pipe, Stream}
+import fs2.{Pipe, Pull, Stream}
 import fs2.concurrent.{Queue, Topic}
 import org.http4s._
 import org.http4s.client.jdkhttpclient.{JdkWSClient, WSFrame, WSRequest}
@@ -13,7 +13,10 @@ import org.http4s.server.websocket.WebSocketBuilder
 import org.http4s.websocket.WebSocketFrame
 
 import java.net.http.HttpClient
+import java.time.{Instant, Duration => JavaDuration}
+import java.util.concurrent.TimeUnit
 import scala.concurrent.ExecutionContext
+import scala.concurrent.duration._
 
 object WebSocketIntroduction {
 
@@ -51,21 +54,49 @@ object WebSocketServer extends IOApp {
       // Pipe is a stream transformation function of type `Stream[F, I] => Stream[F, O]`. In this case
       // `I == O == WebSocketFrame`. So the pipe transforms incoming WebSocket messages from the client to
       // outgoing WebSocket messages to send to the client.
-      val echoPipe: Pipe[IO, WebSocketFrame, WebSocketFrame] =
-        _.collect {
-          case WebSocketFrame.Text(message, _) => WebSocketFrame.Text(message)
+      def echoPipe(joinedAt: Instant): Pipe[IO, WebSocketFrame, WebSocketFrame] =
+        _.collect { // filter + map
+          case WebSocketFrame.Text(message, _) => message.trim
         }
+          .evalMap {
+//            case "time" => IO.delay(Instant.now().toString)
+//            case "time" => timer.clock.realTime(TimeUnit.MILLISECONDS).map(Instant.ofEpochMilli(_).toString)
+            case "time" => timer.clock.instantNow.map(_.toString) // Clock[F].instantNow => F[Instant]
+            case text   => IO.pure(text)
+          }
+          .merge(Stream.eval(reportDuration(joinedAt)).delayBy(5.seconds).repeat)
+          .map(WebSocketFrame.Text(_))
+
+      def reportDuration(start: Instant): IO[String] =
+        timer.clock.instantNow.map { now =>
+          val duration = JavaDuration.between(start, now)
+          s"You have been connected for ${duration.toSeconds} seconds!"
+        }
+
+//      val echoPipe: Pipe[IO, WebSocketFrame, WebSocketFrame] =
+//        _.evalMap {
+//          case WebSocketFrame.Text(message, _) => message.trim match {
+//            case "time" => for {
+//              //              time <- IO.delay(Instant.now())
+//              time <- timer.clock.realTime(TimeUnit.MILLISECONDS).map(Instant.ofEpochMilli(_).toString)
+//            } yield WebSocketFrame.Text(time)
+//            case text => IO(WebSocketFrame.Text(text))
+//          }
+//
+//          case _ => IO(WebSocketFrame.Text("It's not a WebSocketFrame.Text - I don't know what to do."))
+//        }
 
       for {
         // Unbounded queue to store WebSocket messages from the client, which are pending to be processed.
         // For production use bounded queue seems a better choice. Unbounded queue may result in out of
         // memory error, if the client is sending messages quicker than the server can process them.
+        joinedAt <- timer.clock.instantNow
         queue    <- Queue.unbounded[IO, WebSocketFrame]
         response <- WebSocketBuilder[IO].build(
                       // Sink, where the incoming WebSocket messages from the client are pushed to.
                       receive = queue.enqueue,
                       // Outgoing stream of WebSocket messages to send to the client.
-                      send = queue.dequeue.through(echoPipe)
+                      send = queue.dequeue.through(echoPipe(joinedAt))
                     )
       } yield response
 
@@ -86,9 +117,17 @@ object WebSocketServer extends IOApp {
       case GET -> Root / "chat" =>
         WebSocketBuilder[IO].build(
           // Sink, where the incoming WebSocket messages from the client are pushed to.
-          receive = chatTopic.publish.compose[Stream[IO, WebSocketFrame]](_.collect {
-            case WebSocketFrame.Text(message, _) => message
-          }),
+          receive = chatTopic.publish.compose[Stream[IO, WebSocketFrame]](
+            _
+              .collect { case WebSocketFrame.Text(message, _) => message }
+              .pull
+              .uncons1
+              .flatMap {
+                case None                 => Pull.done
+                case Some((name, stream)) => stream.map(message => s"$name: $message").pull.echo
+              }
+              .stream
+          ),
           // Outgoing stream of WebSocket messages to send to the client.
           send = chatTopic.subscribe(maxQueued = 10).map(WebSocketFrame.Text(_))
         )
