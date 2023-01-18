@@ -3,6 +3,9 @@ package com.evolutiongaming.bootcamp.basics
 object Basics {
   // Let's start by quickly going through the basic building blocks of Scala programs.
 
+  // We will be covering a lot of ground, but shallowly, in this lecture. All of these topics will be
+  // revisited in more detail in subsequent lectures.
+
   // You can follow your progress using the tests in `BasicsSpec`.
   // You can run those tests from the IDE or using `sbt "testOnly com.evolutiongaming.bootcamp.basics.BasicsSpec"`.
 
@@ -31,8 +34,10 @@ object Basics {
 
   // Immutability is a good thing and leads to code which is easier to reason about and thus maintain.
 
-  // Prefer `val` to `var` except in cases where `var` cannot be avoided. As we progress with this course,
-  // we will learn to avoid using `var`.
+  // Prefer `val` to `var` except in cases where `var` cannot be avoided or where mutable code is needed
+  // for performance reasons.
+  //
+  // As we progress with this course, we will learn to avoid using `var`.
 
   // Types define the data that a value can contain.
 
@@ -169,6 +174,12 @@ object Basics {
       5 <= 3    // false
    */
 
+  // Scala standard library has many other built-in types and we will not cover all of them here, there
+  // are dedicated lectures about this later on.
+
+  // We are using some of them in this lecture, for example `Set` and `List` from collections.
+  // I hope the way they are used is obvious enough, and if not, please ask questions.
+
   // Unit is a special type with only one possible value - `()`
   val unit1: Unit = ()
   val allUnitValues: Set[Unit] = Set(())
@@ -176,7 +187,12 @@ object Basics {
   // Where `void` is used in Java to indicate that a method doesn't return a value,
   // in Scala `Unit` is usually used.
 
-  // Nothing is a special type with no possible values
+  // Nothing is a special, so-called "bottom type" with no possible values.
+  // Nothing is a subtype of every other type.
+  // It is still useful - for example, a Scala empty `List` called `Nil` is of type `List[Nothing]`.
+  // Because lists are covariant in Scala, this makes `Nil` an instance of List[T], for any element of type T.
+  // If this seems complicated and hard to understand, that is completely normal, we will revisit this
+  // multiple times later in more detail.
   val allNothingValues: Set[Nothing] = Set()
 
   // Null
@@ -192,11 +208,11 @@ object Basics {
 
   def artificialExample: String = if (System.getenv("test").toLowerCase == "value") "found" else "not found"
 
-  // There is a proposal for Scala 3 to improve `null` handling:
-  // https://contributors.scala-lang.org/t/sip-public-review-explicit-nulls/3889
+  // There is an experimental feature in Scala 3 that makes `null` handling explicit:
+  // https://docs.scala-lang.org/scala3/reference/experimental/explicit-nulls.html
 
-  // There are nine predefined types which are non-nullable (also called primitive): Boolean, Byte, Short,
-  // Int, Long, Float, Double, Char, Unit.
+  // There are nine predefined types which are non-nullable (also called primitive):
+  // Boolean, Byte, Short, Int, Long, Float, Double, Char, Unit
 
   // Blocks and Expressions
 
@@ -299,6 +315,21 @@ object Basics {
   // Functions are first class citizens and can be passed as parameters to other functions, as well as
   // returned as return values from functions.
 
+  private val listOfStrings: List[String] = List("4", "7", "89")
+
+  // Example of a function passed as a parameter to the `map` method in `List`:
+  // The following yield the same results:
+  private def stringToInt(s: String): Int = s.toInt
+  val listOfInts1: List[Int] = listOfStrings.map(stringToInt)
+  val listOfInts2: List[Int] = listOfStrings.map(s => s.toInt)
+  val listOfInts3: List[Int] = listOfStrings.map((s: String) => s.toInt)
+  val listOfInts4: List[Int] = listOfStrings.map(_.toInt)
+
+  // We will discuss `map` in more details in later lectures.
+  //
+  // For now, it is enough to know that it builds a new collection by applying a function to all elements of
+  // this collection.
+
   // Example of a function returned as a return value:
   def greeter(intro: String): String => String = { name: String =>
     s"$intro, $name!"
@@ -310,14 +341,6 @@ object Basics {
   val goodMorning: String => String = greeter("Good morning")
   val goodMorningWorld: String = goodMorning("World") // Good morning, World!
 
-  // A more convoluted example:
-  def formatNamedDouble(name: String, format: Double => String): Double => String = { x: Double =>
-    s"$name = ${format(x)}"
-  }
-
-  val fourDecimalPlaces: Double => String = (x: Double) => f"$x%.4f"
-  val formattedNamedDouble: String = formatNamedDouble("x", fourDecimalPlaces)(Math.PI) // x = 3.1416
-
   // Exercise. Implement `power` method which takes a Byte `n` and returns a function from Int to
   // Long, raising the Int parameter provided to the n-th power using `Math.pow`.
   // For conversions, use `Double#round` (for rounding Double-s to Long-s) as well as `Byte` and `Int`
@@ -328,16 +351,28 @@ object Basics {
     (x + n).toLong
   }
 
+  private val squared: Int => Long = power(2)
+  private val fourSquared = squared(4)
+
+  private val cubed: Int => Long = power(3)
+  private val fiveCubed = cubed(5)
+
   // Polymorphic methods, or methods which take type parameters
   //
   // Methods in Scala can be parameterised by types of their arguments and return values. Type parameters are
   // enclosed in square brackets (in contrast with value parameters which are enclosed in parentheses).
-  //
-  // The function `formatNamedDouble` can be rewritten in a more general way as follows:
 
-  def formatNamedValue[A](name: String, format: A => String): A => String = { x : A =>
-    s"$name = ${format(x)}"
-  }
+  // Thus instead of having to implement similar or identical methods for each type, you can
+  // implement polymorphic methods:
+  import cats.data.NonEmptyList
+  def allEqualInt(list: NonEmptyList[Int]): Boolean = list.tail.forall(_ == list.head)
+  def allEqualString(list: NonEmptyList[String]): Boolean = list.tail.forall(_ == list.head)
+
+  def allEqual[A](list: NonEmptyList[A]): Boolean = list.tail.forall(_ == list.head)
+
+  // Invocation:
+  private val areAllEqual1 = allEqual[Int](NonEmptyList.of(1, 1, 1))
+  private val areAllEqual2 = allEqual(NonEmptyList.of(1, 1, 1))
 
   // Using such "parametric polymorphism" helps us do "parametric reasoning" - to reason about implementation
   // merely by looking at type signatures.
@@ -348,14 +383,8 @@ object Basics {
   // Thus, while initially parametric polymorphisms seems to make our code more complicated, as you gain
   // experience with it, it will often help you write simpler, more maintainable code.
 
-  val commasForThousands: Long => String = (x: Long) => f"$x%,d"
-  val formattedLong: String = formatNamedValue("y", commasForThousands)(123456) // y = 123,456
-
-  // Question: What is `A` for `formatNamedValue` in this `formattedLong` invocation of it?
-
-  // Exercise. Invoke `formatNamedValue` with a `List[String]` as `A`. You can use `_.mkString(", ")` to
-  // concatenate the list with comma as a delimiter. You can provide the `List[String]` type
-  // explicitly after the method name or for the `format` function.
+  // For example, we can assume just from looking at the type signature that the polymorphic version of
+  // `allEqual` does not do arithmetic on the elements, while we cannot assume this for the `Int` version.
 
   // Tuples
   //
@@ -369,7 +398,8 @@ object Basics {
   val pepper1 = tuple1._1
   val pepperPrice1 = tuple1._2
 
-  // However this should be done sparingly and instead preferring the following destructuring form:
+  // However this should be done sparingly as it can lead to poorly readable code if over-used.
+  // Instead, consider using the following destructuring form:
   val (pepper3, pepperPrice3) = tuple1
 
   // If you only need one of these values you can omit the other using `_`:
@@ -408,13 +438,4 @@ object Basics {
   val allTupleBooleanBooleans: Set[(Boolean, Boolean)] = Set()
 
   // Question. Can we make a `Set` with all possible `Byte` values? `Double` values? `String` values?
-
-  // Homework. Implement functions that calculate https://en.wikipedia.org/wiki/Least_common_multiple and
-  // https://en.wikipedia.org/wiki/Greatest_common_divisor for integers.
-
-  def lcm(a: Int, b: Int): Int = ???
-  def gcd(a: Int, b: Int): Int = ???
-
-  // Create a new Git public repository for your homework solutions, use `basics` package for this homework.
-  // You can use `sbt new scala/hello-world.g8` to start a new bare-bones Scala SBT project.
 }
