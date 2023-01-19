@@ -7,14 +7,15 @@ object ClassesAndTraits {
   // Classes in Scala are blueprints for creating object instances. They can contain methods, values,
   // variables, types, objects, traits, and classes which are collectively called members.
 
-  class MutablePoint(var x: Double, var y: Double) {
-    def move(dx: Double, dy: Double): Unit = {
-      x = x + dx
-      y = y + dy
-    }
+  class MutableUser(var login: String, var balance: Double) {
+    def addMoney(amount: Double): Unit = changeBalance(amount)
+    def takeMoney(amount: Double): Unit = changeBalance(-amount)
+
+    private def changeBalance(amount: Double): Unit =
+      balance += amount
 
     override def toString: String =
-      s"($x, $y)"
+      s"User($login, $balance)"
   }
 
   // Singleton objects are defined using `object`.
@@ -23,20 +24,21 @@ object ClassesAndTraits {
   //
   // Use it to contain methods and values related to this trait or class, but that aren't
   // specific to instances of this trait or class.
-  object MutablePoint {
-    def apply(x: Double, y: Double): MutablePoint = new MutablePoint(x, y)
+  //
+  // User specific methods `apply` and `unapply` to construct and deconstruct classes
+  object MutableUser {
+    def apply(login: String): MutableUser = new MutableUser(login, 0)
 
-    def unapply(point: MutablePoint): Option[(Double, Double)] = Option((point.x, point.y))
+    def unapply(user: MutableUser): Option[(String, Double)] = Some(user.login, user.balance)
   }
 
-  val point1 = new MutablePoint(3, 4)
-  println(point1.x) // 3.0
-  println(point1) // (3.0, 4.0)
+  val mutableUser = MutableUser("potter")
+  mutableUser.login // "potter"
+  mutableUser.balance // 0.0
 
-  // Question. Is MutablePoint a good design? Why or why not?
+  // Question. Is MutableUser a good design? Why or why not?
 
   // Traits define a common interface that classes conform to. They are similar to Java's interfaces.
-
   // A trait can be thought of as a contract that defines the capabilities and behaviour of a component.
 
   // Subtyping
@@ -49,34 +51,31 @@ object ClassesAndTraits {
   //
   // This makes code more reusable and testable.
 
-  sealed trait Shape extends Located with Bounded
-
-  sealed trait Located {
-    def x: Double
-    def y: Double
+  trait HasBalance {
+    def balance: Double
   }
 
-  sealed trait Bounded {
-    def minX: Double
-    def maxX: Double
-    def minY: Double
-    def maxY: Double
+  // Exercise. Implement a method that will allow aggregating all entities with balances into one
+  // that will have the sum of all balances inside.
+  //
+  def totalBalance(accounts: List[HasBalance]): HasBalance =
+    new HasBalance {
+      def balance: Double = ???
+    }
+
+  trait Account extends HasBalance {
+    // def addMoney(amount: Double)
+    // def takeMoney(amount: Double)
   }
 
-  final case class Point(x: Double, y: Double) extends Shape {
-    override def minX: Double = x
-    override def maxX: Double = x
-    override def minY: Double = y
-    override def maxY: Double = y
+  sealed trait User {
+    def login: String
   }
 
-  final case class Circle(centerX: Double, centerY: Double, radius: Double) extends Shape {
-    override def x: Double    = ???
-    override def y: Double    = ???
-    override def minX: Double = ???
-    override def maxX: Double = ???
-    override def minY: Double = ???
-    override def maxY: Double = ???
+  final case class RegularUser(login: String, balance: Double) extends User with Account
+
+  case object Admin extends User {
+    val login: String = "admin"
   }
 
   // Case Classes
@@ -99,41 +98,22 @@ object ClassesAndTraits {
   // case-to-case inheritance is prohibited
 
   // calls .apply method
-  val point2 = Point(1, 2)
-  println(point2.x)
+  val user = RegularUser("potter", 200)
 
   // calls .unapply method
-  val Point(x, y) = point2
+  val RegularUser(login, balance) = user
 
-  val point3 = point2.copy(x = 3)
-  println(point3.toString) // Point(3, 2)
+  val updatedUser = user.copy(balance = 1000)
 
-  // Exercise. Implement an algorithm for finding the minimum bounding rectangle
-  // (https://en.wikipedia.org/wiki/Minimum_bounding_rectangle) for a set of `Bounded` objects.
-  //
-  def minimumBoundingRectangle(objects: Set[Bounded]): Bounded =
-    new Bounded {
-      // if needed, fix the code to be correct
-      override def minX: Double = objects.map(_.minX).min
-      override def maxX: Double = objects.map(_.minX).min
-      override def minY: Double = objects.map(_.minX).min
-      override def maxY: Double = objects.map(_.minX).min
-    }
+  println(updatedUser.toString) // RegularUser(potter,1000)
 
-  // Singleton can extend classes and mix in traits
-  object Origin extends Located {
-    override def x: Double = 0
-    override def y: Double = 0
-  }
-
-  // Let us come back to our `Shape`-s and add a `Movable` trait
-  // which will have a method:
+  // Let's go back to the `Account` trait, which contains two methods for changing the balance:
   //
-  //   def move(dx: Double, dy: Double)
+  // def addMoney(amount: Double)
+  // def takeMoney(amount: Double)
   //
-  // How should we implement `move` for various types?
-  //
-  // What should be the return type of the `move` method in `Shape`? In `Point` and other sub-types?
+  // How should we implement these methods for all heirs at once?
+  // What should be the return type of these methods in `Account`? In `RegularUser`?
 
   // Generic classes and type parameters
 
