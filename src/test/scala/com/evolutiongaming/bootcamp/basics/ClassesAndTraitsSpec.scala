@@ -1,38 +1,32 @@
 package com.evolutiongaming.bootcamp.basics
 
-import ClassesAndTraits._
-import com.evolutiongaming.bootcamp.basics.ClassesAndTraits.Circle
-import org.scalatest.matchers.should.Matchers._
-import org.scalacheck.Gen._
+import com.evolutiongaming.bootcamp.basics.ClassesAndTraits._
+import org.scalacheck.Gen
 import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers._
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
-import cats.implicits._
 
 class ClassesAndTraitsSpec extends AnyFlatSpec with ScalaCheckDrivenPropertyChecks {
-  "Circle" should "be correct" in {
-    val intervalGen = choose(1.0, 10)
+  "totalBalance" should "correctly calculate total balance for empty list" in {
+    totalBalance(List.empty).balance shouldBe 0
+  }
 
-    forAll(intervalGen, intervalGen, intervalGen) { (x, y, r) =>
-      val circle = Circle(x, y, r)
-      circle.minX shouldEqual x - r
-      circle.maxX shouldEqual x + r
-      circle.minY shouldEqual y - r
-      circle.maxY shouldEqual y + r
+  it should "correctly calculate total balance for list of Users" in {
+    val numberGen = Gen.choose[Int](1, 10)
+    val loginGen = Gen.oneOf("potter", "smith", "jonson")
+
+    forAll(numberGen, loginGen) { (number, login) =>
+      val users = List.fill(number)(RegularUser(login, 1.0))
+
+      totalBalance(users).balance shouldBe number.toDouble
     }
   }
 
-  "minimumBoundingRectangle" should "be correct" in {
-    val mbr = minimumBoundingRectangle(
-      Set(
-        Point(-12, -3),
-        Point(-3, 7),
-        Circle(0, 0, 5),
-      )
-    )
+  it should "correctly calculate total balance for unknown entities" in {
+    val entity1 = new HasBalance { def balance: Double = 100 }
+    val entity2 = new HasBalance { def balance: Double = 200 }
+    val entity3 = new HasBalance { def balance: Double = 500 }
 
-    mbr.minX shouldEqual -12
-    mbr.maxX shouldEqual 5
-    mbr.minY shouldEqual -5
-    mbr.maxY shouldEqual 7
+    totalBalance(List(entity1, entity2, entity3)) shouldBe 800
   }
 }
