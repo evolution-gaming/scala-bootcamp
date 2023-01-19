@@ -2,7 +2,7 @@ package com.evolutiongaming.bootcamp.effects
 
 import cats.effect.{ExitCode, IO, IOApp}
 import cats.implicits.catsSyntaxParallelSequence1
-import com.evolutiongaming.bootcamp.effects.Console.Real.putStrLn
+import com.evolutiongaming.bootcamp.effects.v3.ConsoleIO._
 
 import scala.concurrent.duration._
 import scala.util.Random
@@ -35,38 +35,38 @@ object CancelBoundaries extends IOApp  {
   val nonCancelableProgram: IO[Unit] = {
     //program has no context shift and no cancel boundary set, it's not cancellable
     def nonCancellableTimes(rec: Int): IO[Unit] = for {
-      _ <- putStrLn(s"Running remaining iterations: ${rec}")
+      _ <- putString(s"Running remaining iterations: ${rec}")
       _ <- IO.sleep(1.seconds).uncancelable
-      _ <- if(rec > 0) IO.suspend(nonCancellableTimes(rec - 1)) else IO.unit
+      _ <- if(rec > 0) IO.defer(nonCancellableTimes(rec - 1)) else IO.unit
     } yield ()
 
     for {
-      _ <- putStrLn("Starting nonCancelableProgram")
+      _ <- putString("Starting nonCancelableProgram")
       fib <- nonCancellableTimes(10).start
       _ <- IO.sleep(5.seconds)
       _ <- fib.cancel
-      _ <- putStrLn("Cancelled nonCancelableProgram")
+      _ <- putString("Cancelled nonCancelableProgram")
       _ <- IO.sleep(5.seconds) //just to keep program alive, otherwise deamon thread will be terminated
-      _ <- putStrLn("End nonCancelableProgram")
+      _ <- putString("End nonCancelableProgram")
     } yield ()
   }
 
   val cancelableProgram: IO[Unit] = {
     //on every iteration cancel boundary is set, program is cancellable
     def cancellableTimes(rec: Int): IO[Unit] = for {
-      _ <- putStrLn(s"Running remaining iterations: ${rec}")
+      _ <- putString(s"Running remaining iterations: ${rec}")
       _ <- IO.sleep(1.seconds).uncancelable
-      _ <- if(rec > 0) IO.cancelBoundary *> IO.suspend(cancellableTimes(rec - 1)) else IO.unit
+      _ <- if(rec > 0) IO.cede *> IO.defer(cancellableTimes(rec - 1)) else IO.unit
     } yield ()
 
     for {
-      _ <- putStrLn("Starting cancelableProgram")
+      _ <- putString("Starting cancelableProgram")
       fib <- cancellableTimes(10).start
       _ <- IO.sleep(5.seconds)
       _ <- fib.cancel
-      _ <- putStrLn("Cancelled cancelableProgram")
+      _ <- putString("Cancelled cancelableProgram")
       _ <- IO.sleep(5.seconds) //just to keep program alive, otherwise deamon thread will be terminated
-      _ <- putStrLn("End cancelableProgram")
+      _ <- putString("End cancelableProgram")
     } yield ()
   }
 
@@ -89,20 +89,20 @@ object CancelBoundariesExercises extends IOApp {
         task
           .handleErrorWith {
             case NonFatal(e) =>
-              putStrLn(s"$id Retrying... retries left: $maxRetries") *> (if(maxRetries <= 0) IO.raiseError(e)
-              else delay(interval) *> IO.suspend(task.retry(id, maxRetries-1, interval)))
+              putString(s"$id Retrying... retries left: $maxRetries") *> (if(maxRetries <= 0) IO.raiseError(e)
+              else delay(interval) *> IO.defer(task.retry(id, maxRetries-1, interval)))
           }
     }
 
     val io = IO.delay(if(Random.nextBoolean()) throw new RuntimeException("kaboom!") else "SUCCESS!")
     for {
       fib <- (0 to 10).toList.map(id => io.retry(s"id:$id", 10, 5.second))
-        .parSequence.flatMap(ll => putStrLn(ll.toString())).start
+        .parSequence.flatMap(ll => putString(ll.toString())).start
       _ <- IO.sleep(5.seconds)
       _ <- fib.cancel
-      _ <- putStrLn("No more work after this point")
+      _ <- putString("No more work after this point")
       _ <- IO.sleep(30.seconds)
-      _ <- putStrLn(s"End")
+      _ <- putString(s"End")
     } yield ()
   }
 
@@ -112,13 +112,13 @@ object CancelBoundariesExercises extends IOApp {
   val computeExercise = {
     def cpuBoundCompute(value: BigInt, multiplier: BigInt): IO[BigInt] = {
       val log = IO.delay(println(s"${Thread.currentThread().toString} Calculating... ${multiplier}"))
-      log *> IO.suspend(cpuBoundCompute(value * multiplier, multiplier + 1))
+      log *> IO.defer(cpuBoundCompute(value * multiplier, multiplier + 1))
     }
     for {
-      _ <- putStrLn("Starting program")
+      _ <- putString("Starting program")
       fib <- cpuBoundCompute(1, 1).start
       _ <- fib.cancel
-      _ <- putStrLn("cpu bound cancelled")
+      _ <- putString("cpu bound cancelled")
       _ <- IO.sleep(10.seconds)
     } yield ()
   }

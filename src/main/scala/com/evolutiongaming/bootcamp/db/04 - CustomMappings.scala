@@ -25,17 +25,15 @@ object CustomMappings extends IOApp {
   // OR untagged `.map` vs tagged `.timap`
 //  implicit val xyMeta: Meta[Coordinate] = Meta[String].timap(Coordinate.fromVarchar)(Coordinate.toVarchar)
 
-  override def run(args: List[String]): IO[ExitCode] =
-    DbTransactor
-      .make[IO]
-      .use { xa =>
-        setup().transact(xa) *>
-          selectAll()
-            .nel
-            .transact(xa)
-            .map(println)
-      }
-      .as(ExitCode.Success)
+  override def run(args: List[String]): IO[ExitCode] = {
+    val xa = DbTransactor.make[IO]
+    setup().transact(xa) *>
+      selectAll()
+        .nel
+        .transact(xa)
+        .map(println)
+        .as(ExitCode.Success)
+}
 
   def selectAll(): Query0[Point] =
     sql"select name, x, y from points".query[Point]

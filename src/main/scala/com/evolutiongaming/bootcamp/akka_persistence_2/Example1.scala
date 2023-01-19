@@ -39,7 +39,7 @@ object Example1 extends App {
   }
 
   val system = ActorSystem("AkkaPersistenceSystem")
-  val basket = system.actorOf(Props[EmployeeShoppingBasketActor])
+  val basket = system.actorOf(Props[EmployeeShoppingBasketActor]())
 
   StdIn.readLine()
 

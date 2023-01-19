@@ -161,12 +161,14 @@ object Cancellable extends IOApp {
 
     val program = for {
       _     <- IO.delay(println("Launching cancelable"))
-      io     = IO.cancelable[Long] { cb =>
-                 val legacy = new LegacyCode
-                 legacy.compute(2L, Long.MaxValue)(res => cb(Right(res)), e => cb(Left(e)))
-//                 legacy.compute(2L, 100)(res => cb(Right(res)), e => cb(Left(e)))
-                 IO.delay(legacy.cancel())
-               }
+      io     = IO.async[Long] { cb =>
+        IO {
+          val legacy = new LegacyCode
+          legacy.compute(2L, Long.MaxValue)(res => cb(Right(res)), e => cb(Left(e)))
+//          legacy.compute(2L, 100)(res => cb(Right(res)), e => cb(Left(e)))
+          IO.delay(legacy.cancel()).some
+        }
+      }
       fiber <- io.start
       _     <- IO.delay(println(s"Started $fiber"))
       res   <- IO.race(IO.sleep(10.seconds), fiber.join)
@@ -211,7 +213,7 @@ object CancelBoundaries extends IOApp {
       for {
         _ <- IO.delay(println(s"Running remaining iterations: $rec"))
         _ <- IO.sleep(1.seconds).uncancelable
-        _ <- if (rec > 0) IO.suspend(nonCancellableTimes(rec - 1)) else IO.unit
+        _ <- if (rec > 0) IO.defer(nonCancellableTimes(rec - 1)) else IO.unit
       } yield ()
 
     for {
@@ -232,7 +234,7 @@ object CancelBoundaries extends IOApp {
       for {
         _ <- IO.delay(println(s"Running remaining iterations: $rec"))
         _ <- IO.sleep(1.seconds).uncancelable
-        _ <- if (rec > 0) IO.cancelBoundary *> IO.suspend(cancellableTimes(rec - 1)) else IO.unit
+        _ <- if (rec > 0) IO.cede *> IO.defer(cancellableTimes(rec - 1)) else IO.unit
       } yield ()
 
     for {
@@ -276,7 +278,7 @@ object CancelBoundariesExercise extends IOApp {
                 .flatMap { _ =>
                   if (maxRetries <= 0) IO.raiseError(e)
                   else
-                    delay(interval) *> IO.suspend(
+                    delay(interval) *> IO.defer(
                       task.retry(
                         id,
                         maxRetries - 1,
@@ -309,7 +311,7 @@ object CancelBoundariesExercise extends IOApp {
 
     def cpuBoundCompute(value: BigInt, multiplier: BigInt): IO[BigInt] = {
       val log = IO.delay(println(s"${Thread.currentThread().toString} Calculating... $multiplier"))
-      log *> IO.suspend(cpuBoundCompute(value * multiplier, multiplier + 1))
+      log *> IO.defer(cpuBoundCompute(value * multiplier, multiplier + 1))
     }
 
     for {

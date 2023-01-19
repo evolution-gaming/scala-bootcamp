@@ -127,7 +127,7 @@ object AkkaServer extends App {
 
   val route = helloRoute ~ paramsRoute ~ headersRoute ~ entityRoute ~ jsonRoute ~ multipartRoute ~ wsEchoRoute
 
-  val binding = Http().bindAndHandle(route, "localhost", 9000)
+  val binding = Http().newServerAt("localhost", 9000).bindFlow(route)
 
   sys.addShutdownHook {
     binding.flatMap(_.terminate(hardDeadline = 3.seconds)).flatMap { _ =>

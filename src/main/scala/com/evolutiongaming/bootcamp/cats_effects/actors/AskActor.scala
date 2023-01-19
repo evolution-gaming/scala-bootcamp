@@ -8,7 +8,7 @@ trait AskActor[In, Out] extends Actor[In] {
   def ask(
     entity: In
   ): IO[Out] =
-    semaphore.withPermit(
+    semaphore.permit.surround(
       handleMessageWithResult(entity)
     )
 }

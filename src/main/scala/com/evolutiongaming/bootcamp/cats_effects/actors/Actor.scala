@@ -1,11 +1,9 @@
 package com.evolutiongaming.bootcamp.cats_effects.actors
 
-import cats.effect.concurrent.Semaphore
-import cats.effect.{ContextShift, IO}
-import cats.implicits._
+import cats.effect.IO
+import cats.effect.std.Semaphore
 
 trait Actor[In] {
-  protected implicit def contextShift: ContextShift[IO]
   protected def semaphore: Semaphore[IO]
   protected def name: String
   protected def handleMessage: In => IO[Unit]
@@ -13,7 +11,7 @@ trait Actor[In] {
   def sendMessage(
     entity: In
   ): IO[Unit] =
-    semaphore.withPermit(
+    semaphore.permit.surround(
       handleMessage(entity)
     ).start *> IO.unit
 }

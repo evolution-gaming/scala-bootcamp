@@ -1,10 +1,10 @@
 package com.evolutiongaming.bootcamp.effects.v2
 
+import cats.effect.kernel.Resource.ExitCase
+import cats.effect._
+
 import java.io.{BufferedReader, FileReader}
 import java.util.concurrent.Executors
-
-import cats.effect.{Blocker, ContextShift, ExitCase, ExitCode, IO, IOApp, Resource, Sync}
-
 import scala.concurrent.ExecutionContext
 import scala.concurrent.duration._
 
@@ -15,15 +15,13 @@ object Cats_Resource_Example1 extends IOApp {
     val pureIO = IO.pure(intValue)
 
     Resource.pure[IO, Int](intValue)
-    Resource.liftF(pureIO)
+    Resource.liftK(pureIO)
 
     Resource.make(pureIO)(_ => IO.unit)
     Resource.makeCase(pureIO)((_, exitCase) =>
       exitCase match {
-        case ExitCase.Completed => ???
-
-        case ExitCase.Error(_) => ???
-
+        case ExitCase.Succeeded => ???
+        case ExitCase.Errored(e) => ???
         case ExitCase.Canceled => ???
       })
 
@@ -159,9 +157,7 @@ object Cats_ContextShift_Example1 extends IOApp {
 
   override def run(args: List[String]): IO[ExitCode] = {
     val executionContext = ExecutionContext.fromExecutor(Executors.newCachedThreadPool())
-    val cs = IO.contextShift(executionContext)
-    cs.shift
-    cs.evalOn(executionContext)(IO.pure(123))
+    IO.pure(123).evalOn(executionContext)
 
     for {
       _ <- IO(println(s"operation - ${ Thread.currentThread().getName }"))
@@ -177,8 +173,8 @@ object Cats_ContextShift_Example1 extends IOApp {
 
 object Cats_ContextShift_Exercise1 extends IOApp {
 
-  def readName(blocker: Blocker)(implicit contextShift: ContextShift[IO], sync: Sync[IO]): IO[String] = ???
-  def readAge(blocker: Blocker)(implicit contextShift: ContextShift[IO], sync: Sync[IO]): IO[String] = ???
+  def readName(implicit sync: Sync[IO]): IO[String] = ???
+  def readAge(implicit sync: Sync[IO]): IO[String] = ???
 
   override def run(args: List[String]): IO[ExitCode] = ???
 }
@@ -186,23 +182,16 @@ object Cats_ContextShift_Exercise1 extends IOApp {
 
 object Cats_ContextShift_Example2 extends IOApp {
 
-  def readName(blocker: Blocker)(implicit contextShift: ContextShift[IO], sync: Sync[IO]): IO[String] =
-    blocker.delay {
+  def readName(implicit sync: Sync[IO]): IO[String] =
+    sync.blocking {
       println(s"operation - ${ Thread.currentThread().getName }")
       println("Enter your name: ")
       scala.io.StdIn.readLine()
     }
 
-  def run(args: List[String]) = {
-    //val executionContext = ExecutionContext.fromExecutor(Executors.newCachedThreadPool())
-    //val cs = IO.contextShift(executionContext)
-    val name = Blocker[IO].use { blocker =>
-      //readName(blocker)(cs, implicitly[Sync[IO]])
-      readName(blocker)
-    }
-
+  def run(args: List[String]): IO[ExitCode] = {
     for {
-      n <- name
+      n <- readName
       _ <- IO(println(s"operation - ${ Thread.currentThread().getName }"))
       _ <- IO(println(s"Hello, $n!"))
     } yield ExitCode.Success
@@ -220,11 +209,10 @@ object Cats_ContextShift_Exercise2 extends IOApp {
 
   override def run(args: List[String]): IO[ExitCode] = {
     val executionContext = ExecutionContext.fromExecutor(Executors.newFixedThreadPool(1))
-    val cs = IO.contextShift(executionContext)
 
     for {
-      _ <- recursiveF(0, "operation 1").start(cs)
-      _ <- recursiveF(0, "operation 2").start(cs)
+      _ <- recursiveF(0, "operation 1").start.evalOn(executionContext)
+      _ <- recursiveF(0, "operation 2").start.evalOn(executionContext)
       _ <- IO.sleep(15.second)
     } yield ExitCode.Success
   }
@@ -250,7 +238,7 @@ object Cats_Fiber_Example1 extends IOApp {
 
 object Cats_Fiber_Exercise1 extends IOApp {
 
-  def readIndex(blocker: Blocker)(implicit contextShift: ContextShift[IO], sync: Sync[IO]): IO[Int] = ???
+  def readIndex(implicit sync: Sync[IO]): IO[Int] = ???
   def getDataFromDB(index: Int): IO[Int] =
     IO.sleep(5.second) *> IO.pure(index * 2)
 

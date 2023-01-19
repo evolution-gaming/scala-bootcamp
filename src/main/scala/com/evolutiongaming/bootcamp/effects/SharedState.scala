@@ -1,16 +1,14 @@
 package com.evolutiongaming.bootcamp.effects
 
+import cats.effect._
+import cats.effect.kernel.Deferred
+import cats.effect.std._
+import cats.implicits._
+import org.typelevel.log4cats.slf4j.Slf4jLogger
+
 import java.time.Instant
 import java.util.concurrent.Executors
 import java.util.concurrent.atomic.AtomicReference
-import cats.effect.concurrent._
-import cats.effect.{Concurrent, ExitCode, IO, IOApp}
-import cats.implicits.{catsSyntaxMonadErrorRethrow, catsSyntaxParallelSequence1}
-import cats.syntax.flatMap._
-import cats.syntax.functor._
-import com.evolutiongaming.bootcamp.effects.IosCommon.logger
-import io.chrisdavenport.log4cats.slf4j.Slf4jLogger
-
 import scala.concurrent.duration.{DurationInt, FiniteDuration}
 
 /*
@@ -331,14 +329,14 @@ object SemaphoreExample extends IOApp {
 
   def process1(sem: Semaphore[IO]): IO[Unit] =
     logger.info("start first process") >>
-      sem.withPermit(someExpensiveTask) >>
+      sem.permit.surround( someExpensiveTask) >>
       logger.info("finish fist process") >>
       process1(sem)
 
 
   def process2(sem: Semaphore[IO]): IO[Unit] =
     logger.info("start second process") >>
-      sem.withPermit(someExpensiveTask) >>
+      sem.permit.surround( someExpensiveTask) >>
       logger.info("finish second process") >>
       process2(sem)
 
@@ -552,139 +550,6 @@ object RefsExerciseTwo extends IOApp {
       IO(ExitCode.Success)
   }
 }
-
-/*
- * What is an MVar?
- * Comes from the Haskell world
- *
- * Use-cases:
- * As synchronized, thread-safe mutable variables
- * As channels, with take and put acting as “receive” and “send”
- * As a binary semaphore, with take and put acting as “acquire” and “release”
- *
- * Main methods:
- * def take: F[A] Empties the `MVar` if full, returning the contained value,
- * or blocks (asynchronously) until a value is available.
- *
- * def put(a: A): F[Unit] Fills the `MVar` if it is empty, or blocks (asynchronously)
- * if the `MVar` is full, until the given value is next in
- * line to be consumed on [[take]].
- */
-
-object MVarQueueExample extends IOApp {
-
-  import IosCommon.logger
-
-  val N = 10
-  val mvarF: IO[MVar2[IO, Int]] = MVar.empty[IO, Int]
-
-  // Puts 'n', 'n+1', ..., 'N-1' to 'mvar'
-  def produce(mvar: MVar2[IO, Int], n: Int): IO[Unit] = {
-    logger.info(s"produce($n)") >> IO(if (n < N) {
-      mvar.put(n).flatTap(_ => logger.info(s"produced $n")) >> produce(mvar, n + 1)
-    } else {
-      IO.unit
-    }).flatten
-  }
-
-  // Takes 'N-c' values from 'mvar' and sums them. Fails if cannot take in 100 ms.
-  def consume(mvar: MVar2[IO, Int], sum: Long, c: Int): IO[Long] = {
-
-    logger.info(s"consume($sum, $c)") >> IO(if (c < N) {
-      mvar.take
-        .timeout(100.millisecond).flatTap(n => logger.info(s"consumed $n"))
-        .flatMap { v =>
-          consume(mvar, v + sum, c + 1)
-        }
-    } else {
-      IO(sum)
-    }).flatten
-  }
-
-  override def run(args: List[String]): IO[ExitCode] = for {
-    mv <- mvarF
-    _ <- consume(mv, 0, 0).start
-    _ <- produce(mv, 0)
-  } yield ExitCode.Success
-}
-
-
-/*
- * Question: what will happen in the code below ?
- */
-object MVarBehavior extends IOApp {
-
-  import IosCommon.logger
-
-  override def run(args: List[String]): IO[ExitCode] = {
-    val mvarF: IO[MVar2[IO, Int]] = MVar.of[IO, Int](1)
-    for {
-      mv <- mvarF
-      i <- mv.take
-      _ <- logger.info(s"got $i from MVar")
-      i <- mv.take
-      _ <- logger.info(s"now $i from MVar")
-      _ <- logger.info(s"putting 10 to MVar")
-      _ <- mv.put(10)
-      i <- mv.take
-      _ <- logger.info(s"and now got $i from MVar")
-    } yield ExitCode.Success
-  }
-}
-
-/*
- * Implement MySemaphore from one of previous exercises in terms of MVar
- *
- * Question: How we can adapt code if we want more to allow more than 1 number of permit ?
- */
-
-object MySemaphoreMVarExercise extends IOApp {
-
-  trait MySemaphore[F[_]] {
-    def acquire: F[Unit]
-
-    def release: F[Unit]
-
-    def withPermit[A](fa: F[A]): F[A]
-  }
-
-  class MySemaphoreMVar[F[_] : Concurrent](mvar: MVar2[F, Unit]) extends MySemaphore[F] {
-    override def acquire: F[Unit] = ???
-
-    override def release: F[Unit] = ???
-
-    override def withPermit[A](fa: F[A]): F[A] = ???
-  }
-
-  object MySemaphoreMVar {
-    def of[F[_] : Concurrent]: F[MySemaphoreMVar[F]] = MVar.of[F, Unit](()).map(mv => new MySemaphoreMVar[F](mv))
-  }
-
-
-  def someExpensiveTask: IO[Unit] =
-    IO.sleep(3.second) >>
-      logger.info("expensive task took 3 second")
-
-  def process1(sem: MySemaphore[IO]): IO[Unit] =
-    logger.info("start first process") >>
-      sem.withPermit(someExpensiveTask) >>
-      logger.info("finish fist process") >>
-      process1(sem)
-
-  def process2(sem: MySemaphore[IO]): IO[Unit] =
-    logger.info("start second process") >>
-      sem.withPermit(someExpensiveTask) >>
-      logger.info("finish second process") >>
-      process2(sem)
-
-  def run(args: List[String]): IO[ExitCode] = {
-    for {
-      mySem <- MySemaphoreMVar.of[IO]
-      _ <- List(process1(mySem), process2(mySem)).parSequence
-    } yield ExitCode.Success
-  }
-}
-
 
 /*
  * Implement race method (who completed first - wins, other should be canceled) using MVar

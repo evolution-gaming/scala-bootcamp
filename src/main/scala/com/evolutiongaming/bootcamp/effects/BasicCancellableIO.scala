@@ -1,6 +1,7 @@
 package com.evolutiongaming.bootcamp.effects
 
-import cats.effect.{Concurrent, ExitCode, IO, IOApp, Timer}
+import cats.effect.kernel.Temporal
+import cats.effect.{Concurrent, ExitCode, IO, IOApp}
 import cats.implicits._
 
 import scala.concurrent.duration.{DurationInt, FiniteDuration}
@@ -71,7 +72,7 @@ object BasicCancellableIO extends IOApp {
 
     def timeoutIO[A](task: IO[A], timeout: FiniteDuration): IO[A] = IO.raiseError(???)
 
-    def timeoutF[F[_], A](task: F[A], timeout: FiniteDuration)(implicit F: Concurrent[F], T: Timer[F]): F[A] = F.raiseError(???)
+    def timeoutF[F[_], A](task: F[A], timeout: FiniteDuration)(implicit F: Concurrent[F], T: Temporal[F]): F[A] = F.raiseError(???)
 
     IO.never
   }

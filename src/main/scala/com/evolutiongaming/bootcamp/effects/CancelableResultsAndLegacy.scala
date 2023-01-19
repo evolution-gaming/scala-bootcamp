@@ -3,7 +3,7 @@ package com.evolutiongaming.bootcamp.effects
 import java.util.concurrent.atomic.AtomicBoolean
 
 import cats.effect.{ExitCode, IO, IOApp}
-import com.evolutiongaming.bootcamp.effects.Console.Real.putStrLn
+import com.evolutiongaming.bootcamp.effects.v3.ConsoleIO._
 
 import scala.annotation.tailrec
 import scala.concurrent.duration._
@@ -50,19 +50,21 @@ object CancelableResultsAndLegacy extends IOApp {
     }
 
     for {
-      _ <- putStrLn("Launching cancelable")
-      io = IO.cancelable[Long] { cb =>
-        val legacy = new UglyLegacyCode
-        legacy.compute(2L, Long.MaxValue)(res => cb(Right(res)), e => cb(Left(e)))
-        IO.delay(legacy.cancel())
+      _ <- putString("Launching cancelable")
+      io = IO.async[Long] { cb =>
+        IO {
+          val legacy = new UglyLegacyCode
+          legacy.compute(2L, Long.MaxValue)(res => cb(Right(res)), e => cb(Left(e)))
+          Some(IO.delay(legacy.cancel()))
+        }
       }
       fiber <- io.start
-      _ <- putStrLn(s"Started $fiber")
+      _ <- putString(s"Started $fiber")
       res <- IO.race(IO.sleep(10.seconds), fiber.join)
       _ <-
         res.fold(
-          _ => putStrLn(s"cancelling $fiber...") *> fiber.cancel *> putStrLn("IO cancelled"),
-          i => putStrLn(s"IO completed with: $i")
+          _ => putString(s"cancelling $fiber...") *> fiber.cancel *> putString("IO cancelled"),
+          i => putString(s"IO completed with: $i")
         )
     } yield ()
   }

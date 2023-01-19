@@ -1,22 +1,22 @@
 package com.evolutiongaming.bootcamp.cats_effects.actors
 
-import cats.effect.concurrent.{Deferred, Semaphore}
-import cats.effect.{ContextShift, IO}
+import cats.effect.IO
+import cats.effect.kernel.Deferred
+import cats.effect.std.Semaphore
 import cats.implicits._
 
 trait AskActor_2[In] {
-  protected implicit def contextShift: ContextShift[IO]
   protected def semaphore: Semaphore[IO]
 
-  def handleMessage: (In, Option[TempActor[In]]) => IO[Unit]
+  def handleMessage: (In, Option[TempActor]) => IO[Unit]
 
   def ask(entity: In): IO[In] =
     for {
       deferred_ <- Deferred[IO, In]
-      _ <- semaphore.withPermit(
+      _ <- semaphore.permit.surround(
         handleMessage(
           entity,
-          new TempActor[In] {
+          new TempActor {
             override def deferred: Deferred[IO, In] = deferred_
           }.some)
       ).start
@@ -27,15 +27,15 @@ trait AskActor_2[In] {
   def sendMessage(
     entity: In
   ): IO[Unit] =
-    semaphore.withPermit(
+    semaphore.permit.surround(
       handleMessage(entity, None)
     ).start *> IO.unit
 
-  trait TempActor[In] {
+  trait TempActor {
     def deferred: Deferred[IO, In]
     def sendMessage(
       entity: In
     ): IO[Unit] =
-      deferred.complete(entity)
+      deferred.complete(entity).void
   }
 }

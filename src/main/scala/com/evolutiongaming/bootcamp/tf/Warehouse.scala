@@ -2,7 +2,6 @@ package com.evolutiongaming.bootcamp.tf
 
 import cats._
 import cats.effect._
-import cats.effect.concurrent.Ref
 import cats.syntax.all._
 import com.evolutiongaming.bootcamp.tf.Items.ValidationError
 import com.evolutiongaming.bootcamp.tf.Items.ValidationError.{EmptyName, NegativePrice}

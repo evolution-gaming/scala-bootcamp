@@ -1,19 +1,20 @@
 package com.evolutiongaming.bootcamp.http
 
+import cats.effect.std.Queue
 import cats.effect.{ExitCode, IO, IOApp, Resource}
 import cats.syntax.all._
+import fs2.concurrent.Topic
 import fs2.{Pipe, Stream}
-import fs2.concurrent.{Queue, Topic}
-import org.http4s._
-import org.http4s.client.jdkhttpclient.{JdkWSClient, WSFrame, WSRequest}
+import org.http4s.blaze.server._
+import org.http4s.client.websocket.{WSFrame, WSRequest}
 import org.http4s.dsl.io._
 import org.http4s.implicits._
-import org.http4s.server.blaze.BlazeServerBuilder
-import org.http4s.server.websocket.WebSocketBuilder
+import org.http4s.jdkhttpclient.JdkWSClient
+import org.http4s.server.websocket.WebSocketBuilder2
 import org.http4s.websocket.WebSocketFrame
+import org.http4s.{HttpRoutes, _}
 
 import java.net.http.HttpClient
-import scala.concurrent.ExecutionContext
 
 object WebSocketIntroduction {
 
@@ -44,7 +45,7 @@ object WebSocketServer extends IOApp {
 
   // Let's build a WebSocket server using Http4s.
 
-  private val echoRoute = HttpRoutes.of[IO] {
+  private def echoRoute(wsb: WebSocketBuilder2[IO]) = HttpRoutes.of[IO] {
 
     // websocat "ws://localhost:9002/echo"
     case GET -> Root / "echo" =>
@@ -61,11 +62,11 @@ object WebSocketServer extends IOApp {
         // For production use bounded queue seems a better choice. Unbounded queue may result in out of
         // memory error, if the client is sending messages quicker than the server can process them.
         queue <- Queue.unbounded[IO, WebSocketFrame]
-        response <- WebSocketBuilder[IO].build(
+        response <- wsb.build(
           // Sink, where the incoming WebSocket messages from the client are pushed to.
-          receive = queue.enqueue,
+          receive = _.evalMap(queue.offer),
           // Outgoing stream of WebSocket messages to send to the client.
-          send = queue.dequeue.through(echoPipe),
+          send = Stream.repeatEval(queue.take).through(echoPipe),
         )
       } yield response
 
@@ -79,11 +80,11 @@ object WebSocketServer extends IOApp {
 
   // Topics provide an implementation of the publish-subscribe pattern with an arbitrary number of
   // publishers and an arbitrary number of subscribers.
-  private def chatRoute(chatTopic: Topic[IO, String]): HttpRoutes[IO] = HttpRoutes.of[IO] {
+  private def chatRoute(chatTopic: Topic[IO, String])(wsb: WebSocketBuilder2[IO]): HttpRoutes[IO] = HttpRoutes.of[IO] {
 
     // websocat "ws://localhost:9002/chat"
     case GET -> Root / "chat" =>
-      WebSocketBuilder[IO].build(
+      wsb.build(
         // Sink, where the incoming WebSocket messages from the client are pushed to.
         receive = chatTopic.publish.compose[Stream[IO, WebSocketFrame]](_.collect {
           case WebSocketFrame.Text(message, _) => message
@@ -96,19 +97,19 @@ object WebSocketServer extends IOApp {
     // it to every follow-up message. Tip: you will likely need to use fs2.Pull.
   }
 
-  private def httpApp(chatTopic: Topic[IO, String]): HttpApp[IO] = {
-    echoRoute <+> chatRoute(chatTopic)
+  private def httpApp(chatTopic: Topic[IO, String])(wsb: WebSocketBuilder2[IO]): HttpApp[IO] = {
+    echoRoute(wsb) <+> chatRoute(chatTopic)(wsb)
   }.orNotFound
 
   override def run(args: List[String]): IO[ExitCode] =
     for {
-      chatTopic <- Topic[IO, String](initial = "Welcome to the chat!")
-      _ <- BlazeServerBuilder[IO](ExecutionContext.global)
-      .bindHttp(port = 9002, host = "localhost")
-      .withHttpApp(httpApp(chatTopic))
-      .serve
-      .compile
-      .drain
+      chatTopic <- Topic[IO, String]
+      _ <- BlazeServerBuilder[IO]
+        .bindHttp(port = 9002, host = "localhost")
+        .withHttpWebSocketApp(httpApp(chatTopic))
+        .serve
+        .compile
+        .drain
     } yield ExitCode.Success
 }
 

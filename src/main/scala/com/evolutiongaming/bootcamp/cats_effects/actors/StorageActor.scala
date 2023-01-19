@@ -1,16 +1,15 @@
 package com.evolutiongaming.bootcamp.cats_effects.actors
 
-import cats.effect.concurrent.Semaphore
-import cats.effect.{ContextShift, IO, Timer}
-import cats.implicits._
+import cats.effect.IO
+import cats.effect.kernel.Temporal
+import cats.effect.std.Semaphore
 
 import scala.concurrent.duration._
 
 class StorageActor(
   val semaphore: Semaphore[IO]
 )(
-  implicit timer: Timer[IO],
-  val contextShift: ContextShift[IO]
+  implicit timer: Temporal[IO],
 ) extends AskActor[Int, Int] {
   override def name: String = "storage_actor"
   @volatile private var account = 0
@@ -35,8 +34,7 @@ object StorageActor {
   def apply(
     semaphore: Semaphore[IO]
   )(
-    implicit timer: Timer[IO],
-    contextShift: ContextShift[IO]
+    implicit timer: Temporal[IO],
   ): StorageActor =
     new StorageActor(semaphore)
 }

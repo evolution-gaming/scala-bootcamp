@@ -1,5 +1,6 @@
 package com.evolutiongaming.bootcamp.typeclass.v2
 
+import scala.language.implicitConversions
 
 object BasicImplicitConversion extends App {
   case class A(x: Int)

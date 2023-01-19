@@ -1,10 +1,12 @@
 package com.evolutiongaming.bootcamp.monitoring
 
-import cats.effect.{IO, Timer}
+import cats.effect.IO
+import cats.effect.kernel.Temporal
+
 import scala.concurrent.duration._
 import scala.util.Random
 
-class Service(implicit timer: Timer[IO]) {
+class Service(implicit timer: Temporal[IO]) {
   private val random = new Random(0)
   private def randomGaussian: IO[Double] = IO(random.nextGaussian())
   private def randomDouble: IO[Double] = IO(random.nextDouble())

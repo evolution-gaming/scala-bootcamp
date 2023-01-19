@@ -93,7 +93,7 @@ class EffectsHomework1Spec extends AnyWordSpec with Matchers {
     }
 
     "have working `suspend`" in {
-      IO.suspend(IO.pure(42)).unsafeRunSync() shouldBe 42
+      IO.defer(IO.pure(42)).unsafeRunSync() shouldBe 42
     }
 
     "have working `delay`" in {

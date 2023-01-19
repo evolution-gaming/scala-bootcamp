@@ -1,9 +1,9 @@
 package com.evolutiongaming.bootcamp.cats_effects
 
-import java.util.concurrent.Executors
-
 import cats.effect.{ExitCode, IO, IOApp}
 import cats.implicits._
+
+import java.util.concurrent.Executors
 import scala.concurrent.ExecutionContext
 import scala.io.Source
 
@@ -78,16 +78,16 @@ object EffectExercises extends IOApp {
     }
 
     object Exercise_6 {
-      val fixedThreadPool = IO.contextShift(ExecutionContext.fromExecutorService(Executors.newFixedThreadPool(1)))
+      val fixedThreadPool = ExecutionContext.fromExecutorService(Executors.newFixedThreadPool(1))
       def fib(n: Int, a: Long = 0, b: Long = 1): IO[Long] =
-        IO.suspend {
+        IO.defer {
           if (n > 0) fib(n - 1, b, a + b)
           else IO.pure(a)
         }
 
       for {
-        fiber1 <- fib(300).start(fixedThreadPool)
-        fiber2 <- fib(300).start(fixedThreadPool)
+        fiber1 <- fib(300).start.evalOn(fixedThreadPool)
+        fiber2 <- fib(300).start.evalOn(fixedThreadPool)
         _ <- fiber1.join
         _ <- fiber2.join
       } yield ()

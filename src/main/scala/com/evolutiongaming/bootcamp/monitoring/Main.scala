@@ -1,19 +1,15 @@
 package com.evolutiongaming.bootcamp.monitoring
 
 import cats.effect.{ExitCode, IO, IOApp}
-import org.http4s.dsl.impl.Root
-import org.http4s.server.blaze.BlazeServerBuilder
-import org.http4s.{HttpRoutes, Response}
-import org.http4s.dsl.io._
-import org.http4s.implicits._
 import io.chrisdavenport.epimetheus._
 import io.chrisdavenport.epimetheus.http4s.EpimetheusOps
-import io.chrisdavenport.log4cats.Logger
-import io.chrisdavenport.log4cats.slf4j.Slf4jLogger
+import org.http4s.blaze.server.BlazeServerBuilder
+import org.http4s.dsl.io._
+import org.http4s.implicits._
 import org.http4s.server.middleware.Metrics
-import cats.implicits._
-
-import scala.concurrent.ExecutionContext
+import org.http4s.{HttpRoutes, Response}
+import org.typelevel.log4cats.Logger
+import org.typelevel.log4cats.slf4j.Slf4jLogger
 
 /*
  * Follow ReadMe.md for instructions.
@@ -69,7 +65,7 @@ object Main extends IOApp {
 
       meteredRoutes     <- EpimetheusOps.server(collectorRegistry).map(metricOps => Metrics[IO](metricOps)(routes))
 
-      _                 <- BlazeServerBuilder[IO](ExecutionContext.global)
+      _                 <- BlazeServerBuilder[IO]
         .bindHttp(9000, "0.0.0.0")
         .withHttpApp(meteredRoutes.orNotFound)
         .serve
