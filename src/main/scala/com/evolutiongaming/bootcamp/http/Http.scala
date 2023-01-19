@@ -1,20 +1,20 @@
 package com.evolutiongaming.bootcamp.http
 
-import java.time.{Instant, LocalDate}
-
 import cats.data.{EitherT, Validated}
-import cats.effect.{Blocker, ExitCode, IO, IOApp}
+import cats.effect.{ExitCode, IO, IOApp}
 import cats.syntax.all._
 import com.evolutiongaming.bootcamp.http.Protocol._
 import org.http4s._
-import org.http4s.client.blaze.BlazeClientBuilder
+import org.http4s.blaze.client._
+import org.http4s.blaze.server._
 import org.http4s.client.dsl.io._
 import org.http4s.dsl.io._
 import org.http4s.headers._
 import org.http4s.implicits._
-import org.http4s.multipart.{Multipart, Part}
-import org.http4s.server.blaze.BlazeServerBuilder
+import org.http4s.multipart.{Multipart, Multiparts, Part}
+import org.typelevel.ci.CIString
 
+import java.time.{Instant, LocalDate}
 import scala.concurrent.ExecutionContext
 import scala.util.Try
 
@@ -187,7 +187,7 @@ object HttpServer extends IOApp {
 
     // curl "localhost:9001/headers" -H "Request-Header: Request header value"
     case req @ GET -> Root / "headers" =>
-      Ok(s"Received headers: ${ req.headers }", Header("Response-Header", "Response header value"))
+      Ok(s"Received headers: ${ req.headers }", Header.Raw(CIString("Response-Header"), "Response header value"))
 
     // Exercise 2. Implement HTTP endpoint that attempts to read the value of the cookie named "counter". If
     // present and contains an integer value, it should add 1 to the value and request the client to update
@@ -273,7 +273,7 @@ object HttpServer extends IOApp {
   ).reduce(_ <+> _).orNotFound
 
   override def run(args: List[String]): IO[ExitCode] =
-    BlazeServerBuilder[IO](ExecutionContext.global)
+    BlazeServerBuilder[IO]
       .bindHttp(port = 9001, host = "localhost")
       .withHttpApp(httpApp)
       .serve
@@ -291,8 +291,7 @@ object HttpClient extends IOApp {
   private def printLine(string: String = ""): IO[Unit] = IO(println(string))
 
   def run(args: List[String]): IO[ExitCode] =
-    BlazeClientBuilder[IO](ExecutionContext.global).resource
-      .parZip(Blocker[IO]).use { case (client, blocker) =>
+    BlazeClientBuilder[IO].resource.use { client =>
       for {
         _ <- printLine(string = "Executing simple GET and POST requests:")
         _ <- client.expect[String](uri / "hello" / "world") >>= printLine
@@ -309,7 +308,7 @@ object HttpClient extends IOApp {
 
         _ <- for {
           _ <- printLine(string = "Executing request with headers and cookies:")
-          request <- Method.GET(uri / "headers", Header("Request-Header", "Request header value"))
+          request = Method.GET(uri / "headers", Headers(Header.Raw(CIString("Request-Header"), "Request header value")))
 
           // `client.run()` provides more flexibility than `client.expect()`, since the entire response
           // becomes available for consumption and processing as `Resource[IO, Response[IO]]`.
@@ -353,14 +352,13 @@ object HttpClient extends IOApp {
         _ <- printLine()
 
         _ <- printLine(string = "Executing multipart requests:")
-        _ <- {
-          val file = getClass.getResource("/text.txt")
-          val multipart = Multipart[IO](Vector(
-            Part.formData("character", "n"),
-            Part.fileData("file", file, blocker, `Content-Type`(MediaType.text.plain))
-          ))
-          client.expect[String](Method.POST(multipart, uri / "multipart").map(_.withHeaders(multipart.headers))) >>= printLine
-        }
+        multiparts <- Multiparts.forSync[IO]
+        file = getClass.getResource("/text.txt")
+        multipart <- multiparts.multipart(Vector(
+          Part.formData("character", "n"),
+          Part.fileData("file", file, `Content-Type`(MediaType.text.plain))
+        ))
+        _ <- client.expect[String](Method.POST(multipart, uri / "multipart").withHeaders(multipart.headers)) >>= printLine
         _ <- printLine()
       } yield ()
     }.as(ExitCode.Success)

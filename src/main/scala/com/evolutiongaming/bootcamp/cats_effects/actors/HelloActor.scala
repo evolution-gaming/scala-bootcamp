@@ -1,7 +1,8 @@
 package com.evolutiongaming.bootcamp.cats_effects.actors
 
-import cats.effect.concurrent.Semaphore
-import cats.effect.{ContextShift, IO, Timer}
+import cats.effect.IO
+import cats.effect.kernel.Temporal
+import cats.effect.std.Semaphore
 import com.evolutiongaming.bootcamp.cats_effects.actors.model.Context
 
 import scala.concurrent.duration._
@@ -10,8 +11,7 @@ class HelloActor(
   val semaphore: Semaphore[IO],
   val name: String
 )(
-  implicit timer: Timer[IO],
-  val contextShift: ContextShift[IO]
+  implicit timer: Temporal[IO],
 ) extends Actor_2[String] {
   override protected def handleMessage[SenderIn]: (IO[String], IO[Context[SenderIn]], IO[String => SenderIn], IO[SenderIn => String]) => IO[Unit] =
     (entityIO, contextIO, fIO, f1IO) =>
@@ -31,8 +31,7 @@ object HelloActor {
     semaphore: Semaphore[IO],
     name: String
   )(
-    implicit timer: Timer[IO],
-    contextShift: ContextShift[IO]
+    implicit timer: Temporal[IO],
   ): HelloActor =
     new HelloActor(semaphore, name)
 }

@@ -1,12 +1,10 @@
 package com.evolutiongaming.bootcamp.cats_effects.actors
 
-import cats.effect.concurrent.Semaphore
-import cats.effect.{ContextShift, IO}
+import cats.effect.IO
+import cats.effect.std.Semaphore
 import com.evolutiongaming.bootcamp.cats_effects.actors.model.Context
-import cats.implicits._
 
 trait Actor_2[In] {
-  protected implicit def contextShift: ContextShift[IO]
   protected def semaphore: Semaphore[IO]
   protected def name: String
   protected def handleMessage[SenderIn]: (
@@ -22,7 +20,7 @@ trait Actor_2[In] {
     f: IO[In => SenderIn],
     f1: IO[SenderIn => In]
   ): IO[Unit] =
-    semaphore.withPermit(
+    semaphore.permit.surround(
       handleMessage(
         entity,
         context,

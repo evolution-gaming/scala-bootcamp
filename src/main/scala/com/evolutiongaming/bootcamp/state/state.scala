@@ -2,19 +2,16 @@ package com.evolutiongaming.bootcamp.state
 
 import cats.Monad
 import cats.effect._
-import cats.effect.concurrent.{Deferred, Ref, Semaphore}
+import cats.effect.std.{Queue, Semaphore}
 import cats.implicits.toTraverseOps
 import cats.instances.list._
 import cats.syntax.parallel._
-import fs2.concurrent.Queue
 import zio.ZIO
 import zio.stm.{STM, TRef}
 
 import java.util.concurrent.ConcurrentHashMap
-import java.util.concurrent.atomic.{AtomicLong, AtomicReference}
-import java.util.function.UnaryOperator
+import java.util.concurrent.atomic.AtomicReference
 import scala.annotation.tailrec
-import scala.collection.mutable.ArrayBuffer
 import scala.concurrent.duration._
 
 /**
@@ -170,6 +167,8 @@ object CounterDemo extends IOApp {
 }
 
 object StateSharingAndIsolationDemo extends App {
+  import cats.effect.unsafe.implicits.global
+
   def program1(counter: Counter[IO]): IO[Unit] =
     counter.inc
 
@@ -204,6 +203,8 @@ object StateSharingAndIsolationDemo extends App {
 }
 
 object LeakyStateDemo extends App {
+  import cats.effect.unsafe.implicits.global
+
   val counter = Counter.createUnsafe
 
   val x = counter.inc *> counter.get
@@ -428,7 +429,7 @@ object RateLimiter {
     Semaphore[IO](n).map { sem =>
       new RateLimiter[IO] {
         override def apply[A](fa: IO[A]): IO[A] =
-          sem.withPermit(fa)
+          sem.permit.surround(fa)
       }
     }
 }
@@ -456,12 +457,12 @@ object QueueDemo extends IOApp {
 
   def producer(n: Int, delay: FiniteDuration, queue: Queue[IO, Int]): IO[Unit] =
     List.range(1, n)
-      .traverse(queue.enqueue1(_).delayBy(delay)) *>
-      queue.enqueue1(-1) *>
+      .traverse(queue.offer(_).delayBy(delay)) *>
+      queue.offer(-1) *>
       IO(println("Producer done"))
 
   def consumer(delay: FiniteDuration, queue: Queue[IO, Int]): IO[Unit] =
-    queue.dequeue1.flatMap {
+    queue.take.flatMap {
       case -1 => IO(println("Consumer done"))
       case i => IO(println(s"Consumer got: $i")) *> consumer(delay, queue).delayBy(delay)
     }

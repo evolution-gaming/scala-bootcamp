@@ -15,7 +15,7 @@ import scala.concurrent.duration._
  */
 object Fibers extends IOApp {
 
-  def logLine(s: => String): IO[Unit] = IO.suspend(IO.delay(println(s"${Thread.currentThread().toString} $s")))
+  def logLine(s: => String): IO[Unit] = IO.defer(IO.delay(println(s"${Thread.currentThread().toString} $s")))
 
   def run(args: List[String]): IO[ExitCode] = ???
 }

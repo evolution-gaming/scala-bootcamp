@@ -69,14 +69,11 @@ object Doobie extends IOApp {
 //    val rng: doobie.ConnectionIO[Either[Throwable, String]] = "42".pure[ConnectionIO].attempt
 //    val rng: doobie.ConnectionIO[Either[SQLException, String]] = sql"WRONG QUERY".query[String].unique.attemptSql
 
-    DbTransactor
-      .make[IO]
-      .use { xa =>
-//        val rng2 = rng.replicateA(5)
-        rng.transact(xa).map(println)
-        // streaming result
-//        rng.take(3).compile.toList.transact(xa).map(println)
-      }
-      .as(ExitCode.Success)
+    val xa = DbTransactor.make[IO]
+//      val rng2 = rng.replicateA(5)
+      rng.transact(xa).map(println)
+      // streaming result
+//      rng.take(3).compile.toList.transact(xa).map(println)
+    .as(ExitCode.Success)
   }
 }

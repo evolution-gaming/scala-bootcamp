@@ -1,6 +1,7 @@
 package com.evolutiongaming.bootcamp.effects.v3
 
-import cats.effect.{ExitCase, ExitCode, IO, IOApp}
+import cats.effect.kernel.Outcome
+import cats.effect.{ExitCode, IO, IOApp}
 
 import scala.concurrent.duration._
 import scala.io.{BufferedSource, Source}
@@ -11,9 +12,9 @@ object GuaranteeApp extends IOApp {
 
   def withGuaranteeCase[A](io: IO[A]): IO[A] =
     io.guaranteeCase {
-      case ExitCase.Completed    => IO.delay(println("Completed"))
-      case ExitCase.Canceled     => IO.delay(println("Canceled"))
-      case ExitCase.Error(error) => IO.delay(println(s"Error: ${error.getMessage}"))
+      case Outcome.Succeeded(fa) => IO.delay(println("Completed"))
+      case Outcome.Canceled() => IO.delay(println("Canceled"))
+      case Outcome.Errored(e) => IO.delay(println(s"Error: ${e.getMessage}"))
     }
 
   def cancelledProgram: IO[Unit] =

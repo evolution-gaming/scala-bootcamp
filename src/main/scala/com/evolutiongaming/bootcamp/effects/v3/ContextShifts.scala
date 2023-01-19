@@ -1,15 +1,11 @@
 package com.evolutiongaming.bootcamp.effects.v3
 
-import cats.effect.{Blocker, ContextShift, ExitCode, IO, IOApp, Sync}
+import cats.effect.{ExitCode, IO, IOApp}
 import cats.syntax.all._
 
-import java.util.concurrent.{Executors, ThreadFactory}
-import java.util.concurrent.atomic.AtomicInteger
-import scala.concurrent.{ExecutionContext, ExecutionContextExecutor}
-import com.evolutiongaming.bootcamp.effects.ContextShifts.{logLine, newThreadFactory}
-
 import java.nio.file.{Files, Path, Paths}
-import scala.concurrent.duration._
+import java.util.concurrent.ThreadFactory
+import java.util.concurrent.atomic.AtomicInteger
 
 /*
  * `ContextShift` is the pure equivalent to `ExecutionContext`:
@@ -31,7 +27,7 @@ import scala.concurrent.duration._
  */
 object ContextShifts extends IOApp {
 
-  def logLine(s: => String): IO[Unit] = IO.suspend(IO.delay(println(s"${Thread.currentThread().toString} $s")))
+  def logLine(s: => String): IO[Unit] = IO.defer(IO.delay(println(s"${Thread.currentThread().toString} $s")))
 
   def newThreadFactory(name: String): ThreadFactory =
     new ThreadFactory {
@@ -48,7 +44,7 @@ object ContextShifts extends IOApp {
 
     def cpuBoundTask(i: Int): IO[Int] =
       if (i == 100_000_000) IO.pure(i)
-      else (if (i % 10_000_000 == 0) logLine(s"Reached $i") else IO.unit) *> IO.suspend(cpuBoundTask(i + 1))
+      else (if (i % 10_000_000 == 0) logLine(s"Reached $i") else IO.unit) *> IO.defer(cpuBoundTask(i + 1))
 
     for {
       _ <- logLine("Started")

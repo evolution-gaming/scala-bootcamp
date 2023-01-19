@@ -11,20 +11,20 @@ scalacOptions ++= Seq(
   "-Ymacro-annotations",
 )
 
-val http4sVersion = "0.21.22"
-val circeVersion = "0.13.0"
+val http4sVersion = "0.23.16"
+val circeVersion = "0.14.1"
 val playVersion = "2.8.2"
-val doobieVersion = "0.13.4"
-val catsVersion = "2.6.1"
-val catsTaglessVersion = "0.11"
-val catsEffectVersion = "2.5.1"
-val epimetheusVersion = "0.4.2"
+val doobieVersion = "1.0.0-RC1"
+val catsVersion = "2.9.0"
+val catsTaglessVersion = "0.14.0"
+val catsEffectVersion = "3.3.0"
+val epimetheusVersion = "0.6.0-M2"
 
 val akkaVersion = "2.6.9"
 val akkaHttpVersion = "10.1.11"
-val akkaHttpCirceVersion = "1.31.0"
+val akkaHttpCirceVersion = "1.39.2"
 
-val log4CatsVersion = "1.1.1"
+val log4CatsVersion = "2.5.0"
 
 val scalaTestVersion = "3.2.7.0"
 val h2Version = "2.0.202"
@@ -35,14 +35,14 @@ libraryDependencies ++= Seq(
   "org.typelevel" %% "cats-core" % catsVersion,
   "org.typelevel" %% "cats-effect" % catsEffectVersion,
   "org.http4s" %% "http4s-dsl" % http4sVersion,
-  "org.http4s" %% "http4s-blaze-server" % http4sVersion,
-  "org.http4s" %% "http4s-blaze-client" % http4sVersion,
+  "org.http4s" %% "http4s-blaze-server" % "0.23.9",
+  "org.http4s" %% "http4s-blaze-client" % "0.23.13",
   "org.http4s" %% "http4s-circe" % http4sVersion,
-  "org.http4s" %% "http4s-jdk-http-client" % "0.3.6",
+  "org.http4s" %% "http4s-jdk-http-client" % "0.8.0",
   "com.typesafe.akka" %% "akka-http" % akkaHttpVersion,
   "de.heikoseeberger" %% "akka-http-circe" % akkaHttpCirceVersion,
   "com.typesafe.akka" %% "akka-stream" % akkaVersion,
-  "io.chrisdavenport" %% "log4cats-slf4j" % log4CatsVersion,
+  "org.typelevel" %% "log4cats-slf4j" % log4CatsVersion,
   "ch.qos.logback" % "logback-classic" % "1.2.3",
   "com.codecommit" %% "cats-effect-testing-scalatest" % "0.4.1" % Test,
   "io.chrisdavenport" %% "epimetheus-http4s" % epimetheusVersion,
@@ -77,8 +77,7 @@ libraryDependencies ++= Seq(
   "org.slf4j" % "slf4j-nop" % "1.6.4",
   "com.typesafe.slick" %% "slick-hikaricp" % slickVersion,
   "com.lihaoyi" %% "requests" % "0.6.5",
-  "dev.zio" %% "zio" % "2.0.0-M4",
-  "io.monix" %% "monix-reactive" % "3.4.0",
+  "dev.zio" %% "zio" % "2.0.0-M4"
 )
 
 addCompilerPlugin("org.typelevel" %% "kind-projector" % "0.13.2" cross CrossVersion.full)

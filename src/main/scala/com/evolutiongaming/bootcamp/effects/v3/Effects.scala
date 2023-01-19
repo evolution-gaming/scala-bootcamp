@@ -2,6 +2,7 @@ package com.evolutiongaming.bootcamp.effects.v3
 
 import cats.Monad
 import cats.effect.{Async, ExitCode, IO, IOApp, Sync}
+import cats.implicits.none
 import cats.syntax.all._
 
 import java.util.concurrent.Executors
@@ -60,6 +61,7 @@ import scala.util.{Random, Try}
  */
 object LazyVsEagerApp extends App {
   import concurrent.ExecutionContext.Implicits.global
+  import cats.effect.unsafe.implicits.{global => globalRuntime}
 
   private def doTaskFuture(x: String): Future[Unit] =
     Future { println(s"Doing task $x") }
@@ -179,7 +181,7 @@ object Exercise1_Common {
 }
 
 object Exercise1_Imperative {
-  import com.evolutiongaming.bootcamp.effects.Exercise1_Common.response
+  import Exercise1_Common.response
 
   private var counter: Int = 0
 
@@ -224,14 +226,14 @@ object Exercise1_Functional extends IOApp {
 }
 
 /*
- * `IO.suspend` is equivalent to `IO(f).flatten` and can be used to avoid a stack overflow.
+ * `IO.defer` is equivalent to `IO(f).flatten` and can be used to avoid a stack overflow.
  *
  *   def suspend[A](thunk: => IO[A]): IO[A]
  *
  * `IO.flatMap` is also "trampolined" (that means - it is stack-safe).
  *
  * Question: What happens when `fib` is executed with a large enough `n`?
- * Question: How can we fix it using `IO.suspend`?
+ * Question: How can we fix it using `IO.defer`?
  */
 object SuspendApp extends IOApp {
 
@@ -435,7 +437,7 @@ object AsyncApp extends IOApp {
   }
 
   def requestF[F[_]: Async](url: String): F[Int] =
-    Async[F].async { cb =>
+    Async[F].async_ { cb =>
       println(s"Starting async: ${Thread.currentThread().getName}")
       val status = Try(requests.get(url).statusCode)
       cb(status.toEither)

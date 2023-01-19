@@ -1,6 +1,6 @@
 package com.evolutiongaming.bootcamp.effects.v3
 
-import cats.effect.{Blocker, ExitCode, IO, IOApp, Resource}
+import cats.effect.{ExitCode, IO, IOApp, Resource}
 import com.evolutiongaming.bootcamp.effects.v3.ResourceExample.DBModule.DBService
 import com.evolutiongaming.bootcamp.effects.v3.ResourceExample.KafkaModule.KafkaService
 
@@ -36,14 +36,8 @@ object ResourceApp extends IOApp {
   def fileInputStreamResource(name: String): Resource[IO, FileInputStream] =
     Resource.fromAutoCloseable(IO(new FileInputStream(name)))
 
-  /*
-   * `Resource.fromAutoCloseableBlocking` also takes a `Blocker` (a blocking context to use
-   * for acquire and release operations).
-   *
-   * `Blocker`-s will be further discussed in `ContextShift`-s section.
-   */
-  def fileInputStreamBlockingResource(name: String, blocker: Blocker): Resource[IO, FileInputStream] =
-    Resource.fromAutoCloseableBlocking(blocker)(IO(new FileInputStream(name)))
+  def fileInputStreamBlockingResource(name: String): Resource[IO, FileInputStream] =
+    Resource.fromAutoCloseable(IO.blocking(new FileInputStream(name)))
 
   def resourceProgram: IO[Unit] =
     fileResource("ReadMe.md")

@@ -14,16 +14,14 @@ import com.evolutiongaming.bootcamp.db.DbCommon._
 
 object FragmentsUsage extends IOApp {
 
-  override def run(args: List[String]): IO[ExitCode] =
-    DbTransactor
-      .make[IO]
-      .use { xa =>
-        for {
-          // setup
-          _ <- setup().transact(xa)
+  override def run(args: List[String]): IO[ExitCode] = {
+    val xa = DbTransactor.make[IO]
+    for {
+      // setup
+      _ <- setup().transact(xa)
 
-          // business part
-          _ <- fetchAuthorById(authorOdersky).option.transact(xa).map(println)
+      // business part
+      _ <- fetchAuthorById(authorOdersky).option.transact(xa).map(println)
 //          _ <- fetchAuthorById(UUID.randomUUID()).option.transact(xa).map(println)
 //          _ <- fetchHarryPotterBooks.to[List].transact(xa).map(_.foreach(println))
 //          _ <- fetchBooksByAuthors(NonEmptyList.of(authorOdersky, authorRowling))
@@ -38,9 +36,8 @@ object FragmentsUsage extends IOApp {
 //              .transact(xa)
 //              .map(_.foreach(println))
 //          _ <- updateYearOfBook(bookHPStone, Year.of(2003)).transact(xa)
-        } yield ()
-      }
-      .as(ExitCode.Success)
+    } yield ExitCode.Success
+}
 
   implicit val uuidMeta: Meta[UUID] = Meta[String].timap(UUID.fromString)(_.toString)
   implicit val yearMeta: Meta[Year] = Meta[Int].timap(Year.of)(_.getValue)
