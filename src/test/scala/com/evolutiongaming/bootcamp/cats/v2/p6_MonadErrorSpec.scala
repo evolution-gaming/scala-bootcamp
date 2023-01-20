@@ -29,6 +29,8 @@ class p6_MonadErrorSpec extends AnyFlatSpec with Matchers {
 }
 
 object p6_MonadErrorSpec {
+  import cats.effect.unsafe.implicits.global
+
   def runSafe[A](io: IO[A]): Either[String, A] =
     Try(io.unsafeRunSync()).toEither.leftMap(_.getMessage)
 

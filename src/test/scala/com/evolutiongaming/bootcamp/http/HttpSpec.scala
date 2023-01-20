@@ -14,6 +14,7 @@ import org.scalatest.matchers.should.Matchers
 class HttpSpec
   extends AnyFreeSpec
     with Matchers {
+  import cats.effect.unsafe.implicits.global
 
   "HttpService should" - {
 
