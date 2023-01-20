@@ -9,6 +9,7 @@ import scala.concurrent.duration.Duration
 import scala.util.Try
 
 class EffectsHomework1Spec extends AnyWordSpec with Matchers {
+  import cats.effect.unsafe.implicits.global
 
   "IO" should {
 
@@ -93,7 +94,7 @@ class EffectsHomework1Spec extends AnyWordSpec with Matchers {
     }
 
     "have working `suspend`" in {
-      IO.defer(IO.pure(42)).unsafeRunSync() shouldBe 42
+      IO.suspend(IO.pure(42)).unsafeRunSync() shouldBe 42
     }
 
     "have working `delay`" in {
