@@ -78,4 +78,5 @@ All resources are listed in no particular order. These resources are optional an
 * The [2020 Q3-Q4 bootcamp](/presentations/2020-q3-q4/Schedule.md) has concluded
 * The [2021 Q1-Q2 bootcamp](/presentations/2021-q1-q2/Schedule.md) has concluded
 * The [2021 Q3-Q4 bootcamp](/presentations/2021-q3-q4/Schedule.md) has concluded
-* The [2022 Q1-Q3 bootcamp](Schedule.md) will start on 2022-03-22, applications are open at [https://scala-bootcamp.evolution.com/](https://scala-bootcamp.evolution.com/)
+* The [2022 Q1-Q3 bootcamp](/presentations/2022-q1-q3/Schedule.md) has concluded
+* The [2023 Q1-Q2 bootcamp](Schedule.md) started on 2023-01-24
