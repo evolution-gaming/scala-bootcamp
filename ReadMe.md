@@ -42,6 +42,7 @@ All resources are listed in no particular order.
 
 ### Books
 
+- [Creative Scala](https://www.creativescala.org/) (free)
 - [Essential Scala](https://underscore.io/books/essential-scala/) (free)
 - [Scala with Cats 2](https://www.scalawithcats.com/) (free)
 - [Functional Programming for Mortals with Scalaz](https://leanpub.com/fpmortals) (free+)
@@ -50,6 +51,9 @@ All resources are listed in no particular order.
 - [Functional Programming in Scala](https://www.manning.com/books/functional-programming-in-scala#toc) ($25+)
 - [Practical FP in Scala: A hands-on approach](https://leanpub.com/pfp-scala) ($30+)
 - [Programming in Scala](https://booksites.artima.com/programming_in_scala_3ed) ($30+)
+- [Functional and Reactive Domain Modeling](https://www.manning.com/books/functional-and-reactive-domain-modeling) ($30+)
+- [Essential Effects](https://essentialeffects.dev/) ($35+)
+- [Functional Event-Driven Architecture](https://leanpub.com/feda) ($35+)
 - [Zionomicon](https://www.zionomicon.com/) ($70)
 
 ### Other
