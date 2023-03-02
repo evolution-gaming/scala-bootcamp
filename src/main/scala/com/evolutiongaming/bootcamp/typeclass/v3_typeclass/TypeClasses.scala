@@ -13,11 +13,13 @@ object OOPJson extends App {
   def prettyPrint(jsonable: Jsonable): Unit = println(jsonable.toJson)
 
   final case class Game(id: Int) extends Jsonable {
-    def toJson: Json = Json(s"{${'"'}id${'"'}:$id}")
+    def toJson: Json = Json(s"""{"id": $id}""")
   }
 
   prettyPrint(Game(123))
 }
+
+// What if Game is defined in a library?
 
 object FPJson extends App {
 
@@ -30,7 +32,7 @@ object FPJson extends App {
   final case class Game(id: Int)
 
   implicit val gameJsonable: Jsonable[Game] = new Jsonable[Game] {
-    def toJson(game: Game): Json = Json(s"{${'"'}id${'"'}:${game.id}}")
+    def toJson(game: Game): Json = Json(s"""{"id": ${game.id}}""")
   }
 
   prettyPrint(Game(123))
@@ -63,7 +65,7 @@ object FPJson extends App {
   object SingleAbstractMethod {
 
     implicit val before: Jsonable[Game] = new Jsonable[Game] {
-      def toJson(game: Game): Json = Json(s"{${'"'}id${'"'}:${game.id}}")
+      def toJson(game: Game): Json = Json(s"""{"id": ${game.id}}""")
     }
 
     implicit val after: Jsonable[Game] = ???
@@ -110,26 +112,32 @@ object FPJson extends App {
 
 object FPJsonSugared extends App {
 
+  // Typeclass Definition
   trait Jsonable[T] {
     def toJson(entity: T): Json
   }
 
+  // Typeclass Summoner
   object Jsonable {
     def apply[A](implicit instance: Jsonable[A]): Jsonable[A] = instance
   }
 
+  // Typeclass Syntax
   object JsonableSyntax {
-    implicit class JsonableOps[A](x: A) {
+    implicit class JsonableOps[A](val x: A) extends AnyVal {
       def toJson(implicit jsonable: Jsonable[A]): Json = jsonable.toJson(x)
     }
   }
 
-  import JsonableSyntax._
-  def prettyPrint[A: Jsonable](a: A): Unit = println(a.toJson)
-
   final case class Game(id: Int)
 
-  implicit val gameJsonable: Jsonable[Game] = (game: Game) => Json(s"{${'"'}id${'"'}:${game.id}}")
+  // Typeclass Instance
+  implicit val gameJsonable: Jsonable[Game] = (game: Game) => Json(s"""{"id": ${game.id}}""")
+
+  import JsonableSyntax._
+
+  // This method can be called only if Typeclass Instance of Jsonable exists (and visible) for A
+  def prettyPrint[A: Jsonable](a: A): Unit = println(a.toJson)
 
   prettyPrint(Game(123))
 }
@@ -146,7 +154,7 @@ object FPJsonSugared extends App {
 //
 //  final case class Game(id: Int)
 //
-//  implicit val gameJsonable: Jsonable[Game] = (game: Game) => Json(s"{${'"'}id${'"'}:${game.id}}")
+//  implicit val gameJsonable: Jsonable[Game] = (game: Game) => Json(s"""{"id": ${game.id}}""")
 //
 //  prettyPrint(Game(123))
 //}
