@@ -32,16 +32,16 @@ class EvolutionSiteSpec extends AnyFunSuite with WebBrowser {
 
   implicit val driver: WebDriver = new HtmlUnitDriver
 
-  test("new Evolution Gaming domain could be found using Google") {
-    goTo("https://google.com")
+  test("new Evolution Gaming domain could be found using Duck Duck Go") {
+    goTo("https://duckduckgo.com/")
 
-    assert(pageTitle == "Google")
+    assert(pageTitle.startsWith( "DuckDuckGo"))
     textField("q").value = "Evolution Gaming"
     submit()
     assert(pageSource contains "evolution.com")
   }
 
-  test("Evolution site contains CrazyTime game") {
+  test("Evolution site contains Crazy Coin Flip game") {
     ???
   }
 

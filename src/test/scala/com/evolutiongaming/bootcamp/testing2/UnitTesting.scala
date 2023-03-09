@@ -103,7 +103,7 @@ import scala.concurrent.Promise
 //
 // > sbt
 //
-// Now type in `test` and press ENTER. Note how long it took to start runing
+// Now type in `test` and press ENTER. Note how long it took to start running
 // the tests.
 //
 // sbt:scala-bootcamp> test
@@ -144,18 +144,11 @@ import scala.concurrent.Promise
 //
 // Other popular libraries are the following:
 //
-// `Specs2` - one of the oldest libraries with opinionated Cucubmer-like DSL,
-//            made by Eric Torreborre from Zalando.
-//
 // `MUnit` - lightweight testing library inspired by JUnit by the author of Metals,
 //           Ólafur Páll Geirsson from Twitter.
 //
 // `Weaver-test` - tailored for integration testing by Olivier Mélois from
 //                 Disney Streaming.
-//
-// `utest` - simple testing library by Li Haoyi from Databricks, authors of
-//           Apache Spark. He just published a new book on Scala advocating
-//           the simple Python-like coding style in Scala.
 //
 // So, what are the styles ScalaTest support? You can find them on the following
 // page: https://www.scalatest.org/user_guide/selecting_a_style
