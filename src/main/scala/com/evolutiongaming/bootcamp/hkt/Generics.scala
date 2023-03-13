@@ -10,7 +10,7 @@ object Generics {
 
   object Triple {
 
-    def fromList[A](elements: List[A]): Option[List[A]] = ??? // exercise 2 : implement
+    def fromList[A](elements: List[A]): Option[Triple[A]] = ??? // exercise 2 : implement
 
 
     sealed trait Index
