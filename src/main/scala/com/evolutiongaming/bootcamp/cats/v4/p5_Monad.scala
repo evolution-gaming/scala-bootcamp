@@ -1,7 +1,10 @@
 package com.evolutiongaming.bootcamp.cats.v4
 
 import cats.FlatMap
-import cats.effect.ExitCode
+import cats.effect.unsafe.implicits.global
+import cats.effect.{ExitCode, IO}
+
+import scala.concurrent.duration._
 
 object p5_Monad {
 
@@ -136,4 +139,21 @@ object p5_Monad {
 
   // import cats.syntax.validated._
   // minAge("ERROR".invalidNel[Player], "ALSO ERROR".invalidNel[Player])
+
+  // Other operations
+
+  // There's >>, behaves like *>, but takes right argument by-name
+  // https://impurepics.com/posts/2019-02-09-operator-wars-reality.html
+
+  import cats.effect.IO
+
+  IO(println("Computing")) >> IO(1)
+}
+
+object p5_MonadRun extends App {
+  def putStrLine(s: String): IO[Unit] = IO(println(s)) *> IO.sleep(1.second)
+
+  def program: IO[Unit] = putStrLine("forever") >> program
+
+  program.unsafeRunSync()
 }
