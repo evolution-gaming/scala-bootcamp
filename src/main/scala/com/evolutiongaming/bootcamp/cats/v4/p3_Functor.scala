@@ -21,6 +21,8 @@ object p3_Functor {
       ??? /* your code here */
   }
 
+  def identity[A](a: A): A = a
+
   /** Main laws:
     *           fa.map(identity) <-> fa
     *           fa.map(f).map(g) <-> fa.map(a => g(f(a))
@@ -42,8 +44,10 @@ object p3_Functor {
   val bobRight: Either[Throwable, User] = bob.asRight[Throwable] // Right(User(Bob, 32))
 
   bobRight.as("This is a string, there is no Bob here") // Right("This is a string, there is no Bob here")
+  bobRight.map(_ => "This is a string, there is no Bob here")
 
   val bobVoided: Either[Throwable, Unit] = bobRight.void // Right(())
+  bobRight.map(_ => ()) // Right(())
 
   import cats.effect.IO
 

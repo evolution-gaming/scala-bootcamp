@@ -64,7 +64,7 @@ object p5_Monad {
 
   /** On associativity: lets de-sugar maybeGift2.
     * Associativity law requires these two to be equivalent:
-    * fa.flatMap(f).flatMap(g) <-> fa.flatMap(a => f(a).flatMap(g))l
+    * fa.flatMap(f).flatMap(g) <-> fa.flatMap(a => f(a).flatMap(g))
     */
 
   /** Ex 5.1 implement EvoMonad for List
@@ -90,11 +90,8 @@ object p5_Monad {
   import cats.syntax.applicative._
   1.pure[Option]
 
-  val maybeStr: Option[String] = Monad[Option].pure("Hi")
-
-  val flatMapList: List[String] =
-    Monad[List].flatMap(List("Hie"))((v: String) => List(v, v, v))
-
+  Monad[Option].pure("Hi")
+  Monad[List].flatMap(List("Hie"))((v: String) => List(v, v, v))
   Monad[cats.data.NonEmptyList]
 
   // Monad[Map[Int, *]]
@@ -112,10 +109,11 @@ object p5_Monad {
   def exec[F[_]: Monad](log: String => F[Unit], action: F[Unit]): F[ExitCode] =
     log("Feels good").flatMap(_ => action).map(_ => ExitCode.Success)
 
-  /** Monad is also an Applicative, and Applicative's behavior must be consistent with Monad
+  /** Monad is also an Applicative, and Applicative's behavior must be consistent with Monad (type class coherence).
+    * If a type has a Monad, Applicative for that type should behave as it was derived from Monad.
     * https://impurepics.com/posts/2019-03-18-monad-applicative-consistency-law.html
     *
-    * This forbids some behaviors, e.g. error accumulation in Validated.
+    * This forbids some behaviors, e.g. error accumulation in Either.
     */
 
   final case class Player(name: String, age: Int)
