@@ -17,6 +17,8 @@ sealed trait MyList[+A]
     case MyList.Cons(h, t) => t.reverseWith(MyList.Cons(h, acc))
   }
 
+  def ::[A1 >: A](x: A1) = MyList.Cons(x, this)
+
   override def reverse: MyList[A] = reverseWith(MyList.Nil)
 
   override def isEmpty: Boolean = this.eq(MyList.Nil)
@@ -25,7 +27,7 @@ sealed trait MyList[+A]
 }
 
 object MyList extends SeqFactory[MyList] {
-   
+
   def from[A](source: IterableOnce[A]): MyList[A] =
     source.iterator.foldRight[MyList[A]](Nil)(Cons(_, _))
 
