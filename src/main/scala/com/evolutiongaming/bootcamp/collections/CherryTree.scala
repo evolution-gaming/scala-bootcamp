@@ -175,8 +175,3 @@ case class Pair[+A](first: A, last: A) extends Peduncle[A] {
   override def updatedWith[A1 >: A](f: A => A1)(i: Int): Pair[A1] =
     if (i == 0) Pair(f(first), last) else if (i == 1) Pair(first, f(last)) else this
 }
-
-object Test extends App {
-  val x = CherryTree.from(1 to 10)
-  println(x.drop(4))
-}
