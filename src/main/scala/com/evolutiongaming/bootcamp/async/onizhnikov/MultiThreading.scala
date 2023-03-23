@@ -544,3 +544,100 @@ object ComplexState2 extends App {
   * However, the optimal number of threads depends on the specific application and the hardware it’s running on. In some
   * cases, having more threads than cores can improve performance, while in other cases, it can hurt performance
   */
+
+/** Question 16.
+  *
+  * > What is thread pool in java?
+  *
+  * A thread pool in Java is a group of worker threads that are waiting for the job and reused many times. In the case
+  * of a thread pool, a group of fixed-size threads is created. A thread from the thread pool is pulled out and assigned
+  * a job by the service provider. After completion of the job, the thread is contained in the thread pool again. This
+  * offers a solution to the problem of thread cycle overhead and resource thrashing. Since the thread is already
+  * existing when the request arrives, the delay introduced by thread creation is eliminated, making the application
+  * more responsive
+  */
+
+/** Question 17.
+  *
+  * > What is ExecutionContext in scala?
+  *
+  * In Scala, the ExecutionContext trait is defined in the scala.concurrent package. It offers similar functionality to
+  * that of Executor objects. Many Scala methods take ExecutionContext objects as implicit parameters. It implements the
+  * abstract execute method, which exactly corresponds to the execute method on the Executor interface, and the
+  * reportFailure method. A custom ExecutionContext may be appropriate to execute code which blocks on IO or performs
+  * long-running computations. ExecutionContext.fromExecutorService and ExecutionContext.fromExecutor are good ways to
+  * create a custom ExecutionContext. The intent of ExecutionContext is to lexically scope code execution. That is, each
+  * method, class, file, package, or application determines how to run its own code. This avoids issues such as running
+  * application callbacks on a thread pool belonging to a networking library
+  */
+
+object ComplexStateEC extends App {
+
+  import scala.concurrent.ExecutionContext
+
+  class WordCounter {
+    val wordMap = mutable.Map.empty[String, Int]
+    val wordBuffer = mutable.ArrayBuffer.empty[String]
+
+    def addWord(word: String): Unit = {
+      if (wordMap.contains(word)) {
+        wordMap(word) += 1
+      } else {
+        wordMap(word) = 1
+        wordBuffer += word
+      }
+    }
+  }
+  val counter = new WordCounter
+  val done = new AtomicLong(10)
+
+  val words = Array(
+    "Abolition",
+    "Abolitionist",
+    "Abominable",
+    "Abomination",
+    "Aborigine",
+    "Abortion",
+    "Abrasive",
+    "Abroad",
+    "Abscess",
+    "Abscond",
+    "Absence",
+    "Absent",
+    "Absentee",
+    "Absenteeism",
+    "Absinthe",
+    "Absolute",
+    "Absolution",
+    "Absolutism",
+    "Absolve",
+    "Absorb"
+  )
+
+  def task() = counter.addWord(words(Random.nextInt(20)))
+
+  def runTasks(name: String, count: Long)(task: => Any)(implicit ec: ExecutionContext): Unit =
+    if (count > 0) {
+      ec.execute(() => {
+        task
+        runTasks(name, count - 1)(task)
+      })
+    } else {
+      println(s"$name done")
+      done.decrementAndGet()
+    }
+
+  import ExecutionContext.Implicits.global
+  for (i <- 0 until 10) {
+    runTasks(s"task-$i", 1_000_000)(task())
+  }
+
+  while (done.get() > 0) {
+    Thread.sleep(100)
+  }
+
+  println(s"""
+    total count of words: ${counter.wordMap.values.sum}
+    wordBuffer is the same as wordMap.keys: ${counter.wordBuffer.sorted == counter.wordMap.keys.toSeq.sorted}
+    """)
+}
