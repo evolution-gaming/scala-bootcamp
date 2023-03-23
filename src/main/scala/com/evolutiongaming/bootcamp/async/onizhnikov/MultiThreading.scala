@@ -2,14 +2,14 @@ package com.evolutiongaming.bootcamp.async.onizhnikov
 
 import java.util.concurrent.atomic.AtomicLong
 
-//  WHAT QUESTION SHOULD YOU ASK AI Chatbot about Java Concurrency?
+//  20 QUESTIONs SHOULD YOU ASK AI Chatbot about Java Concurrency?
 //
 
 
 //format: off
 /**
- * > What is the ... ?
- * > What is the difference between ... and ... ?
+ * Questions 1-6
+ * > What does ... mean in computer science ?
  * ╔═══════════════╗  
  * ║ B i g         ║  
  * ║ w o r d s     ║  
@@ -33,10 +33,30 @@ import java.util.concurrent.atomic.AtomicLong
 
 
 
- 
+ //format: on
 
+/** Questions 7-9.
+  *
+  * > What is an OS process ?
+  *
+  * In an operating system, a process is something that is currently under execution. So, an active program can be
+  * called a process. For example, when you want to search something on the web, then you start a browser. The browser
+  * is a process that is currently under execution
+  *
+  * > What is an OS thread and how does it differ from an OS process?
+  *
+  * A thread is a subprocess or an execution unit within a process. A process can contain a single thread to multiple
+  * threads. When a process starts, the operating system assigns the memory and resources to it. Each thread within a
+  * process shares the memory and resources of that process only
+  *
+  * > What is a java thread?
+  *
+  * Java provides a Thread class to achieve thread programming. The Thread class provides constructors and methods to
+  * create and perform operations on a thread. The Thread class extends the Object class and implements the Runnable
+  * interface
+  */
 
-
+ //format: off
 /** > Draw me a text art comprising multicore computer, OS, processes, threads and dispatcher
 * _____________
 * /            /|  _______   _______   _______
@@ -154,6 +174,7 @@ object MultiThreading2 extends App {
 
 
 //format: on
+// Question 10.
 
 // > WHAT IS Java Memory Model?
 
@@ -226,6 +247,15 @@ object Volatility1 extends App {
 
 //format: on
 
+/** Question 11.
+  *
+  * > What is synchronized keyword in java ?
+  *
+  * The synchronized keyword in Java marks a block or method a critical section. A critical section is where one and
+  * only one thread is executing at a time, and the thread holds the lock for the synchronized section. The synchronized
+  * keyword helps in writing concurrent parts of the applications, to protect shared resources within this block123
+  */
+
 object Volatility2 extends App {
   class Var(var value: Int)
   val v = new Var(0)
@@ -276,6 +306,20 @@ object Volatility2 extends App {
 
 
 //format: on
+
+/** Question 12.
+  *
+  * > What is Atomic in Java ?
+  *
+  * An atomic in Java is a toolkit of variable java.util.concurrent.atomic package classes, which assist in writing lock
+  * and wait-free algorithms with the Java language. An algorithm requiring only partial threads for constant progress
+  * is lock-free. In a wait-free algorithm, all threads make progress continuously, even in cases of thread failure or
+  * delay1
+  *
+  * In Java, the reading and writing of 32-bit or smaller quantities are guaranteed to be atomic. By atomic, we mean
+  * each action takes place in one step and cannot be interrupted. Thus, when we have multithreaded applications, the
+  * read and write operations are thread-safe and need not be made synchronized234
+  */
 
 object Volatility3 extends App {
   class Var(val value: AtomicLong = new AtomicLong)
