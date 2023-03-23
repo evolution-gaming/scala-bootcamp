@@ -140,4 +140,40 @@ object MultiThreading2 extends App {
   * +(----------------------------------+--------------------+
   * 
   */
+
+
+
+
+
+
+
+
+
+
+
 //format: on
+
+// > WHAT IS Java Memory Model?
+
+/** The Java Memory Model (JMM) is a specification that describes how threads in the Java programming language interact
+  * through memory. It defines the allowable behavior of multithreaded programs, and therefore describes when memory
+  * reorderings and optimizations are possible1.
+  *
+  * The JMM also defines the structure and organization of different memory spaces within the Java Virtual Machine
+  * (JVM). These include:
+  *
+  * Heap memory: This is where objects are allocated and stored. It is divided into two parts: young generation and old
+  * generation. The young generation contains newly created objects that are likely to be garbage collected soon. The
+  * old generation contains long-lived objects that survive many rounds of garbage collection23. Non-heap memory: This
+  * includes permanent generation (or metaspace since Java 8), which stores class metadata, constants, static variables,
+  * and compiled code23. Stack memory: This is where local variables and method parameters are stored for each thread.
+  * Each thread has its own stack that grows and shrinks as methods are invoked and returned23. The JMM helps developers
+  * understand how to write correct and efficient concurrent programs in Java by providing guarantees about visibility,
+  * atomicity, ordering, and synchronization of memory operations1.
+  */
+
+/** https://docs.oracle.com/javase/specs/jls/se20/html/jls-17.html
+  */
+
+
+  
