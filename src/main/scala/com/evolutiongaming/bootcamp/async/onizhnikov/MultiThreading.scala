@@ -1,5 +1,7 @@
 package com.evolutiongaming.bootcamp.async.onizhnikov
 
+import java.util.concurrent.atomic.AtomicLong
+
 //  WHAT QUESTION SHOULD YOU ASK AI Chatbot about Java Concurrency?
 //
 
@@ -175,5 +177,133 @@ object MultiThreading2 extends App {
 /** https://docs.oracle.com/javase/specs/jls/se20/html/jls-17.html
   */
 
+object Volatility1 extends App {
+  class Var(var value: Int)
+  val v = new Var(0)
 
-  
+  val done = new AtomicLong(20)
+
+  for (_ <- 0 until 10) {
+    new Thread(() => {
+      for (_ <- 0 until 1_000_000)
+        v.value += 1
+      println(s"${Thread.currentThread().getName()} done")
+      done.decrementAndGet()
+    }).start()
+  }
+
+  for (_ <- 0 until 10) {
+    new Thread(() => {
+      for (_ <- 0 until 1_000_000)
+        v.value -= 1
+      println(s"${Thread.currentThread().getName()} done")
+      done.decrementAndGet()
+    }).start()
+  }
+
+  while (done.get() > 0) {
+    Thread.sleep(100)
+  }
+
+  println(s"Done ${v.value}")
+}
+
+//format: off
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//format: on
+
+object Volatility2 extends App {
+  class Var(var value: Int)
+  val v = new Var(0)
+
+  val done = new AtomicLong(20)
+
+  for (_ <- 0 until 10) {
+    new Thread(() => {
+      for (_ <- 0 until 1_000_000)
+        v.synchronized { v.value += 1 }
+      println(s"${Thread.currentThread().getName()} done")
+      done.decrementAndGet()
+    }).start()
+  }
+
+  for (_ <- 0 until 10) {
+    new Thread(() => {
+      for (_ <- 0 until 1_000_000)
+        v.synchronized { v.value -= 1 }
+      println(s"${Thread.currentThread().getName()} done")
+      done.decrementAndGet()
+    }).start()
+  }
+
+  while (done.get() > 0) {
+    Thread.sleep(100)
+  }
+
+  println(s"Done ${v.value}")
+}
+
+
+
+//format: off
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//format: on
+
+object Volatility3 extends App {
+  class Var(val value: AtomicLong = new AtomicLong)
+  val v = new Var()
+
+  val done = new AtomicLong(20)
+
+  for (_ <- 0 until 10) {
+    new Thread(() => {
+      for (_ <- 0 until 1_000_000)
+        v.value.incrementAndGet()
+      println(s"${Thread.currentThread().getName()} done")
+      done.decrementAndGet()
+    }).start()
+  }
+
+  for (_ <- 0 until 10) {
+    new Thread(() => {
+      for (_ <- 0 until 1_000_000)
+        v.value.decrementAndGet()
+      println(s"${Thread.currentThread().getName()} done")
+      done.decrementAndGet()
+    }).start()
+  }
+
+  while (done.get() > 0) {
+    Thread.sleep(100)
+  }
+
+  println(s"Done ${v.value}")
+}
