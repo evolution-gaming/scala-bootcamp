@@ -579,7 +579,7 @@ object ComplexStateEC extends App {
     val wordMap = mutable.Map.empty[String, Int]
     val wordBuffer = mutable.ArrayBuffer.empty[String]
 
-    def addWord(word: String): Unit = {
+    def addWord(word: String): Unit = synchronized {
       if (wordMap.contains(word)) {
         wordMap(word) += 1
       } else {
@@ -628,9 +628,8 @@ object ComplexStateEC extends App {
     }
 
   import ExecutionContext.Implicits.global
-  for (i <- 0 until 10) {
+  for (i <- 0 until 10)
     runTasks(s"task-$i", 1_000_000)(task())
-  }
 
   while (done.get() > 0) {
     Thread.sleep(100)
@@ -640,4 +639,98 @@ object ComplexStateEC extends App {
     total count of words: ${counter.wordMap.values.sum}
     wordBuffer is the same as wordMap.keys: ${counter.wordBuffer.sorted == counter.wordMap.keys.toSeq.sorted}
     """)
+}
+
+/** Question 18.
+  *
+  * > What is the Future type in scala ?
+  *
+  * In Scala, Future is a type that represents a result of an asynchronous computation that may or may not be available
+  * yet. When a new Future is created, Scala spawns a new thread and executes its code. Once the execution is finished,
+  * the result of the computation (value or exception) will be assigned to the Future12.
+  *
+  * Future is used to create a temporary pocket of concurrency that you use for one-shot needs. You typically use it
+  * when you need to call an algorithm that runs an indeterminate amount of time — such as calling a web service or
+  * executing a long-running algorithm — so you therefore want to run it off of the main thread2.
+  *
+  * Scala provides combinators such as flatMap, foreach, and filter used to compose futures in a non-blocking way3.
+  */
+
+object ComplexStateFuture extends App {
+
+  import scala.concurrent.ExecutionContext
+  import scala.concurrent.Future
+  import scala.concurrent.duration._
+  import scala.concurrent.Await
+
+  case class WordCounter(
+      wordMap: Map[String, Int] = Map.empty[String, Int],
+      wordBuffer: Vector[String] = Vector.empty
+  ) {
+    def addWord(word: String): WordCounter = {
+      wordMap.get(word) match {
+        case Some(count) => copy(wordMap = wordMap.updated(word, count + 1))
+        case None        => copy(wordMap = wordMap.updated(word, 1), wordBuffer = wordBuffer :+ word)
+      }
+    }
+  }
+
+  object counter {
+    val state = new AtomicReference(WordCounter())
+    def addWord(word: String)(implicit ec: ExecutionContext): Future[Unit] =
+      Future(state.updateAndGet(_.addWord(word)))
+  }
+
+  val done = new AtomicLong(10)
+
+  val words = Array(
+    "Abolition",
+    "Abolitionist",
+    "Abominable",
+    "Abomination",
+    "Aborigine",
+    "Abortion",
+    "Abrasive",
+    "Abroad",
+    "Abscess",
+    "Abscond",
+    "Absence",
+    "Absent",
+    "Absentee",
+    "Absenteeism",
+    "Absinthe",
+    "Absolute",
+    "Absolution",
+    "Absolutism",
+    "Absolve",
+    "Absorb"
+  )
+
+  def task()(implicit ec: ExecutionContext): Future[Unit] =
+    Future(counter.addWord(words(Random.nextInt(20))))
+
+  def runTasks(name: String, count: Long)(task: => Future[Unit])(implicit ec: ExecutionContext): Future[Unit] =
+    if (count > 0)
+      task.flatMap(_ => runTasks(name, count - 1)(task))
+    else
+      Future {
+        println(s"$name done")
+        done.decrementAndGet()
+      }
+
+  import ExecutionContext.Implicits.global
+
+  val result = Future.sequence(
+    for (i <- 0 until 10)
+      yield runTasks(s"task-$i", 1_000_000)(task())
+  )
+
+  Await.result(result, Duration.Inf)
+
+  val wordCounter = counter.state.get()
+
+  println(s"""
+      total count of words: ${wordCounter.wordMap.values.sum}
+      wordBuffer is the same as wordMap.keys: ${wordCounter.wordBuffer.sorted == wordCounter.wordMap.keys.toSeq.sorted}
+      """)
 }

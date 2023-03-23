@@ -2,7 +2,7 @@ name := "scala-bootcamp"
 
 version := "0.2"
 
-scalaVersion := "2.13.8"
+scalaVersion := "2.13.10"
 
 // From https://tpolecat.github.io/2017/04/25/scalac-flags.html
 scalacOptions ++= Seq(
