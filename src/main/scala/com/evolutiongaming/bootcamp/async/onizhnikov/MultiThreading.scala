@@ -4,6 +4,12 @@ import java.util.concurrent.atomic.AtomicLong
 import scala.collection.mutable
 import scala.util.Random
 import java.util.concurrent.atomic.AtomicReference
+import scala.concurrent.Promise
+import java.util.concurrent.ConcurrentLinkedQueue
+import akka.actor.Actor
+import java.util.concurrent.BlockingQueue
+import java.util.concurrent.LinkedBlockingDeque
+import java.util.concurrent.LinkedBlockingQueue
 
 //  20 QUESTIONs SHOULD YOU ASK AI Chatbot about Java Concurrency?
 //
@@ -734,3 +740,144 @@ object ComplexStateFuture extends App {
       wordBuffer is the same as wordMap.keys: ${wordCounter.wordBuffer.sorted == wordCounter.wordMap.keys.toSeq.sorted}
       """)
 }
+
+/** Question 19.
+  *
+  * > What is the Promise in scala?
+  *
+  * In Scala, Promise is a class that provides a way to complete a Future manually. A Promise is a writable, single
+  * assignment container which sets the value of the future1.
+  *
+  * A Future is a read-only placeholder view of a variable1. By default, futures and promises are non-blocking, making
+  * use of callbacks instead of typical blocking operations. To simplify the use of callbacks both syntactically and
+  * conceptually, Scala provides combinators such as flatMap, foreach, and filter used to compose futures in a
+  * non-blocking way2.
+  *
+  * Is there anything else I can help you with?
+  */
+
+object ComplexStateActor extends App {
+  import scala.concurrent.ExecutionContext
+  import scala.concurrent.Future
+  import scala.concurrent.duration._
+  import scala.concurrent.Await
+  import java.util.concurrent.ConcurrentLinkedQueue
+
+  case class WordCounter(
+      wordMap: Map[String, Int] = Map.empty[String, Int],
+      wordBuffer: Vector[String] = Vector.empty
+  ) {
+    def addWord(word: String): WordCounter = {
+      wordMap.get(word) match {
+        case Some(count) => copy(wordMap = wordMap.updated(word, count + 1))
+        case None        => copy(wordMap = wordMap.updated(word, 1), wordBuffer = wordBuffer :+ word)
+      }
+    }
+  }
+
+  val words = Array(
+    "Abolition",
+    "Abolitionist",
+    "Abominable",
+    "Abomination",
+    "Aborigine",
+    "Abortion",
+    "Abrasive",
+    "Abroad",
+    "Abscess",
+    "Abscond",
+    "Absence",
+    "Absent",
+    "Absentee",
+    "Absenteeism",
+    "Absinthe",
+    "Absolute",
+    "Absolution",
+    "Absolutism",
+    "Absolve",
+    "Absorb"
+  )
+
+  sealed trait CounterMessage
+  case class AddWord(word: String) extends CounterMessage
+  case class GetWordCount(result: Promise[Long]) extends CounterMessage
+  case class AreWordInOrder(result: Promise[Boolean]) extends CounterMessage
+
+  type ActorRef[A] = BlockingQueue[A]
+
+  def ask[Mes, Res](ref: ActorRef[Mes], result: Promise[Res] => Mes): Future[Res] = {
+    val promise = Promise[Res]()
+    ref.offer(result(promise))
+    promise.future
+  }
+
+  def counter(ref: ActorRef[CounterMessage]) = new Thread(() => {
+    var wordMap: Map[String, Int] = Map.empty[String, Int]
+    var wordBuffer: Vector[String] = Vector.empty
+
+    def addWord(word: String): Unit = {
+      wordMap.get(word) match {
+        case Some(count) =>
+          wordMap = wordMap.updated(word, count + 1)
+        case None =>
+          wordMap = wordMap.updated(word, 1)
+          wordBuffer = wordBuffer :+ word
+      }
+    }
+
+    while (true) {
+      ref.take() match {
+        case AddWord(word)          => addWord(word)
+        case GetWordCount(result)   => result.success(wordMap.values.sum)
+        case AreWordInOrder(result) => result.success(wordBuffer.sorted == wordMap.keys.toSeq.sorted)
+      }
+    }
+  })
+
+  def task(ref: ActorRef[CounterMessage])(implicit ec: ExecutionContext): Future[Unit] =
+    Future(ref.offer(AddWord(words(Random.nextInt(20)))))
+
+  def runTasks(name: String, count: Long)(task: => Future[Unit])(implicit ec: ExecutionContext): Future[Unit] =
+    if (count > 0)
+      task.flatMap(_ => runTasks(name, count - 1)(task))
+    else
+      Future {
+        println(s"$name done")
+      }
+
+  def job(implicit ec: ExecutionContext): Future[String] = {
+    val ref = new LinkedBlockingQueue[CounterMessage]()
+    counter(ref).start()
+    def runFutures() = Future.sequence(
+      for (i <- 0 until 10)
+        yield runTasks(s"task-$i", 1_000_000)(task(ref))
+    )
+
+    for {
+      _ <- runFutures()
+      count <- ask(ref, GetWordCount)
+      inOrder <- ask(ref, AreWordInOrder)
+    } yield s"""|total count of words: $count
+                |wordBuffer is the same as wordMap.keys: $inOrder
+                | """.stripMargin
+  }
+
+  {
+    import ExecutionContext.Implicits.global
+    println(Await.result(job, Duration.Inf))
+  }
+
+}
+
+/** Question 20.
+  *
+  * > What are the popular approaches to concurrency in scala?
+  *
+  * 1. Actors
+  *
+  * 2. Futures
+  *
+  * 3. Reactive Streams
+  *
+  * 4. IO-based
+  */
