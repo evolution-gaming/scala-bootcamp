@@ -1,6 +1,9 @@
 package com.evolutiongaming.bootcamp.async.onizhnikov
 
 import java.util.concurrent.atomic.AtomicLong
+import scala.collection.mutable
+import scala.util.Random
+import java.util.concurrent.atomic.AtomicReference
 
 //  20 QUESTIONs SHOULD YOU ASK AI Chatbot about Java Concurrency?
 //
@@ -351,3 +354,193 @@ object Volatility3 extends App {
 
   println(s"Done ${v.value}")
 }
+
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+
+object ComplexState extends App {
+  class WordCounter {
+    val wordMap = mutable.Map.empty[String, Int]
+    val wordBuffer = mutable.ArrayBuffer.empty[String]
+
+    def addWord(word: String): Unit = {
+      if (wordMap.contains(word)) {
+        wordMap(word) += 1
+      } else {
+        wordMap(word) = 1
+        wordBuffer += word
+      }
+    }
+  }
+
+  val counter = new WordCounter
+  val done = new AtomicLong(10)
+
+  val words = Array(
+    "Abolition",
+    "Abolitionist",
+    "Abominable",
+    "Abomination",
+    "Aborigine",
+    "Abortion",
+    "Abrasive",
+    "Abroad",
+    "Abscess",
+    "Abscond",
+    "Absence",
+    "Absent",
+    "Absentee",
+    "Absenteeism",
+    "Absinthe",
+    "Absolute",
+    "Absolution",
+    "Absolutism",
+    "Absolve",
+    "Absorb"
+  )
+
+  for (_ <- 0 until 10) {
+    new Thread(() => {
+      try {
+        for (_ <- 0 until 1_000_000)
+          counter.addWord(words(Random.nextInt(20)))
+      } finally {
+        println(s"${Thread.currentThread().getName()} done")
+        done.decrementAndGet()
+      }
+    }).start()
+  }
+
+  while (done.get() > 0) {
+    Thread.sleep(100)
+  }
+
+  println(s"""
+  total count of words: ${counter.wordMap.values.sum}
+  wordBuffer is the same as wordMap.keys: ${counter.wordBuffer.sorted == counter.wordMap.keys.toSeq.sorted}
+  """)
+}
+
+/** Question 13. > What is AtomicReference in Java and how is it related to cats-effect/zio Ref type ?
+  *
+  * An AtomicReference in Java is a class that provides operations on an underlying object reference that can be read
+  * and written atomically, and also contains advanced atomic operations
+  *
+  * The java.util.concurrent.atomic.AtomicReference class is designed to update variables in a thread-safe way It is a
+  * reference to an object that may be updated atomically
+  *
+  * Functional programming is a programming paradigm that emphasizes the use of functions5 In Java, functional
+  * programming can be achieved using the Java 8 lambda expressions and functional interfaces5
+  *
+  * The AtomicReference class can be used in functional programming to provide thread-safe access to a shared object
+  * reference53124
+  *
+  * I hope that helps. Let me know if you have any other questions. The cats-effect/zio Ref type is a concurrency
+  * primitive that provides a way to safely share mutable state between concurrent computations
+  *
+  * The Ref type is similar to the AtomicReference class in Java, but it is designed to work with the IO monad in
+  * cats-effect and the ZIO monad in ZIO
+  *
+  * The Ref type is thread-safe and provides a way to update a value atomically
+  */
+object ComplexState2 extends App {
+
+  case class WordCounter(
+      wordMap: Map[String, Int] = Map.empty[String, Int],
+      wordBuffer: Vector[String] = Vector.empty
+  ) {
+    def addWord(word: String): WordCounter = {
+      wordMap.get(word) match {
+        case Some(count) => copy(wordMap = wordMap.updated(word, count + 1))
+        case None        => copy(wordMap = wordMap.updated(word, 1), wordBuffer = wordBuffer :+ word)
+      }
+
+    }
+  }
+
+  val counter = new AtomicReference(WordCounter())
+  val done = new AtomicLong(10)
+
+  val words = Array(
+    "Abolition",
+    "Abolitionist",
+    "Abominable",
+    "Abomination",
+    "Aborigine",
+    "Abortion",
+    "Abrasive",
+    "Abroad",
+    "Abscess",
+    "Abscond",
+    "Absence",
+    "Absent",
+    "Absentee",
+    "Absenteeism",
+    "Absinthe",
+    "Absolute",
+    "Absolution",
+    "Absolutism",
+    "Absolve",
+    "Absorb"
+  )
+
+  for (_ <- 0 until 10) {
+    new Thread(() => {
+      try {
+        for (_ <- 0 until 1_000_000)
+          counter.getAndUpdate(_.addWord(words(Random.nextInt(20))))
+      } finally {
+        println(s"${Thread.currentThread().getName()} done")
+        done.decrementAndGet()
+      }
+    }).start()
+  }
+
+  while (done.get() > 0) {
+    Thread.sleep(100)
+  }
+
+  println(s"""
+  total count of words: ${counter.get.wordMap.values.sum}
+  wordBuffer is the same as wordMap.keys: ${counter.get.wordBuffer.sorted == counter.get.wordMap.keys.toSeq.sorted}
+  """)
+}
+
+/** Question 14.
+  *
+  * > What is context switching in programming, should one avoid it?
+  *
+  * In computer programming, context switching refers to storing an active process in its current state so the system’s
+  * CPU can shift its resources to other tasks. A user can then instruct the CPU at any time to resume the process from
+  * the same point. Context switching is a technique or method used by the operating system to switch a process from one
+  * state to another to execute its function using CPUs in the system. When switching perform in the system, it stores
+  * the old running process’s status in the form of registers and assigns the CPU to a new process to execute its tasks.
+  *
+  * Context switching is not inherently bad, but it can be a performance issue if it happens too frequently. This is
+  * because the process of switching between contexts takes time and resources, which can slow down the system. However,
+  * context switching is necessary for multitasking and is a fundamental part of modern operating systems
+  */
+
+/** Question 15.
+  *
+  * > What is the cost of having too many active threads in a process?
+  *
+  * The cost of having too many active threads in a process can be high. When a process has too many threads, the
+  * operating system has to spend more time switching between them, which can slow down the system. Additionally, each
+  * thread requires its own stack space, which can consume a lot of memory. If there are too many threads, the system
+  * may run out of memory, which can cause the program to crash. In general, it’s best to limit the number of threads in
+  * a process to the number of available cores on the system.
+  *
+  * However, the optimal number of threads depends on the specific application and the hardware it’s running on. In some
+  * cases, having more threads than cores can improve performance, while in other cases, it can hurt performance
+  */
