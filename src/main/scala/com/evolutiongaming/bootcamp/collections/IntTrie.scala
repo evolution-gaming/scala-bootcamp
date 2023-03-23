@@ -44,6 +44,8 @@ sealed trait IntTrie[+A] extends Map[Int, A] {
 
   def updated[V1 >: A](key: Int, value: V1): Map[Int, V1] = insert(key, 1 << 31, value)
 
+  override protected[this] def className = "IntTrie"
+
 }
 
 object IntTrie {
