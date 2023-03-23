@@ -1,21 +1,29 @@
 package com.evolutiongaming.bootcamp.async.onizhnikov
 
-import java.util.concurrent.atomic.AtomicLong
-import scala.collection.mutable
-import scala.util.Random
-import java.util.concurrent.atomic.AtomicReference
-import scala.concurrent.Promise
-import java.util.concurrent.ConcurrentLinkedQueue
-import akka.actor.Actor
-import java.util.concurrent.BlockingQueue
-import java.util.concurrent.LinkedBlockingDeque
-import java.util.concurrent.LinkedBlockingQueue
-
-//  20 QUESTIONs SHOULD YOU ASK AI Chatbot about Java Concurrency?
+//  20 QUESTIONS SHOULD YOU ASK AI CHATBOT ABOUT Java\Scala Concurrency
 //
 
 
 //format: off
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 /**
  * Questions 1-6
  * > What does ... mean in computer science ?
@@ -27,7 +35,7 @@ import java.util.concurrent.LinkedBlockingQueue
  * ╟───────────────╢  
  * ║ Non-blocking  ║  
  * ╟───────────────╢  
- * ║ Asyncronous   ║  
+ * ║ Asynchronous  ║  
  * ╟───────────────╢  
  * ║ Parallel      ║  
  * ╟───────────────╢  
@@ -65,6 +73,17 @@ import java.util.concurrent.LinkedBlockingQueue
   * interface
   */
 
+import java.util.concurrent.atomic.AtomicLong
+import scala.collection.mutable
+import scala.util.Random
+import java.util.concurrent.atomic.AtomicReference
+import scala.concurrent.Promise
+import java.util.concurrent.ConcurrentLinkedQueue
+import akka.actor.Actor
+import java.util.concurrent.BlockingQueue
+import java.util.concurrent.LinkedBlockingDeque
+import java.util.concurrent.LinkedBlockingQueue
+
  //format: off
 /** > Draw me a text art comprising multicore computer, OS, processes, threads and dispatcher
 * _____________
@@ -94,9 +113,8 @@ object MultiThreading1 extends App {
     println("Hello from other thread")
   })
 
-//   other.setDaemon(true)
+  other.setDaemon(true)
   other.start()
-
   println("Hello from the main thread")
 }
 
@@ -213,23 +231,21 @@ object Volatility1 extends App {
 
   val done = new AtomicLong(20)
 
-  for (_ <- 0 until 10) {
+  for (_ <- 0 until 10)
     new Thread(() => {
       for (_ <- 0 until 1_000_000)
         v.value += 1
       println(s"${Thread.currentThread().getName()} done")
       done.decrementAndGet()
     }).start()
-  }
 
-  for (_ <- 0 until 10) {
+  for (_ <- 0 until 10)
     new Thread(() => {
       for (_ <- 0 until 1_000_000)
         v.value -= 1
       println(s"${Thread.currentThread().getName()} done")
       done.decrementAndGet()
     }).start()
-  }
 
   while (done.get() > 0) {
     Thread.sleep(100)
@@ -262,7 +278,7 @@ object Volatility1 extends App {
   *
   * The synchronized keyword in Java marks a block or method a critical section. A critical section is where one and
   * only one thread is executing at a time, and the thread holds the lock for the synchronized section. The synchronized
-  * keyword helps in writing concurrent parts of the applications, to protect shared resources within this block123
+  * keyword helps in writing concurrent parts of the applications, to protect shared resources within this block
   */
 
 object Volatility2 extends App {
@@ -271,23 +287,21 @@ object Volatility2 extends App {
 
   val done = new AtomicLong(20)
 
-  for (_ <- 0 until 10) {
+  for (_ <- 0 until 10)
     new Thread(() => {
       for (_ <- 0 until 1_000_000)
         v.synchronized { v.value += 1 }
       println(s"${Thread.currentThread().getName()} done")
       done.decrementAndGet()
     }).start()
-  }
 
-  for (_ <- 0 until 10) {
+  for (_ <- 0 until 10)
     new Thread(() => {
       for (_ <- 0 until 1_000_000)
         v.synchronized { v.value -= 1 }
       println(s"${Thread.currentThread().getName()} done")
       done.decrementAndGet()
     }).start()
-  }
 
   while (done.get() > 0) {
     Thread.sleep(100)
@@ -323,11 +337,11 @@ object Volatility2 extends App {
   * An atomic in Java is a toolkit of variable java.util.concurrent.atomic package classes, which assist in writing lock
   * and wait-free algorithms with the Java language. An algorithm requiring only partial threads for constant progress
   * is lock-free. In a wait-free algorithm, all threads make progress continuously, even in cases of thread failure or
-  * delay1
+  * delay
   *
   * In Java, the reading and writing of 32-bit or smaller quantities are guaranteed to be atomic. By atomic, we mean
   * each action takes place in one step and cannot be interrupted. Thus, when we have multithreaded applications, the
-  * read and write operations are thread-safe and need not be made synchronized234
+  * read and write operations are thread-safe and need not be made synchronized
   */
 
 object Volatility3 extends App {
@@ -379,7 +393,7 @@ object ComplexState extends App {
     val wordMap = mutable.Map.empty[String, Int]
     val wordBuffer = mutable.ArrayBuffer.empty[String]
 
-    def addWord(word: String): Unit = {
+    def addWord(word: String): Unit = synchronized {
       if (wordMap.contains(word)) {
         wordMap(word) += 1
       } else {
@@ -465,13 +479,12 @@ object ComplexState2 extends App {
       wordMap: Map[String, Int] = Map.empty[String, Int],
       wordBuffer: Vector[String] = Vector.empty
   ) {
-    def addWord(word: String): WordCounter = {
+    def addWord(word: String): WordCounter =
       wordMap.get(word) match {
         case Some(count) => copy(wordMap = wordMap.updated(word, count + 1))
         case None        => copy(wordMap = wordMap.updated(word, 1), wordBuffer = wordBuffer :+ word)
       }
 
-    }
   }
 
   val counter = new AtomicReference(WordCounter())
@@ -503,8 +516,10 @@ object ComplexState2 extends App {
   for (_ <- 0 until 10) {
     new Thread(() => {
       try {
-        for (_ <- 0 until 1_000_000)
-          counter.getAndUpdate(_.addWord(words(Random.nextInt(20))))
+        for (_ <- 0 until 1_000_000) {
+          val word = words(Random.nextInt(20))
+          counter.getAndUpdate(_.addWord(word))
+        }
       } finally {
         println(s"${Thread.currentThread().getName()} done")
         done.decrementAndGet()
@@ -620,7 +635,7 @@ object ComplexStateEC extends App {
     "Absorb"
   )
 
-  def task() = counter.addWord(words(Random.nextInt(20)))
+  def addWordTask() = counter.addWord(words(Random.nextInt(20)))
 
   def runTasks(name: String, count: Long)(task: => Any)(implicit ec: ExecutionContext): Unit =
     if (count > 0) {
@@ -635,7 +650,7 @@ object ComplexStateEC extends App {
 
   import ExecutionContext.Implicits.global
   for (i <- 0 until 10)
-    runTasks(s"task-$i", 1_000_000)(task())
+    runTasks(s"task-$i", 1_000_000)(addWordTask())
 
   while (done.get() > 0) {
     Thread.sleep(100)
@@ -726,10 +741,7 @@ object ComplexStateFuture extends App {
 
   import ExecutionContext.Implicits.global
 
-  val result = Future.sequence(
-    for (i <- 0 until 10)
-      yield runTasks(s"task-$i", 1_000_000)(task())
-  )
+  val result = Future.traverse(0 until 10)(i => runTasks(s"task-$i", 1_000_000)(task()))
 
   Await.result(result, Duration.Inf)
 
@@ -746,9 +758,9 @@ object ComplexStateFuture extends App {
   * > What is the Promise in scala?
   *
   * In Scala, Promise is a class that provides a way to complete a Future manually. A Promise is a writable, single
-  * assignment container which sets the value of the future1.
+  * assignment container which sets the value of the future.
   *
-  * A Future is a read-only placeholder view of a variable1. By default, futures and promises are non-blocking, making
+  * A Future is a read-only placeholder view of a variable. By default, futures and promises are non-blocking, making
   * use of callbacks instead of typical blocking operations. To simplify the use of callbacks both syntactically and
   * conceptually, Scala provides combinators such as flatMap, foreach, and filter used to compose futures in a
   * non-blocking way2.
@@ -762,18 +774,6 @@ object ComplexStateActor extends App {
   import scala.concurrent.duration._
   import scala.concurrent.Await
   import java.util.concurrent.ConcurrentLinkedQueue
-
-  case class WordCounter(
-      wordMap: Map[String, Int] = Map.empty[String, Int],
-      wordBuffer: Vector[String] = Vector.empty
-  ) {
-    def addWord(word: String): WordCounter = {
-      wordMap.get(word) match {
-        case Some(count) => copy(wordMap = wordMap.updated(word, count + 1))
-        case None        => copy(wordMap = wordMap.updated(word, 1), wordBuffer = wordBuffer :+ word)
-      }
-    }
-  }
 
   val words = Array(
     "Abolition",
@@ -877,7 +877,7 @@ object ComplexStateActor extends App {
   *
   * 2. Futures
   *
-  * 3. Reactive Streams
+  * 3. Reactive and other concurrent Streams
   *
   * 4. IO-based
   */
