@@ -741,7 +741,7 @@ object ComplexStateFuture extends App {
 
   import ExecutionContext.Implicits.global
 
-  val result = Future.traverse(0 until 10)(i => runTasks(s"task-$i", 1_000_000)(task()))
+  val result = Future.traverse(0 until 10 to Vector)(i => runTasks(s"task-$i", 1_000_000)(task()))
 
   Await.result(result, Duration.Inf)
 

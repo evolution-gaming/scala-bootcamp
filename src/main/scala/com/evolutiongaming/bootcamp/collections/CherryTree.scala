@@ -13,18 +13,18 @@ sealed trait CherryTree[+A]
     with IndexedSeqOps[A, CherryTree, CherryTree[A]] {
   import CherryTree.{Empty, One, Many}
 
-  def prepend[A1 >: A](a: A1): CherryTree[A1] = this match {
+  override def prepended[A1 >: A](a: A1): CherryTree[A1] = this match {
     case Empty                              => One(a)
     case One(b)                             => Many(Single(a), Empty, Single(b), 2)
     case Many(Single(b), mid, after, size)  => Many(Pair(a, b), mid, after, size + 1)
-    case Many(p: Pair[A], mid, after, size) => Many(Single(a), mid.prepend(p), after, size + 1)
+    case Many(p: Pair[A], mid, after, size) => Many(Single(a), mid.prepended(p), after, size + 1)
   }
 
-  def append[A1 >: A](a: A1): CherryTree[A1] = this match {
+  override def appended[A1 >: A](a: A1): CherryTree[A1] = this match {
     case Empty                               => One(a)
     case One(b)                              => Many(Single(b), Empty, Single(a), 2)
     case Many(before, mid, Single(b), size)  => Many(before, mid, Pair(b, a), size + 1)
-    case Many(before, mid, p: Pair[A], size) => Many(before, mid.append(p), Single(a), size + 1)
+    case Many(before, mid, p: Pair[A], size) => Many(before, mid.appended(p), Single(a), size + 1)
   }
 
   def getOption(i: Int): Option[A] = this match {
@@ -117,6 +117,30 @@ sealed trait CherryTree[+A]
 
   override def slice(from: Int, until: Int): CherryTree[A] = take(until).drop(from)
 
+  override def appendedAll[B >: A](suffix: IterableOnce[B]): CherryTree[B] = suffix match {
+    case c: CherryTree[B] =>
+      c match {
+        case One(value) => this :+ value
+        case Many(beforeR, midR, afterR, lengthR) =>
+          this match {
+            case Empty      => c
+            case One(value) => value +: c
+            case Many(beforeL, midL, afterL, lengthL) =>
+              def merged[A](mid: CherryTree[Pair[B]]): CherryTree[B] =
+                Many(beforeL, mid ++ midR, afterR, lengthL + lengthR)
+
+              (afterL, beforeR) match {
+                case (Single(a), Single(b))     => merged(midL :+ Pair(a, b))
+                case (p1: Pair[B], p2: Pair[B]) => merged(midL :+ p1 :+ p2)
+                case _ if lengthL < lengthR     => foldRight(c)(_ +: _)
+                case _                          => c.foldLeft[CherryTree[B]](this)(_ :+ _)
+              }
+          }
+        case Empty => this
+      }
+    case _ => super.appendedAll(suffix)
+  }
+
   override protected[this] def className: String = "CherryTree"
 }
 
@@ -135,14 +159,14 @@ object CherryTree extends StrictOptimizedSeqFactory[CherryTree] {
   ) extends CherryTree[A]
 
   def from[A](source: IterableOnce[A]): CherryTree[A] =
-    source.iterator.foldLeft[CherryTree[A]](Empty)(_.append(_))
+    source.iterator.foldLeft[CherryTree[A]](Empty)(_.appended(_))
 
   def empty[A]: CherryTree[A] = Empty
 
   def newBuilder[A]: Builder[A, CherryTree[A]] = new ReusableBuilder[A, CherryTree[A]] {
     private var tree: CherryTree[A] = Empty
     def addOne(elem: A): this.type = {
-      tree = tree.append(elem)
+      tree = tree.appended(elem)
       this
     }
     def clear(): Unit = tree = Empty
