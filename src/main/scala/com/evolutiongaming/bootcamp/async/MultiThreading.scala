@@ -1,4 +1,4 @@
-package com.evolutiongaming.bootcamp.async.onizhnikov
+package com.evolutiongaming.bootcamp.async
 
 //  20 QUESTIONS SHOULD YOU ASK AI CHATBOT ABOUT Java\Scala Concurrency
 //

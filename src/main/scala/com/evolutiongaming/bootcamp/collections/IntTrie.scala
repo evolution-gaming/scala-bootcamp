@@ -11,6 +11,7 @@ import scala.collection.StrictOptimizedSeqFactory
 import scala.collection.mutable.Builder
 import scala.collection.SeqFactory
 import scala.collection.mutable.ReusableBuilder
+import scala.annotation.tailrec
 
 sealed trait IntTrie[+A] extends Map[Int, A] {
   import IntTrie._
@@ -73,53 +74,62 @@ sealed trait PackedIntTrie[+A] extends Map[Int, A] {
     case Empty                  => Iterator.empty
   }
 
-  def getOption(key: Int, shift: Int): Option[A] = this match {
-    case Cell(`key`, value) => Some(value)
-    case Branch(bitMap, values) =>
-      val skey = (key >>> shift) & MASK
-      if ((bitMap & (1 << skey)) != 0)
-        values(branchPos(bitMap, skey)).getOption(key, shift >>> BITS)
-      else None
-    case (_: Cell[_] | Empty) => None
+  @tailrec final def getOption(key: Int, shift: Int): Option[A] = {
+    val shift1 = shift.max(0)
+    this match {
+      case Cell(`key`, value) => Some(value)
+      case Branch(bitMap, values) =>
+        val skey = (key >>> shift1) & MASK
+        if ((bitMap & (1 << skey)) != 0)
+          values(branchPos(bitMap, skey)).getOption(key, shift1 - BITS)
+        else None
+      case (_: Cell[_] | Empty) => None
+    }
   }
 
-  def insert[A1 >: A](key: Int, value: A1, shift: Int): PackedIntTrie[A1] = this match {
-    case Empty          => Cell(key, value)
-    case Cell(`key`, _) => Cell(key, value)
-    case c: Cell[A]     => c.extend(shift).insert(key, value, shift >>> BITS)
-    case Branch(bitMap, children) =>
-      val skey = (key >>> shift) & MASK
-      if ((bitMap & (1 << skey)) != 0) {
-        val pos = branchPos(bitMap, skey)
-        val subTree = children(pos).insert(key, value, shift >>> BITS)
-        val newChildren = children.updated(pos, subTree)
-        Branch(bitMap, newChildren)
-      } else {
-        val bitMap1 = bitMap | (1 << skey)
-        val pos = branchPos(bitMap1, skey)
-        val newChildren = (children.take(pos) :+ Cell(key, value)) ++ children.drop(pos)
-        Branch(bitMap1, newChildren)
-      }
-  }
-
-  def remove[A1 >: A](key: Int, shift: Int): PackedIntTrie[A1] = this match {
-    case Empty | Cell(`key`, _) => Empty
-    case c: Cell[A]             => this
-    case Branch(bitMap, children) =>
-      val skey = (key >>> shift) & MASK
-      if ((bitMap & (1 << skey)) == 0) this
-      else {
-        val pos = branchPos(bitMap, skey)
-        children(pos).remove(key, shift >>> BITS) match {
-          case Empty =>
-            val bitMap1 = bitMap & ~(1 << skey)
-            val newChildren = children.take(pos) ++ children.drop(pos + 1)
-            if (bitMap1 == 0) Empty else Branch(bitMap1, newChildren)
-          case subTree =>
-            val newChildren = children.updated(pos, subTree)
-            Branch(bitMap, newChildren)
+  def insert[A1 >: A](key: Int, value: A1, shift: Int): PackedIntTrie[A1] = {
+    val shift1 = shift.max(0)
+    this match {
+      case Empty          => Cell(key, value)
+      case Cell(`key`, _) => Cell(key, value)
+      case c: Cell[A]     => c.extend(shift1).insert(key, value, shift1)
+      case Branch(bitMap, children) =>
+        val skey = (key >>> shift1) & MASK
+        if ((bitMap & (1 << skey)) != 0) {
+          val pos = branchPos(bitMap, skey)
+          val subTree = children(pos).insert(key, value, shift1 - BITS)
+          val newChildren = children.updated(pos, subTree)
+          Branch(bitMap, newChildren)
+        } else {
+          val bitMap1 = bitMap | (1 << skey)
+          val pos = branchPos(bitMap1, skey)
+          val newChildren = (children.take(pos) :+ Cell(key, value)) ++ children.drop(pos)
+          Branch(bitMap1, newChildren)
         }
-      }
+    }
+  }
+
+  def remove[A1 >: A](key: Int, shift: Int): PackedIntTrie[A1] = {
+    val shift1 = shift.max(0)
+    this match {
+      case Empty | Cell(`key`, _) => Empty
+      case c: Cell[A]             => this
+      case Branch(bitMap, children) =>
+        val skey = (key >>> shift1) & MASK
+        if ((bitMap & (1 << skey)) == 0) this
+        else {
+          val pos = branchPos(bitMap, skey)
+          children(pos).remove(key, shift1 - BITS) match {
+            case Empty =>
+              val bitMap1 = bitMap & ~(1 << skey)
+              val newChildren = children.take(pos) ++ children.drop(pos + 1)
+              if (bitMap1 == 0) Empty else Branch(bitMap1, newChildren)
+            case subTree =>
+              val newChildren = children.updated(pos, subTree)
+              Branch(bitMap, newChildren)
+          }
+        }
+    }
   }
 
   def get(key: Int): Option[A] = getOption(key, 32 - BITS)
@@ -140,7 +150,7 @@ object PackedIntTrie {
     def extend(shift: Int): Branch[A] = {
       val skey = (key >>> shift) & MASK
       val bitMap = 1 << skey
-      val children = ArraySeq.tabulate(1 << BITS)(i => if (skey == i) this else Empty)
+      val children = ArraySeq(this)
       Branch(bitMap, children)
     }
   }
@@ -148,7 +158,7 @@ object PackedIntTrie {
   case class Branch[+A](bitMap: Int, children: ArraySeq[PackedIntTrie[A]]) extends PackedIntTrie[A]
 
   def branchPos(bitMap: Int, maskedKey: Int): Int = {
-    val mask = ~((1 << maskedKey) - 1)
+    val mask = (1 << maskedKey) - 1
     Integer.bitCount(bitMap & mask)
   }
 }
@@ -157,7 +167,7 @@ final class TrieVector[+A](trie: PackedIntTrie[A], offset: Int, val length: Int)
     extends IndexedSeq[A]
     with IndexedSeqOps[A, TrieVector, TrieVector[A]]
     with IterableFactoryDefaults[A, TrieVector] {
-  def apply(i: Int): A = trie.get(i + offset).get
+  def apply(i: Int): A = trie.get(i + offset).getOrElse(throw new IndexOutOfBoundsException(i))
 
   override def appended[B >: A](elem: B): TrieVector[B] =
     new TrieVector(trie.updated(length + offset, elem), offset, length + 1)
@@ -166,6 +176,8 @@ final class TrieVector[+A](trie: PackedIntTrie[A], offset: Int, val length: Int)
     new TrieVector(trie.updated(offset - 1, elem), offset - 1, length + 1)
 
   override def iterableFactory: SeqFactory[TrieVector] = TrieVector
+
+  override protected[this] def className = "TrieVector"
 }
 
 object TrieVector extends StrictOptimizedSeqFactory[TrieVector] {
@@ -183,4 +195,12 @@ object TrieVector extends StrictOptimizedSeqFactory[TrieVector] {
     def clear(): Unit = trie = empty[A]
     def result(): TrieVector[A] = trie
   }
+}
+
+object Test extends App {
+  var init = TrieVector.empty[Int]
+
+  init :+= 1
+  init +:= 2
+  println(init)
 }
