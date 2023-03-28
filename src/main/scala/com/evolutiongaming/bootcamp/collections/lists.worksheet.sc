@@ -1,3 +1,4 @@
+import scala.collection.immutable.HashMap
 import com.evolutiongaming.bootcamp.collections.MyList.Cons
 import com.evolutiongaming.bootcamp.collections.CherryTree
 import com.evolutiongaming.bootcamp.collections.MyList
@@ -25,3 +26,4 @@ uniqueRefs(subsets1(MyList(1, 2, 3)))
 
 uniqueRefs(subsets1(1 to 10 to MyList))
 
+HashMap().empty
