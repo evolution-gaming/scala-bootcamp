@@ -424,34 +424,35 @@ object AsyncApp extends IOApp {
 
   private val ec = Executors.newFixedThreadPool(4)
 
-  def request(url: String, callback: Either[Throwable, Int] => Unit): Unit = {
-    val thread = new Thread() {
-      override def run(): Unit = {
-        println(s"Thread from pool: ${Thread.currentThread().getName}")
-        val status = Try(requests.get(url).statusCode)
-        callback(status.toEither)
-      }
+  def requestAndChangeThread(callback: Either[Throwable, Int] => Unit): Unit = {
+    val runnable: Runnable = () => {
+      println(s"Thread from pool: ${Thread.currentThread().getName}")
+      callback(getGoogleStatus())
     }
 
-    ec.execute(thread)
+    ec.execute(runnable)
   }
 
-  def requestF[F[_]: Async](url: String): F[Int] =
+  def requestF[F[_]: Async]: F[Int] =
     Async[F].async_ { cb =>
       println(s"Starting async: ${Thread.currentThread().getName}")
-      val status = Try(requests.get(url).statusCode)
-      cb(status.toEither)
-//      request(url, cb)
+//      cb(getGoogleStatus())
+      requestAndChangeThread(cb)
     }
 
   override def run(args: List[String]): IO[ExitCode] = {
     val app = for {
-      response <- IO(StdIn.readLine()) >>= requestF[IO]
+      _        <- IO(println(s"Starting run: ${Thread.currentThread().getName}"))
+      response <- requestF[IO]
       _        <- IO(println(s"Finished: ${Thread.currentThread().getName}"))
       _        <- IO(println(response))
     } yield ()
 
     app.guarantee(IO(ec.shutdown())) as ExitCode.Success
+  }
+
+  private def getGoogleStatus(): Either[Throwable, Int] = {
+    Try(requests.get("https://www.google.com").statusCode).toEither
   }
 }
 
