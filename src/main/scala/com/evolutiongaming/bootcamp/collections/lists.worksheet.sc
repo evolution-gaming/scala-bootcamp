@@ -25,5 +25,3 @@ def subsets1[A](xs: MyList[A]): MyList[MyList[A]] = xs match {
 uniqueRefs(subsets1(MyList(1, 2, 3)))
 
 uniqueRefs(subsets1(1 to 10 to MyList))
-
-HashMap().empty
