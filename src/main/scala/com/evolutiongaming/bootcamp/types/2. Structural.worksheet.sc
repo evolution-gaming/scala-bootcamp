@@ -9,3 +9,6 @@ import scala.collection.immutable.VectorImpl
 
 //format: on
 
+type U = {
+    def A: Int
+}

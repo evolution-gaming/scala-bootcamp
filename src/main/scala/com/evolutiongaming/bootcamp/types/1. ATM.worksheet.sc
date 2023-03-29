@@ -1,3 +1,4 @@
+
 // format: off
 
 /**
@@ -175,6 +176,35 @@ object Fibonacci extends Caching {
 Fibonacci.fib(100)
 
 
+trait GeneralizedCaching {
+    type Key[A]
+    type Cache <: PartialFunction[Key[_], Any] 
+
+    def init: Cache
+
+    private var cache = init
+    def add[A]( cache: Cache, key: Key[A], a: A): Cache
+
+    def cached[A](key: Key[A])(f: Key[A] => A): A = 
+        cache.applyOrElse(key, { _: Key[A] => 
+                val a = f(key)
+                cache = add(cache, key, a)
+                a
+        }).asInstanceOf[A]
+}
+
+
+import scala.collection.immutable.LongMap
+
+trait LongCache extends GeneralizedCaching{
+
+    type Key[A] <: Long
+    type Cache = LongMap[Any]
+
+    def init = LongMap.empty[Any]
+
+    def add[A](cache: Cache, key: Key[A], a: A): Cache = cache + (key -> a)
+}
 
 
 
