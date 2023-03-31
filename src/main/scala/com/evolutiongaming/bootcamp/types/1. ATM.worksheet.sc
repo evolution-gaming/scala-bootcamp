@@ -46,11 +46,13 @@ getInfos(1, 2, 3)(new InfoGetter {
 
 
 
-//format: on
 
-/** ┌─────────────┐ │ Composition │ └─────────────┘
+
+/** ┌─────────────┐ 
+ *  │ Composition │ 
+ *  └─────────────┘
   */
-
+//format: on
 trait Transformer[-A, +B] {
   self =>
   type State
@@ -144,80 +146,137 @@ transform(Vector(1, 2, 3, -3, -2, -1))(averageTransformer[Int])
  * │ Mix-in │   
  * └────────┘
  */
-
+// format: on
 
 trait Caching {
-    type Key[A]
+  type Key[A]
 
-    private var cache = Map.empty[Key[_], Any]
+  private var cache = Map.empty[Key[_], Any]
 
-    def cached[A](key: Key[A])(f: Key[A] => A): A = 
-        cache.get(key) match {
-            case Some(a) => a.asInstanceOf[A]
-            case None => 
-                val a = f(key)
-                cache += key -> a
-                a
-        }
+  def cached[A](key: Key[A])(f: Key[A] => A): A =
+    cache.get(key) match {
+      case Some(a) => a.asInstanceOf[A]
+      case None =>
+        val a = f(key)
+        cache += key -> a
+        a
+    }
 }
 
 object Fibonacci extends Caching {
-    sealed trait Key[A]
-    case class Fib(n: Int) extends Key[BigInt]
+  sealed trait Key[A]
+  case class Fib(n: Int) extends Key[BigInt]
 
-
-    def fib(n: Int): BigInt = cached(Fib(n)) { case Fib(n) =>
-        if (n <= 1) n
-        else fib(n - 1) + fib(n - 2)
-    }
+  def fib(n: Int): BigInt = cached(Fib(n)) { case Fib(n) =>
+    if (n <= 1) n
+    else fib(n - 1) + fib(n - 2)
+  }
 
 }
 
 Fibonacci.fib(100)
 
-
 trait GeneralizedCaching {
-    type Key[A]
-    type Cache <: PartialFunction[Key[_], Any] 
+  type Key[A]
+  type Cache <: PartialFunction[Key[_], Any]
 
-    def init: Cache
+  def init: Cache
 
-    private var cache = init
-    def add[A]( cache: Cache, key: Key[A], a: A): Cache
+  private var cache = init
+  def add[A](cache: Cache, key: Key[A], a: A): Cache
 
-    def cached[A](key: Key[A])(f: Key[A] => A): A = 
-        cache.applyOrElse(key, { _: Key[A] => 
-                val a = f(key)
-                cache = add(cache, key, a)
-                a
-        }).asInstanceOf[A]
+  def cached[A](key: Key[A])(f: Key[A] => A): A =
+    cache
+      .applyOrElse(
+        key,
+        { _: Key[A] =>
+          val a = f(key)
+          cache = add(cache, key, a)
+          a
+        }
+      )
+      .asInstanceOf[A]
 }
-
 
 import scala.collection.immutable.LongMap
 
-trait LongCache extends GeneralizedCaching{
+trait LongCache extends GeneralizedCaching {
 
-    type Key[A] <: Long
-    type Cache = LongMap[Any]
+  type Key[A] <: Long
+  type Cache = LongMap[Any]
 
-    def init = LongMap.empty[Any]
+  def init = LongMap.empty[Any]
 
-    def add[A](cache: Cache, key: Key[A], a: A): Cache = cache + (key -> a)
+  def add[A](cache: Cache, key: Key[A], a: A): Cache = cache + (key -> a)
+}
+//format: off
+
+
+
+
+
+
+/**
+ * ┌──────────┐
+ * │ Newtypes │   
+ * └──────────┘
+ */
+// format: on
+
+object ClientId {
+  type ClientId
+  def apply(id: String): ClientId = id.asInstanceOf[ClientId]
+
+  implicit class ClientIdOps(val id: ClientId) {
+    def asString: String = id.asInstanceOf[String]
+  }
 }
 
+type ClientId = ClientId.ClientId
 
+import scala.concurrent.Future
 
+def getClientInfo(id: ClientId): Future[Vector[String]] =
+  Future.successful(Vector.empty)
 
+getClientInfo(ClientId("123"))
 
-
-
-
-
-
-
-
-
-
-
+//format: off
+/**
+ * ┌───────────────┐
+ * │ New(sub)types │   
+ * └───────────────┘
+ */
 // format: on
+
+object Kilograms {
+  type Kilograms <: Long
+
+  def apply(kg: Long): Kilograms = kg.asInstanceOf[Kilograms]
+
+  implicit class KilogramsOps(val kg: Kilograms) {
+    def +!(other: Kilograms): Kilograms = (kg + other).asInstanceOf[Kilograms]
+  }
+}
+
+type Kilograms = Kilograms.Kilograms
+
+Kilograms(2) +! Kilograms(3)
+
+def addOne(kg: Kilograms): Kilograms = kg +! Kilograms(1)
+
+getClass.getMethods.find(_.getName == "addOne").get.toString
+
+object NonEmptyVector {
+  type Coll[+A] <: Vector[A]
+
+  def fromVector[A](s: Vector[A]): Option[Coll[A]] =
+    Option.when(s.nonEmpty)(s.asInstanceOf[Coll[A]])
+
+  def apply[A](a: A, as: A*): Coll[A] = (a +: as.toVector).asInstanceOf[Coll[A]]
+
+}
+
+type NonEmptyVector[+A] = NonEmptyVector.Coll[A]
+
+NonEmptyVector(Vector(1, 2, 3))

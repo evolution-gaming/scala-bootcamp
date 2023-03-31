@@ -10,6 +10,7 @@ sealed trait MyList[+A]
     extends LinearSeq[A]
     with LinearSeqOps[A, MyList, MyList[A]]
     with IterableFactoryDefaults[A, MyList] {
+
   override def iterableFactory = MyList
 
   private def reverseWith[A1 >: A](acc: MyList[A1]): MyList[A1] = this match {
@@ -28,6 +29,13 @@ sealed trait MyList[+A]
 
 object MyList extends SeqFactory[MyList] {
 
+  case object Nil extends MyList[Nothing]
+
+  final case class Cons[+A](
+      override val head: A,
+      override val tail: MyList[A]
+  ) extends MyList[A]
+
   def from[A](source: IterableOnce[A]): MyList[A] =
     source.iterator.foldRight[MyList[A]](Nil)(Cons(_, _))
 
@@ -42,11 +50,4 @@ object MyList extends SeqFactory[MyList] {
     def clear(): Unit = elems = Nil
     def result(): MyList[A] = elems.reverse
   }
-
-  case object Nil extends MyList[Nothing]
-
-  final case class Cons[+A](
-      override val head: A,
-      override val tail: MyList[A]
-  ) extends MyList[A]
 }

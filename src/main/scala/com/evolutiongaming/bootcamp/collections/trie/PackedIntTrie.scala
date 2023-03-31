@@ -25,10 +25,10 @@ sealed trait PackedIntTrie[+A] extends Map[Int, A] {
   @tailrec final def getOption(key: Int, shift: Int): Option[A] =
     this match {
       case Cell(`key`, value) => Some(value)
-      case Branch(bitMap, values) =>
+      case Branch(bitMap, children) =>
         val skey = (key >>> shift) & MASK
         if ((bitMap & (1 << skey)) != 0)
-          values(branchPos(bitMap, skey)).getOption(key, shift + BITS)
+          children(branchPos(bitMap, skey)).getOption(key, shift + BITS)
         else None
       case (_: Cell[_] | Empty) => None
     }
@@ -99,6 +99,17 @@ object PackedIntTrie {
       Branch(bitMap, children)
     }
   }
+
+ //9876543210 
+ //1001001001
+ //children = Array(a, b, c, d)
+ //children(0) for index 0
+ //children(1) for index 3
+ //children(2) for index 6
+ //children(3) for index 9
+ // 32 = 2 ^ 5
+ // ceil(32 + 4/ 5)  = 7
+
 
   case class Branch[+A](bitMap: Int, children: ArraySeq[PackedIntTrie[A]])
       extends PackedIntTrie[A]

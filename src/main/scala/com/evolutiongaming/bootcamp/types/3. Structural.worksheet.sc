@@ -1,4 +1,5 @@
 import scala.collection.immutable.VectorImpl
+// import scala.languageFeature.reflectiveCalls
 //format: off
 
 /**
@@ -48,4 +49,18 @@ eq[
   }
 ]
 
+sub[
+  {
+    val a: Int
+  }, {
+    def a: Int
+  }
+]
 
+sub[
+  {
+    def calc(x: Int): Int
+  }, {
+    def calc(x: Any): Int
+  }
+]
