@@ -39,7 +39,7 @@ trait CheckingVariance[-In, +Out, Stop, `?`] {
 
   type Upper <: `?`
   type Lower >: `?`
-  type EqCo = Co[`?`]
+  type Eq = Co[`?`]
 
   type UpperCo <: Co[`?`]
   type LowerCo >: Co[`?`]

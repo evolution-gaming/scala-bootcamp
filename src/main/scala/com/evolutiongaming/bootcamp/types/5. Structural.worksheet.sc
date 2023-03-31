@@ -59,8 +59,39 @@ sub[
 
 sub[
   {
-    def calc(x: Int): Int
+    def calc(x: Int): String
   }, {
-    def calc(x: Any): Int
+    def calc(x: Int): Any
+  }
+]
+
+sub[
+  {
+    def calc(x: Int): String
+  }, {
+    def calc(x: Int): String
+  }
+]
+
+type HaveSomeType = {
+  type SomeType
+}
+
+sub[
+  {
+    type SomeType
+    def calc: SomeType
+  }, {
+    def calc: Any
+  }
+]
+
+sub[
+  {
+    type SomeType >: List[String] <: Seq[Any]
+    def calc: SomeType
+  }, {
+    type SomeType
+    def calc: SomeType
   }
 ]

@@ -176,39 +176,39 @@ object Fibonacci extends Caching {
 
 Fibonacci.fib(100)
 
-trait GeneralizedCaching {
-  type Key[A]
-  type Cache <: PartialFunction[Key[_], Any]
+// trait GeneralizedCaching {
+//   type Key[A]
+//   type Cache <: PartialFunction[Key[_], Any]
 
-  def init: Cache
+//   def init: Cache
 
-  private var cache = init
-  def add[A](cache: Cache, key: Key[A], a: A): Cache
+//   private var cache = init
+//   def add[A](cache: Cache, key: Key[A], a: A): Cache
 
-  def cached[A](key: Key[A])(f: Key[A] => A): A =
-    cache
-      .applyOrElse(
-        key,
-        { _: Key[A] =>
-          val a = f(key)
-          cache = add(cache, key, a)
-          a
-        }
-      )
-      .asInstanceOf[A]
-}
+//   def cached[A](key: Key[A])(f: Key[A] => A): A =
+//     cache
+//       .applyOrElse(
+//         key,
+//         { _: Key[A] =>
+//           val a = f(key)
+//           cache = add(cache, key, a)
+//           a
+//         }
+//       )
+//       .asInstanceOf[A]
+// }
 
-import scala.collection.immutable.LongMap
+// import scala.collection.immutable.LongMap
 
-trait LongCache extends GeneralizedCaching {
+// trait LongCache extends GeneralizedCaching {
 
-  type Key[A] <: Long
-  type Cache = LongMap[Any]
+//   type Key[A] <: Long
+//   type Cache = LongMap[Any]
 
-  def init = LongMap.empty[Any]
+//   def init = LongMap.empty[Any]
 
-  def add[A](cache: Cache, key: Key[A], a: A): Cache = cache + (key -> a)
-}
+//   def add[A](cache: Cache, key: Key[A], a: A): Cache = cache + (key -> a)
+// }
 //format: off
 
 
@@ -280,3 +280,24 @@ object NonEmptyVector {
 type NonEmptyVector[+A] = NonEmptyVector.Coll[A]
 
 NonEmptyVector(Vector(1, 2, 3))
+
+
+//format: off
+/**
+ * ┌──────────────────┐
+ * │ Type Projections │   
+ * └──────────────────┘
+ */
+// format: on
+
+
+class IntCache extends Caching {
+  type Key[A] = Int
+}
+
+val k1: IntCache#Key[String] = 1
+
+
+type CachingKey[C <: Caching, A] = C#Key[A]
+
+val k2: CachingKey[IntCache, String] = 1

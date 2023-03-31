@@ -36,7 +36,9 @@ object Parent1 {
 
 // format: on
 
-// existential types
+// ┌───────────────────┐
+// │ Existential Types │
+// └───────────────────┘
 sealed trait InfoGetter
 object InfoGetter {
   case class Impl[A](
@@ -45,19 +47,19 @@ object InfoGetter {
   ) extends InfoGetter
 }
 
-// def getInfos(keys: Long*)(getter: InfoGetter): Vector[String] =
-//   getter match {
-//     case InfoGetter.Impl(getInfo, printInfo) =>
-//       keys.view.map(k => printInfo(getInfo(k))).toVector
-//   }
-
-def getInfos2(keys: Long*)(getter: InfoGetter): Vector[String] =
+def getInfos(keys: Long*)(getter: InfoGetter): Vector[String] =
   getter match {
-    case getter: InfoGetter.Impl[a] =>
-      val getInfo: Long => a = getter.getInfo
-      val printInfo: a => String = getter.printInfo
+    case InfoGetter.Impl(getInfo, printInfo) =>
       keys.view.map(k => printInfo(getInfo(k))).toVector
   }
+
+// def getInfos2(keys: Long*)(getter: InfoGetter): Vector[String] =
+//   getter match {
+//     case getter: InfoGetter.Impl[a] =>
+//       val getInfo: Long => a = getter.getInfo
+//       val printInfo: a => String = getter.printInfo
+//       keys.view.map(k => printInfo(getInfo(k))).toVector
+//   }
 
 // format: off
 
@@ -74,6 +76,10 @@ def getInfos2(keys: Long*)(getter: InfoGetter): Vector[String] =
 
 
 // format: on
+
+// ┌───────────────┐
+// │ Type Indexes  │
+// └───────────────┘
 
 sealed trait Tag[A]
 
@@ -126,6 +132,10 @@ combineAll(
 
 // format: on
 
+// ┌────────────────────────┐
+// │ Polymorphic Recursion  │
+// └────────────────────────┘
+
 val bigCompose =
   1.to(100000).foldLeft((x: Int) => x)((f, _) => f.andThen(_ + 1))
 
@@ -152,7 +162,7 @@ object Compose {
 val bigCompose1 =
   1.to(100000).foldLeft[Int => Int](x => x)((f, _) => f.andThen(_ + 1))
 
-List(1, 2, 3).map(bigCompose1)
+// List(1, 2, 3).map(bigCompose1)
 //
 //
 
