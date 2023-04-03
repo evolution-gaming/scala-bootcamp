@@ -1,4 +1,4 @@
-package com.evolutiongaming.bootcamp.state
+package com.evolutiongaming.bootcamp.state.v2
 
 import cats.Monad
 import cats.effect._
