@@ -1,5 +1,5 @@
 import scala.collection.immutable.VectorImpl
-// import scala.languageFeature.reflectiveCalls
+import scala.languageFeature.reflectiveCalls
 //format: off
 
 /**
@@ -12,22 +12,22 @@ import scala.collection.immutable.VectorImpl
 
 type A_B = {
   def a: Int
-  def b: String
+  def b(x: Int): String
 }
 
 object SimpleObject {
   val a = 1
-  val b = "squirrel"
+  def b(x: Int) = s"squirrel $x"
 }
 
 val simpleObject: A_B = SimpleObject
 
 simpleObject.a
-simpleObject.b
+simpleObject.b(2)
 
 type A_C = {
   def a: Int
-  def c: Double
+  def c[A]: A
 }
 
 type A_B_C = A_B with A_C
@@ -44,8 +44,8 @@ def eq[A, B >: A <: A] = {
 eq[
   A_B_C, {
     def a: Int
-    def b: String
-    def c: Double
+    def b(x: Int): String
+    def c[A]: A
   }
 ]
 
@@ -65,13 +65,13 @@ sub[
   }
 ]
 
-sub[
-  {
-    def calc(x: Int): String
-  }, {
-    def calc(x: Int): String
-  }
-]
+// sub[
+//   {
+//     def calc(x: Int): String
+//   }, {
+//     def calc(x: Int): String
+//   }
+// ]
 
 type HaveSomeType = {
   type SomeType
@@ -79,10 +79,10 @@ type HaveSomeType = {
 
 sub[
   {
-    type SomeType
+    type SomeType <: Int
     def calc: SomeType
   }, {
-    def calc: Any
+    def calc: Int
   }
 ]
 
@@ -95,3 +95,35 @@ sub[
     def calc: SomeType
   }
 ]
+
+
+//format: off
+/**
+ * ┌──────────────────┐
+ * │    Refinements   │   
+ * └──────────────────┘
+ */
+// format: on
+
+trait Transformer[-A, +B] {
+  self =>
+  type State
+
+  def init: State
+
+  def transformOne(a: A, state: State): State
+
+  def result(state: State): B
+}
+
+class SumTransformer extends Transformer[Long, Long] {
+  type State = Long
+
+  def init: State = Numeric[Long].zero
+
+  def transformOne(a: Long, state: State): State = a + state
+
+  def result(state: State): Long = state
+}
+
+val transformer: Transformer[Long, Long]{type State = Long} = new SumTransformer

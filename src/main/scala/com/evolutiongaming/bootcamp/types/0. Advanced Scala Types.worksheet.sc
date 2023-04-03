@@ -9,3 +9,7 @@
 //  ║                                               ║
 //  ╚═══════════════════════════════════════════════╝
 //
+
+val x: String = "123"
+
+// x.asInstanceOf[java.lang.Integer].byteValue()

@@ -57,7 +57,7 @@ object PersonTL {
   ): PersonTL[name, age] = person
 }
 
-// PersonTL("Oleg", 37)
+PersonTL("Oleg", 37)
 
 val persons = (
   PersonTL("Oleg", 37),
@@ -117,7 +117,7 @@ val x2: 2 = 2
 val x3: x2.type = 2
 
 //
-val xInt = 2
+// val xInt = 2
 
 // val yInt: xInt.type = 2
 
@@ -136,6 +136,10 @@ val xInt = 2
  * └──────────────────┘
  */
 //format: on
+
+// new PersonBuilder
+// .name("Oleg")
+// .age(32)
 
 import scala.collection.mutable.Buffer
 import scala.collection.mutable.ReusableBuilder

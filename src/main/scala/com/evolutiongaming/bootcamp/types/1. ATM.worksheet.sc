@@ -118,7 +118,8 @@ class SumTransformer[A: Numeric] extends Transformer[A, A] {
   def result(state: State): A = state
 }
 
-transform(Vector(1, 2, 3, -3, -2, -1))(new SumTransformer[Int])
+transform(Vector(1, 2, 3, -3, -2, -1))(new SumTransformer[Int].map(_.toString()))
+// result(Vector(1, 2, 4, -3, -2, -1))(new SumTransformer[Int])
 
 object QuantityTransformer extends Transformer[Any, Long] {
   type State = Long
@@ -174,7 +175,7 @@ object Fibonacci extends Caching {
 
 }
 
-Fibonacci.fib(100)
+Fibonacci.fib(10)
 
 // trait GeneralizedCaching {
 //   type Key[A]
@@ -222,7 +223,9 @@ Fibonacci.fib(100)
  * └──────────┘
  */
 // format: on
+// opaque type aliases 
 
+// case class CliendId(s: String)
 object ClientId {
   type ClientId
   def apply(id: String): ClientId = id.asInstanceOf[ClientId]
@@ -237,9 +240,11 @@ type ClientId = ClientId.ClientId
 import scala.concurrent.Future
 
 def getClientInfo(id: ClientId): Future[Vector[String]] =
-  Future.successful(Vector.empty)
+  Future.successful(Vector(id.asString))
 
-getClientInfo(ClientId("123"))
+getClass.getMethods().find(_.getName == "getClientInfo")
+
+getClientInfo(ClientId("id123"))
 
 //format: off
 /**
@@ -279,7 +284,7 @@ object NonEmptyVector {
 
 type NonEmptyVector[+A] = NonEmptyVector.Coll[A]
 
-NonEmptyVector(Vector(1, 2, 3))
+NonEmptyVector.fromVector(Vector(1, 2, 3))
 
 
 //format: off
@@ -296,6 +301,8 @@ class IntCache extends Caching {
 }
 
 val k1: IntCache#Key[String] = 1
+
+// val x: Fibonacci.type#Key[A] = null
 
 
 type CachingKey[C <: Caching, A] = C#Key[A]

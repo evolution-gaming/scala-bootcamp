@@ -17,6 +17,10 @@ object Parent {
   case class Child2[A, B](a: A, b: B) extends Parent[A, B]
 }
 
+// Parent[String, Int] 
+// Child1[String, Int]
+// Child2[String, Int]
+
 // Generalized ADT
 
 sealed trait Parent1[A, B]
@@ -25,6 +29,7 @@ object Parent1 {
   case class Child2[C, D](c: C, d: D) extends Parent1[String, (C, D)]
 }
 
+// Parent1[Double, String]
 // format: off
 
 
@@ -80,6 +85,8 @@ def getInfos(keys: Long*)(getter: InfoGetter): Vector[String] =
 // ┌───────────────┐
 // │ Type Indexes  │
 // └───────────────┘
+// List[String]
+
 
 sealed trait Tag[A]
 

@@ -7,7 +7,11 @@ import doobie.util.transactor
 def someFunction[F[_]](
     ints: F[Int],
     strings: F[String]
-): F[(Int, String)] = ???
+): F[(Int, String)] = null.asInstanceOf[F[(Int, String)]]
+
+someFunction(Vector(1), Vector("asd"))
+someFunction(List(1), List("asd"))
+// someFunction(Vector(1), List("asd"))
 
 trait Mapper[F[_]] {
   def map[A, B](fa: F[A])(f: A => B): F[B]
@@ -111,13 +115,14 @@ collect[Result, String](Vector(Right("a"), Right("b"), Right("c")))(
   resultSingle
 )
 
+// ------- More Kinds ---------
 def hkt1[
+    K3[_, _, _, _],
+    K4[a[b[c]]],
     K1[+_],
     K2[-_],
-    K3[_, _, _, _],
-    K4[_[_[_]]],
     K5[_ >: String <: AnyRef],
-    K6[+F[x] <: Seq[x]],
+    K6[+F[x] <: Seq[x], +G[x] <: Seq[_]],
     K7[+A[x, +y <: String, z >: Int] <: Either[x, y]],
     K8[A <: B, B],
     K9[X[x] <: Y[x], Y[+x]]
