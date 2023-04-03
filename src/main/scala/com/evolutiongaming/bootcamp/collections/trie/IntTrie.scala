@@ -65,3 +65,4 @@ object IntTrie {
   }
   final case class Branch[+A](zero: IntTrie[A], one: IntTrie[A]) extends IntTrie[A]
 }
+

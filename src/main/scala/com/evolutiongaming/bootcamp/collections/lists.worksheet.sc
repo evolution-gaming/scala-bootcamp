@@ -8,10 +8,14 @@ def uniqueRefs(ms: MyList[MyList[Any]]): Int =
 
 val xs = MyList(1, 2, 3)
 
+List(1, 2, 3, 4).to(MyList)
+
 val xss = MyList(xs, MyList.Cons(4, xs))
 
 def subsets[A](xs: MyList[A]) =
   0 to xs.length to MyList flatMap xs.combinations
+
+subsets(MyList(1, 2, 3))
 
 uniqueRefs(subsets(MyList(1, 2, 3)))
 uniqueRefs(subsets(1 to 10 to MyList))
@@ -22,8 +26,8 @@ def subsets1[A](xs: MyList[A]): MyList[MyList[A]] = xs match {
   case MyList.Nil => MyList(MyList.Nil)
 }
 
+subsets1(MyList(1, 2, 3))
+
 uniqueRefs(subsets1(MyList(1, 2, 3)))
 
 uniqueRefs(subsets1(1 to 10 to MyList))
-
-HashMap().empty
