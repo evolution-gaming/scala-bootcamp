@@ -66,9 +66,3 @@ object IntTrie {
   final case class Branch[+A](zero: IntTrie[A], one: IntTrie[A]) extends IntTrie[A]
 }
 
-
-object ExampleMap extends App{
-    val m: IntTrie[String] = IntTrie.Empty
-    val x = m + (1 -> "one") + (2 -> "two") + (3 -> "three")
-    println(x)
-}

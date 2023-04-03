@@ -10,7 +10,6 @@ sealed trait MyList[+A]
     extends LinearSeq[A]
     with LinearSeqOps[A, MyList, MyList[A]]
     with IterableFactoryDefaults[A, MyList] {
-
   override def iterableFactory = MyList
 
   private def reverseWith[A1 >: A](acc: MyList[A1]): MyList[A1] = this match {

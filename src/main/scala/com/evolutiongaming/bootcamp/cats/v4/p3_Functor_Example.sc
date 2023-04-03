@@ -23,6 +23,8 @@ val users: Map[String, User] = Map(
 // The only thing we care about here is Functor instance for F to be able to call .map function.
 def getUserAge[F[_]: Functor](user: F[User]): F[Int] = user.map(_.age)
 
+getUserAge(users)
+
 def maybeUser(name: String): Option[User] =
   users.get(name)
 
