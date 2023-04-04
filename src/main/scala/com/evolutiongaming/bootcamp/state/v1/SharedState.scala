@@ -1,4 +1,4 @@
-package com.evolutiongaming.bootcamp.effects
+package com.evolutiongaming.bootcamp.state.v1
 
 import cats.effect._
 import cats.effect.kernel.Deferred
@@ -578,7 +578,6 @@ object RaceMVarExercise extends IOApp {
 
   }
 }
-
 
 
 

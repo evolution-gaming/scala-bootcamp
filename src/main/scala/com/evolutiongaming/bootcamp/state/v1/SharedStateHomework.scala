@@ -1,4 +1,4 @@
-package com.evolutiongaming.bootcamp.effects
+package com.evolutiongaming.bootcamp.state.v1
 
 import cats.Monad
 import cats.effect._
@@ -68,4 +68,3 @@ object SharedStateHomework extends IOApp {
     } yield ExitCode.Success
   }
 }
-
