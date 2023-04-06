@@ -12,14 +12,20 @@ import scala.concurrent.duration._
   * But what if we want to modify multiple pieces of state atomically?
   */
 object BankTransferDemo extends IOApp.Simple {
-  // TODO 1: modify below method to check if balance is high enough
-  // TODO 2: make it atomic
   // question: how to check if there were any retries?
   def withdraw(account: Ref[IO, Int], amount: Int): IO[Unit] =
-    account.update(_ - amount)
+    account.access.flatMap {
+      case (prev, setter) => if(prev < amount) IO.raiseError(new Exception("insufficient funds"))
+      else setter(prev - amount).flatMap {
+        case false => withdraw(account, amount)
+        case true => IO.unit
+      }
+    }
 
   def deposit(account: Ref[IO, Int], amount: Int) = account.update(_ + amount)
 
+  // problem: we have two atomic operations but they're not atomic together
+  // because of that state can be inconsistent - sum of money in both accounts should always be the same
   def transfer(a: Ref[IO, Int], b: Ref[IO, Int], amount: Int) =
     for {
       _ <- withdraw(a, amount)
@@ -56,11 +62,22 @@ object STMDemo extends IOApp.Simple {
   def run(stm: STM[IO]): IO[Unit] = {
     import stm._
 
-    def withdraw(account: TVar[Int], amount: Int): Txn[Unit] = ???
+    def withdraw(account: TVar[Int], amount: Int): Txn[Unit] =
+      for {
+        balance <- account.get
+        _ <- if(balance < amount) stm.raiseError(new Exception())
+             else account.set(balance - amount)
+      } yield ()
 
-    def deposit(account: TVar[Int], amount: Int): Txn[Unit] = ???
+    def deposit(account: TVar[Int], amount: Int): Txn[Unit] = account.modify(_ + amount)
 
-    def transfer(a: TVar[Int], b: TVar[Int], amount: Int): IO[Unit] = ???
+    def transfer(a: TVar[Int], b: TVar[Int], amount: Int): IO[Unit] = {
+    commit {
+      for {
+        _ <- withdraw(a, amount)
+        _ <- deposit(b, amount)
+      } yield ()
+    }}
 
     for {
       a <- commit(TVar.of(1000))

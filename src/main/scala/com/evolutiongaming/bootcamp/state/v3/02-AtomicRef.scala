@@ -19,10 +19,39 @@ object AtomicRef extends IOApp.Simple {
     def modify[B](f: A => (A, B)): IO[B]
   }
 
-  def createAtomicRef[A](initialValue: A): IO[AtomicRef[A]] = ???
+  def createAtomicRef[A](initialValue: A): IO[AtomicRef[A]] = IO(new AtomicReference[A](initialValue)).map { ref =>
+    new AtomicRef[A] {
+      override def get: IO[A] = IO(ref.get())
+
+      override def set(value: A): IO[Unit] = IO(ref.set(value))
+
+      override def update(f: A => A): IO[Unit] = {
+        def loop(): Unit = {
+          val prev = ref.get()
+          val next = f(prev)
+          if(ref.compareAndSet(prev, next)) ()
+          else loop()
+        }
+        IO(loop())
+      }
+
+      override def modify[B](f: A => (A, B)): IO[B] = {
+        def loop(): B = {
+          val prev = ref.get()
+          val (next, result) = f(prev)
+          if(ref.compareAndSet(prev, next)) result
+          else loop()
+        }
+        IO(loop())
+      }
+    }
+  }
 
   // here we're starting 3 fibers, each fiber will increment ref 3 times
   // we'll end up with ref = 9 but there'll be more than 9 operations
+  // fiber 1: x += 1, x += 1, x += 1
+  // fiber 2: x += 1, x += 1, x += 1
+  // fiber 3: x += 1, x += 1, x += 1
   def modifyAndPrint(ref: AtomicRef[Int]) =
     List
       .fill(3)(0)
@@ -67,15 +96,33 @@ object AtomicRefCounter extends IOApp.Simple {
   }
 
   /** use AtomicRef to implement counter */
-  def makeAtomicRefCounter: IO[Counter] = ???
+  def makeAtomicRefCounter: IO[Counter] = createAtomicRef(0).map { ref =>
+    new Counter {
+      override def inc: IO[Unit] = ref.update(_ + 1)
+
+      override def get: IO[Int] = ref.get
+    }
+  }
 
   // we can also use java concurrent API to create thread-safe counter
   /** use AtomicInteger from java API to implement counter */
-  def makeAtomicIntCounter: IO[Counter] = ???
+  def makeAtomicIntCounter: IO[Counter] = IO(new AtomicInteger(0)).map { ref =>
+    new Counter {
+      override def inc: IO[Unit] = IO(ref.updateAndGet(_ + 1))
+
+      override def get: IO[Int] = IO(ref.get)
+    }
+  }
 
   // cats-effect provides Ref, thread-safe reference
   /** use cats effect Ref to implement counter */
-  def makeRefCounter: IO[Counter] = ???
+  def makeRefCounter: IO[Counter] = Ref.of[IO, Int](0).map { ref =>
+    new Counter {
+      override def inc: IO[Unit] = ref.update(_ + 1)
+
+      override def get: IO[Int] = ref.get
+    }
+  }
 
   override def run: IO[Unit] =
     for {

@@ -23,7 +23,7 @@ object SemaphoreDemo extends IOApp.Simple {
   }
 
   object PreciousResource {
-    def create(permits: Int): IO[PreciousResource] = ???
+    def create(permits: Int): IO[PreciousResource] = Semaphore[IO](permits).map(PreciousResource(_))
   }
 
   override def run: IO[Unit] =
@@ -44,7 +44,11 @@ object RateLimiterDemo extends IOApp.Simple {
   }
 
   object RateLimiter {
-    def create(permits: Int): IO[RateLimiter] = ???
+    def create(permits: Int): IO[RateLimiter] = Semaphore[IO](permits).map { sem =>
+      new RateLimiter {
+        override def apply[A](fa: IO[A]): IO[A] = sem.permit.surround(fa)
+      }
+    }
   }
 
   override def run: IO[Unit] =

@@ -30,7 +30,6 @@ object DeferredDemo extends IOApp.Simple {
       deferred <- Deferred[IO, Int]
       _ <- (IO.sleep(3.seconds) *> deferred.complete(0)).start
       _ <- IO.println("waiting for deferred to complete")
-      _ <- deferred.get
       result <- deferred.get
       _ <- IO.println(s"result: $result")
     } yield ()
