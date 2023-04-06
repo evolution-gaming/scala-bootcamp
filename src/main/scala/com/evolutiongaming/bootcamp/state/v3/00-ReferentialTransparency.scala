@@ -85,7 +85,7 @@ object ImmutableSharedState extends App {
   val x = foo + bar
 
   val map1 =
-    map + "foo" -> 6 // this returns a new reference instead of mutating existing one
+    map + ("foo" -> 6) // this returns a new reference instead of mutating existing one
   val y = map("foo") + map("bar")
 
   println(s"x=$x, y=$y")
@@ -96,10 +96,18 @@ object ImmutableSharedState extends App {
   */
 object MutableLocalState extends App {
   // mutable local state is RT
-  def immutableMap[A, B](list: List[A])(f: A => B): List[B] = ???
+  def immutableMap[A, B](list: List[A])(f: A => B): List[B] = list match {
+    case head :: tail => f(head) +: immutableMap(tail)(f)
+    case Nil => Nil
+  }
 
   // mutable local state can be RT from the 'outside'
-  def mutableMap[A, B](list: List[A])(f: A => B): List[B] = ???
+  def mutableMap[A, B](list: List[A])(f: A => B): List[B] = {
+    val res = new ArrayBuffer[B]()
+    for(l <- list)
+      res.addOne(f(l))
+    res.toList
+  }
 
   def duplicate(s: String) = s ++ s
 

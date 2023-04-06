@@ -12,7 +12,7 @@ import scala.concurrent.duration._
  *
  * Cached items should have an expiration timestamp after which they are evicted.
  */
-object SharedStateHomework extends IOApp {
+object ExpiringCacheExercise extends IOApp {
 
   trait Cache[F[_], K, V] {
     def get(key: K): F[Option[V]]
@@ -36,6 +36,8 @@ object SharedStateHomework extends IOApp {
         expiresIn: FiniteDuration,
         checkOnExpirationsEvery: FiniteDuration
     ): F[Cache[F, K, V]] = ???
+    // depending on approach Resource[F, Cache[F, K, V]] might be also an option to return here e.g. to use .background operator to start a fiber
+    // that'll check on cache expiration
   }
 
   override def run(args: List[String]): IO[ExitCode] =

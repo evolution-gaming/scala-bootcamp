@@ -8,9 +8,12 @@ import cats.syntax.all._
 /** Cats Effect also has a pure, concurrent implementation of a queue. */
 object QueueDemo extends IOApp.Simple {
   def producer(n: Int, delay: FiniteDuration, queue: Queue[IO, Int]): IO[Unit] =
-    ???
+    List.range(0, n).traverse(n => queue.offer(n).delayBy(delay)) *> queue.offer(-1) *> IO.println("producer finished")
 
-  def consumer(delay: FiniteDuration, queue: Queue[IO, Int]): IO[Unit] = ???
+  def consumer(delay: FiniteDuration, queue: Queue[IO, Int]): IO[Unit] = queue.take.flatMap {
+    case -1 => IO.println("consumer finished")
+    case n => IO.println(s"consumed: $n") *> consumer(delay, queue).delayBy(delay)
+  }
 
   override def run: IO[Unit] =
     for {

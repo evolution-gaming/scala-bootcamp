@@ -14,7 +14,14 @@ object MutableCounter extends App {
     def get: Long
   }
 
-  val mutableCounter: Counter = ???
+  val mutableCounter: Counter = {
+    var count = 0
+    new Counter {
+      override def increment: Unit = count += 1
+
+      override def get: Long = count
+    }
+  }
 
   val x = mutableCounter.get
   val y = x + x
@@ -35,7 +42,11 @@ object ImmutableCounter extends App {
     def get: Long
   }
 
-  def makeCounter(initial: Long): Counter = ???
+  def makeCounter(initial: Long): Counter = new Counter {
+    override def increment: Counter = makeCounter(initial + 1)
+
+    override def get: Long = initial
+  }
 
   val counter = makeCounter(0)
   val counter1 = counter.increment
@@ -75,7 +86,9 @@ object PseudoRandomNumberGenerator extends App {
     def nextLong: (Random, Long)
   }
 
-  def createRandom(seed: Seed): Random = ???
+  def createRandom(seed: Seed): Random = new Random {
+    override def nextLong: (Random, Long) = (createRandom(seed.next), seed.next.long)
+  }
 
   val random = createRandom(Seed(0))
 
@@ -95,7 +108,14 @@ object IOCounter extends App {
     def get: IO[Long]
   }
 
-  val unsafeCounter: Counter = ???
+  val unsafeCounter: Counter = {
+    var count = 0
+    new Counter {
+      override def increment: IO[Unit] = IO(count += 1)
+
+      override def get: IO[Long] = IO(count)
+    }
+  }
 
   val leakyStateExample = (unsafeCounter.increment *> unsafeCounter.get
     .debug() *> unsafeCounter.increment *> unsafeCounter.get.debug())
@@ -103,7 +123,14 @@ object IOCounter extends App {
 
   /** Here we suspend creating mutable state in IO, which makes this counter implementation pure.
     */
-  def safeCounter: IO[Counter] = ???
+  def safeCounter: IO[Counter] = IO {
+    var count = 0
+    new Counter {
+      override def increment: IO[Unit] = IO(count += 1)
+
+      override def get: IO[Long] = IO(count)
+    }
+  }
 
   val safeCounterExample = safeCounter
     .flatMap { counter =>
