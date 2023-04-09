@@ -8,9 +8,9 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._
 
 class ScheduledUpdates(
-    client: AppHttpClient,
-    casinoService: CasinoService,
-    system: ActorSystem
+  client: AppHttpClient,
+  casinoService: CasinoService,
+  system: ActorSystem,
 ) {
   def start(): Unit = {
     val casinosRetrieval: Cancellable =

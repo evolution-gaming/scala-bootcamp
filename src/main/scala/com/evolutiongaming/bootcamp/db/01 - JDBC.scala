@@ -32,11 +32,12 @@ object Jdbc {
       connection.setAutoCommit(false) // start transaction
       fetchHPBooks(connection).foreach(println)
       connection.commit() // commit transaction
-    } finally try connection.close()
-    catch {
-      case e: Throwable =>
-        println(s"there was an error: $e");
-    }
+    } finally
+      try connection.close()
+      catch {
+        case e: Throwable =>
+          println(s"there was an error: $e");
+      }
   }
 
   private def setUpTables(connection: Connection): Unit = {
@@ -49,14 +50,14 @@ object Jdbc {
 
   private def fetchHPBooks(connection: Connection): List[BookWithAuthor] = {
     val stmt = connection.createStatement()
-    val rs = stmt.executeQuery(fetchHarryPotterBooksSql)
+    val rs   = stmt.executeQuery(fetchHarryPotterBooksSql)
 
     def parseBooks(): List[BookWithAuthor] = {
       @tailrec def internalParseBooks(acc: List[BookWithAuthor]): List[BookWithAuthor] =
         if (rs.next()) {
           val bookId = UUID.fromString(rs.getString("books.id"))
-          val title = rs.getString("books.title")
-          val year = Year.of(rs.getInt("books.year_published"))
+          val title  = rs.getString("books.title")
+          val year   = Year.of(rs.getInt("books.year_published"))
           val author = Author(
             id = UUID.fromString(rs.getString("authors.id")),
             name = rs.getString("authors.name"),

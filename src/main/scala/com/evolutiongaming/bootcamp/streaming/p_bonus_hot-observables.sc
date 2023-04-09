@@ -15,24 +15,24 @@ implicit val scheduler: Scheduler = Scheduler.apply(ExecutionContext.parasitic)
 // Doesn't run when subscribed, only starts running when .connect() is called
 // Subscribes upstream only once (on connect()), can send elements to multiple downstream consumers
 // .publish just broadcasts elements, there are others
-val ints = Observable.fromIterable(1 to 10)
+val ints             = Observable.fromIterable(1 to 10)
 val intsLogSubscribe = ints.doOnSubscribe(Task(println("Starting")))
 
 def countAndCollect[T](in: Observable[T]): Task[(Long, List[T])] = {
   Task.parZip2(in.countL, in.toListL)
 }
-val publishedInts: ConnectableObservable[Int] = intsLogSubscribe.publish
+val publishedInts: ConnectableObservable[Int]                    = intsLogSubscribe.publish
 publishedInts.headL
 //  .timeout(1.second).attempt.runSyncUnsafe() // will fail
 
 // Example: call connect() directly
 {
   for {
-    published <- Task(intsLogSubscribe.publish)
+    published   <- Task(intsLogSubscribe.publish)
     resultFiber <- countAndCollect(published).start
-    cancel <- Task(published.connect())
-    result <- resultFiber.join
-    _ <- Task(cancel.cancel())
+    cancel      <- Task(published.connect())
+    result      <- resultFiber.join
+    _           <- Task(cancel.cancel())
   } yield result
 }
   .runSyncUnsafe()
@@ -41,7 +41,8 @@ publishedInts.headL
 // Will call connect() on first subscription, and cancel() once all subscriptions are gone
 val rc = intsLogSubscribe
   .delayExecution(10.millis)
-  .publish.refCount
+  .publish
+  .refCount
 
 countAndCollect(rc).runSyncUnsafe()
 
@@ -59,7 +60,6 @@ Task {
   ints.replay(3)
 }
 
-
 // Still, hot observables are impure api, and can be tricky to work with
 // General advice is to stick to publishSelector
 // For behavior/replay/others, there's more general pipeThroughSelector
@@ -69,7 +69,6 @@ Task {
 //   applies function to hot observable
 //   returns pure observable with result
 intsLogSubscribe
-  .pipeThroughSelector(
-    Pipe.behavior[Int](-1),
-    (hot: Observable[Int]) => Observable.from(countAndCollect(hot)))
-  .lastL.runSyncUnsafe()
+  .pipeThroughSelector(Pipe.behavior[Int](-1), (hot: Observable[Int]) => Observable.from(countAndCollect(hot)))
+  .lastL
+  .runSyncUnsafe()

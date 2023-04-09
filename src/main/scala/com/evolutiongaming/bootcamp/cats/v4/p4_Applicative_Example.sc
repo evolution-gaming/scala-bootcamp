@@ -34,7 +34,7 @@ implicit val ec = ExecutionContext.parasitic
 
 val futureSum = wrapSum(
   Future { println("Computing 1"); 1 },
-  Future { println("Computing 2"); 2 }
+  Future { println("Computing 2"); 2 },
 )
 futureSum.foreach(println)
 

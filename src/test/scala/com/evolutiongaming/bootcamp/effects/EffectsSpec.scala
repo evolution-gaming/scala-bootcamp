@@ -8,7 +8,8 @@ import org.scalatest.freespec.AsyncFreeSpec
 import org.scalatest.matchers.should.Matchers
 
 class EffectsSpec extends AsyncFreeSpec with AsyncIOSpec with Matchers {
-  final class TestConsole(var providedInput: List[String] = Nil, var expectedOutput: List[String] = Nil) extends Console {
+  final class TestConsole(var providedInput: List[String] = Nil, var expectedOutput: List[String] = Nil)
+      extends Console {
     def expectOutput(x: String): TestConsole = {
       expectedOutput = expectedOutput :+ x
       this
@@ -51,8 +52,8 @@ class EffectsSpec extends AsyncFreeSpec with AsyncIOSpec with Matchers {
     val console = f(new TestConsole)
 
     val program = for {
-      result  <- process(console)
-      _       <- console.expectEmpty
+      result <- process(console)
+      _      <- console.expectEmpty
     } yield result
 
     program.asserting(_ shouldBe exitCode)
@@ -61,8 +62,7 @@ class EffectsSpec extends AsyncFreeSpec with AsyncIOSpec with Matchers {
   "Exercise 1" - {
     "dogs" in {
       check(
-        _
-          .expectOutput("What is your favourite animal?")
+        _.expectOutput("What is your favourite animal?")
           .provideInput("dogs")
           .expectOutput("Be the person your dog thinks you are."),
         ExitCode.Success,
@@ -71,8 +71,7 @@ class EffectsSpec extends AsyncFreeSpec with AsyncIOSpec with Matchers {
 
     "cats" in {
       check(
-        _
-          .expectOutput("What is your favourite animal?")
+        _.expectOutput("What is your favourite animal?")
           .provideInput("cats")
           .expectOutput("In ancient times cats were worshipped as gods; they have not forgotten this."),
         ExitCode.Success,
@@ -81,8 +80,7 @@ class EffectsSpec extends AsyncFreeSpec with AsyncIOSpec with Matchers {
 
     "some wrong answers" in {
       check(
-        _
-          .expectOutput("What is your favourite animal?")
+        _.expectOutput("What is your favourite animal?")
           .provideInput("")
           .expectOutput("Empty input is not valid, try again...")
           .expectOutput("What is your favourite animal?")
@@ -91,15 +89,13 @@ class EffectsSpec extends AsyncFreeSpec with AsyncIOSpec with Matchers {
           .expectOutput("What is your favourite animal?")
           .provideInput("elephants")
           .expectOutput("I don't know what to say about 'elephants'."),
-
         ExitCode.Success,
       )
     }
 
     "too many wrong answers" in {
       check(
-        _
-          .expectOutput("What is your favourite animal?")
+        _.expectOutput("What is your favourite animal?")
           .provideInput("")
           .expectOutput("Empty input is not valid, try again...")
           .expectOutput("What is your favourite animal?")
@@ -108,7 +104,6 @@ class EffectsSpec extends AsyncFreeSpec with AsyncIOSpec with Matchers {
           .expectOutput("What is your favourite animal?")
           .provideInput("   ")
           .expectOutput("I am disappoint. You have failed to answer too many times."),
-
         ExitCode.Error,
       )
     }

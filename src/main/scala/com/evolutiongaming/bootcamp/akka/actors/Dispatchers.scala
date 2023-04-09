@@ -13,7 +13,7 @@ object Dispatchers extends App {
   final class Main extends Actor {
     private val cache = context.actorOf(
       Props(new SimpleCache(3.seconds)).withDispatcher("dispatchers.custom-dispatcher"),
-      "cache"
+      "cache",
     )
 
     import context.dispatcher
@@ -22,7 +22,7 @@ object Dispatchers extends App {
         initialDelay = 0.seconds,
         interval = 1.seconds,
         receiver = cache,
-        message = SimpleCache.Get("1")
+        message = SimpleCache.Get("1"),
       )
     // cancellableTask.cancel()
 
@@ -57,7 +57,7 @@ object Dispatchers extends App {
           println(s"computing result for $key")
 
           // correct code
-          val client = sender()
+          val client       = sender()
           val futureResult = someComputations(key)
             .map(result => Result(key, result, client))
 
@@ -73,7 +73,7 @@ object Dispatchers extends App {
           }
 
           Do not refer to actor state from async running code!
-          */
+           */
         }
 
       case Result(key, result, client) =>
@@ -110,11 +110,11 @@ object Dispatchers extends App {
   // ask pattern - sometimes called anti-pattern if it used inside of actor
   implicit val timeout: Timeout = Timeout(1.second) // implicit for `?`
   import evoActorSystem.dispatcher // for collect
-  import akka.pattern.ask  // provide ask support
+  import akka.pattern.ask // provide ask support
 
   (mainActor ? SimpleCache.Get("2")) // returns Future[Any]
-    .mapTo[SimpleCache.Out]          // if cannot be cast (message is unhandled) then future failed
-    .collect {
-      case SimpleCache.Answer(x) => println(s"ask answer is $x")
+    .mapTo[SimpleCache.Out] // if cannot be cast (message is unhandled) then future failed
+    .collect { case SimpleCache.Answer(x) =>
+      println(s"ask answer is $x")
     }
 }

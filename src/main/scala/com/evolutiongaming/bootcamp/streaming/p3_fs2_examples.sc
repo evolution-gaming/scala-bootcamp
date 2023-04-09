@@ -11,9 +11,8 @@ import scala.concurrent.ExecutionContext
 import scala.concurrent.duration.DurationInt
 import scala.util.Random
 
-implicit val timer: Timer[IO] = IO.timer(ExecutionContext.parasitic)
+implicit val timer: Timer[IO]     = IO.timer(ExecutionContext.parasitic)
 implicit val cs: ContextShift[IO] = IO.contextShift(ExecutionContext.global)
-
 
 // Poll a database, emit newly-inserted rows as stream
 case class DbRow(data: Int, lastAdded: Instant)
@@ -27,17 +26,19 @@ def getItemsAfter(after: Instant): IO[Seq[DbRow]] = {
    */
   // This just emulates data inserted at 1 row per second
   IO {
-    Iterator.iterate(after.truncatedTo(ChronoUnit.SECONDS))(_.plusSeconds(1L))
+    Iterator
+      .iterate(after.truncatedTo(ChronoUnit.SECONDS))(_.plusSeconds(1L))
       .drop(1)
       .takeWhile(_.isBefore(Instant.now()))
       .take(5) // at most 5 rows per request
-      .map(addedAt => DbRow(Random.nextInt(), addedAt)).toVector
+      .map(addedAt => DbRow(Random.nextInt(), addedAt))
+      .toVector
   }
 }
 
 val rowStream: Stream[IO, DbRow] =
-  Stream.unfoldChunkEval(Instant.now().minusSeconds(10)) {
-    after => getItemsAfter(after).flatMap { rows =>
+  Stream.unfoldChunkEval(Instant.now().minusSeconds(10)) { after =>
+    getItemsAfter(after).flatMap { rows =>
       if (rows.nonEmpty) { // We have data, return it along with new `after`
         val lastAdded = rows.map(_.lastAdded).max
         IO.pure(Option(Chunk.iterable(rows) -> lastAdded))
@@ -50,15 +51,14 @@ val rowStream: Stream[IO, DbRow] =
 // Note that first 10 elements come in two chunks
 //rowStream.take(15).debugChunks().compile.drain.unsafeRunSync()
 
-
 // Byte streams
 // fs2 can efficiently represent raw byte streams as Stream[F, Byte]
-val inputStr =
+val inputStr                        =
   """foo bar baz
     |qux bar baz
     |foO Foo fOO """.stripMargin
 val networkStream: Stream[IO, Byte] =
-Stream.iterable(inputStr.getBytes).chunkLimit(5).flatMap(Stream.chunk)
+  Stream.iterable(inputStr.getBytes).chunkLimit(5).flatMap(Stream.chunk)
 
 // Actual contents, chunk boundaries are not the same as word/line boundaries
 networkStream.debugChunks().compile.drain.unsafeRunSync()
@@ -71,8 +71,9 @@ networkStream
   .debugChunks(formatter = c => s"line: $c")
   .mapChunks(_.flatMap(line => Chunk.array(line.split("\\s+"))))
   .debugChunks(formatter = c => s"word: $c")
-  .compile.toList.unsafeRunSync()
-
+  .compile
+  .toList
+  .unsafeRunSync()
 
 // Parsing json-lines and other structured streams
 Stream(
@@ -84,20 +85,23 @@ Stream(
   .through(fs2.text.lines)
   .filter(_.nonEmpty)
   .evalMapChunk(line => io.circe.parser.parse(line).liftTo[IO])
-  .compile.toList.unsafeRunSync().map(json => json.noSpaces)
-
+  .compile
+  .toList
+  .unsafeRunSync()
+  .map(json => json.noSpaces)
 
 // When decoding, consider dropping unparseable elements
 // Otherwise: decoding fails -> stream fails -> entire app crashes
 def safeDecode(line: String): IO[Option[Json]] = {
   io.circe.parser.decode[Json](line) match {
-    case Right(json) => IO.pure(Some(json))
-    case Left(decodingFailure) => IO {
-      // Scream into logs/metrics here
-      println(s"Decoding failed for $line")
-      decodingFailure.printStackTrace()
-      None // but return None
-    }
+    case Right(json)           => IO.pure(Some(json))
+    case Left(decodingFailure) =>
+      IO {
+        // Scream into logs/metrics here
+        println(s"Decoding failed for $line")
+        decodingFailure.printStackTrace()
+        None // but return None
+      }
   }
 }
 Stream(
@@ -110,8 +114,10 @@ Stream(
   .through(fs2.text.lines)
   .evalMapChunk(safeDecode)
   .unNone // unwrap Option
-  .compile.toList.unsafeRunSync().map(json => json.noSpaces)
-
+  .compile
+  .toList
+  .unsafeRunSync()
+  .map(json => json.noSpaces)
 
 // Side input into a stream
 // There is a stream running in background, you want to insert elements there
@@ -123,18 +129,18 @@ val streamWithInput = for {
   streamFiber <- input.dequeue // this is Stream[IO, Int]
     .evalMap(value => IO(println(s"Received $value")))
     .onFinalize(IO(println("Terminating")))
-    .compile.drain.background
+    .compile
+    .drain
+    .background
 
   // Feed it some elements
-  _ <- Resource.eval(
-    (1 to 5).toList.traverse(
-      toInsert => input.enqueue1(Some(toInsert))
-    )
+  _           <- Resource.eval(
+    (1 to 5).toList.traverse(toInsert => input.enqueue1(Some(toInsert)))
   )
   // Stop the stream by sending None
-  _ <- Resource.eval(input.enqueue1(None))
+  _           <- Resource.eval(input.enqueue1(None))
   // Await stream end, generally not necessary
-  _ <- Resource.eval(streamFiber)
+  _           <- Resource.eval(streamFiber)
 } yield ()
 
 //streamWithInput.use(_ => IO.unit).timeout(10.seconds).unsafeRunSync()

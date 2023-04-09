@@ -41,19 +41,25 @@ object BasicCancellableIO extends IOApp {
       }
     }
 
-    IO.fromFuture(IO.delay(Future.firstCompletedOf[Unit](Seq(runTask(10), completeAfter(5.seconds))))) // *> IO.sleep(5.seconds)
+    IO.fromFuture(
+      IO.delay(Future.firstCompletedOf[Unit](Seq(runTask(10), completeAfter(5.seconds))))
+    ) // *> IO.sleep(5.seconds)
   }
 
   val ioTimeout = {
-    def runTask(i: Int): IO[Unit] = (1 to i).toList.map { iteration =>
-      for {
-        _ <- IO.delay(println(s"${Thread.currentThread().toString} Starting iteration:$iteration work"))
-        _ <- IO.sleep(1.second)
-        _ <- IO.delay(println(s"${Thread.currentThread().toString} Done iteration:$iteration working"))
-      } yield ()
-    }.sequence.void
+    def runTask(i: Int): IO[Unit] = (1 to i).toList
+      .map { iteration =>
+        for {
+          _ <- IO.delay(println(s"${Thread.currentThread().toString} Starting iteration:$iteration work"))
+          _ <- IO.sleep(1.second)
+          _ <- IO.delay(println(s"${Thread.currentThread().toString} Done iteration:$iteration working"))
+        } yield ()
+      }
+      .sequence
+      .void
 
-    runTask(10).timeout(5.seconds).attempt *> IO.delay(println(s"${Thread.currentThread().toString} Cancelled")) *> IO.sleep(5.seconds)
+    runTask(10).timeout(5.seconds).attempt *> IO.delay(println(s"${Thread.currentThread().toString} Cancelled")) *> IO
+      .sleep(5.seconds)
   }
 
   val raceAndCancel = {
@@ -67,12 +73,13 @@ object BasicCancellableIO extends IOApp {
   val exerciseSelfMadeIoTimeout = {
     val tick = (IO.delay(println("Working work long long never terminating")) *> IO.sleep(1.second)).foreverM.void
 
-    //alternative to above abstracting from effect type using type classes
+    // alternative to above abstracting from effect type using type classes
     def tickF[F[_]](implicit F: Concurrent[F]): F[Unit] = F.raiseError(???)
 
     def timeoutIO[A](task: IO[A], timeout: FiniteDuration): IO[A] = IO.raiseError(???)
 
-    def timeoutF[F[_], A](task: F[A], timeout: FiniteDuration)(implicit F: Concurrent[F], T: Temporal[F]): F[A] = F.raiseError(???)
+    def timeoutF[F[_], A](task: F[A], timeout: FiniteDuration)(implicit F: Concurrent[F], T: Temporal[F]): F[A] =
+      F.raiseError(???)
 
     IO.never
   }

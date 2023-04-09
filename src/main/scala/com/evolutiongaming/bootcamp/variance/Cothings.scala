@@ -13,12 +13,9 @@ object Cothings {
                          Comonad                               Monad
    */
 
-
   trait Invariant[F[_]] {
     def imap[A, B](fa: F[A])(f: A => B)(g: B => A): F[B]
   }
-
-
 
   trait Functor[F[_]] extends Invariant[F] {
     def map[A, B](fa: F[A])(f: A => B): F[B]
@@ -32,14 +29,9 @@ object Cothings {
     override def imap[A, B](fa: F[A])(f: A => B)(g: B => A): F[B] = contramap(fa)(g)
   }
 
-
-
-
   trait Semigroupal[F[_]] {
     def product[A, B](fa: F[A], fb: F[B]): F[(A, B)]
   }
-
-
 
   // "Apply" is omitted
   trait Applicative[F[_]] extends Functor[F] with Semigroupal[F] {
@@ -57,8 +49,6 @@ object Cothings {
 
     def divide[A, B, C](fa: F[A], fb: F[B])(f: C => (A, B)): F[C] = contramap(product(fa, fb))(f)
   }
-
-
 
   trait Monad[F[_]] extends Applicative[F] {
     def flatMap[A, B](fa: F[A])(f: A => F[B]): F[B]

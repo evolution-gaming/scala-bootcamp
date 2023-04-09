@@ -6,8 +6,8 @@ import cats.syntax.applicative._
 import cats.~>
 
 object p8_MonadTransformers {
-  /**
-    * The final topic for today is monad transformers.
+
+  /** The final topic for today is monad transformers.
     * So far we've seen a nice way to chain our executions via .map and .flatMap
     * But what if we need to stack different effects together?
     * For example Option with Either?
@@ -29,11 +29,10 @@ object p8_MonadTransformers {
         case Some(gc) => pickGift(gc)
         case None     => Right(None)
       }
-    case None => Right(None)
+    case None       => Right(None)
   }
 
-  /**
-    * Quite cumbersome, isn't it?
+  /** Quite cumbersome, isn't it?
     * What if we had a better way?
     * It turns out there is one: monad transformers.
     * For example EitherT from Cats composes Either with other monads, OptionT composes Option, etc.
@@ -54,20 +53,18 @@ object p8_MonadTransformers {
 
   def giftT: OptionT[AOrErr, Gift] = for {
     user <- fetchUserT()
-    gc <- fetchGiftCardT(user)
+    gc   <- fetchGiftCardT(user)
     gift <- pickGiftT(gc)
   } yield gift
 
-  /**
-    * We now can deal with all the complexity on the very top of our program.
+  /** We now can deal with all the complexity on the very top of our program.
     */
   def maybeGift: Option[Gift] = giftT.value match {
     case Left(_)      => None
     case Right(value) => value
   }
 
-  /**
-    * Drawbacks.
+  /** Drawbacks.
     * The cats implementation of monad transformers comes with a burden of extra memory allocation for each Wrapper.
     * Thus, the deeper our stack is the more memory we need per each call of .map or .flatMap in the context of the wrapper.
     * Good news are that it's quite rare situation (in my personal experience) when you need more than one transformer stacked.
@@ -87,13 +84,12 @@ object p8_MonadTransformers {
   final case class ServiceFailure(nested: UserServiceError) extends Exception(nested.toString)
   type HttpEff[A] = IO[A]
 
-  /**
-  * What we want in most cases we'd like to have a transformation from DbEff context into UserServiceEff and from UserServiceEff into HttpEff
-  * That models a natural flow: We try to fetch something from database from service layer and return it through http api.
-  * One of the ways to move from one effect context to another is `natural transformation`, or FunctionK.
-  * Such function transforms values from one type that takes single type parameter to another, i.e. F[_] ~> G[_]
-  * The trick is that we don't really care what's inside if such a transformation exists, we can apply it to any F[_].
-  */
+  /** What we want in most cases we'd like to have a transformation from DbEff context into UserServiceEff and from UserServiceEff into HttpEff
+    * That models a natural flow: We try to fetch something from database from service layer and return it through http api.
+    * One of the ways to move from one effect context to another is `natural transformation`, or FunctionK.
+    * Such function transforms values from one type that takes single type parameter to another, i.e. F[_] ~> G[_]
+    * The trick is that we don't really care what's inside if such a transformation exists, we can apply it to any F[_].
+    */
 
   val dbToService: DbEff ~> UserServiceEff = new (DbEff ~> UserServiceEff) {
     override def apply[A](fa: DbEff[A]): UserServiceEff[A] = fa.leftMap(UnderlyingError.apply)
@@ -109,10 +105,10 @@ object p8_MonadTransformers {
 
   val httpMethod: HttpEff[String] = {
     val resultF: UserServiceEff[String] =
-    for {
-      fromDb <- dbToService(dbMethod)
-      fromService <- serviceMethod
-    } yield s"$fromDb $fromService"
+      for {
+        fromDb      <- dbToService(dbMethod)
+        fromService <- serviceMethod
+      } yield s"$fromDb $fromService"
 
     serviceToHttp(resultF)
   }

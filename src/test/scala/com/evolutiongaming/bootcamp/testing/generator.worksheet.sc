@@ -39,30 +39,27 @@ biasedListGen.sample
 val stringGen = Gen.alphaNumStr
 stringGen.sample
 
-
 // Implement a generator for list of length from 5 to 10.
 
 val listOfNMGen: Gen[List[Int]] = ???
 listOfNMGen.sample
 
-
 // Implement a generator for ADT.
 
 sealed trait Pet
 object Pet {
-  case object Cat extends Pet
+  case object Cat               extends Pet
   case class Dog(breed: String) extends Pet
 }
 
 val petGen: Gen[Pet] = ???
 petGen.sample
 
-
 // Implement a generator for recursive ADT.
 
 sealed trait Tree
 object Tree {
-  case object Leaf extends Tree
+  case object Leaf                  extends Tree
   case class Node(l: Tree, r: Tree) extends Tree
 }
 

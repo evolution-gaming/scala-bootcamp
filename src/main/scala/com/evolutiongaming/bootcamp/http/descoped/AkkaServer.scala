@@ -13,7 +13,7 @@ import scala.concurrent.duration._
 import scala.io.StdIn
 
 object AkkaServer extends App {
-  implicit val system = ActorSystem("my-system")
+  implicit val system           = ActorSystem("my-system")
   implicit val executionContext = system.dispatcher
 
   val helloRoute =
@@ -48,13 +48,13 @@ object AkkaServer extends App {
 
   val headersRoute = get {
     path("headers") {
-      headerValuePF {
-        case HttpHeader("request-header", v) => v
+      headerValuePF { case HttpHeader("request-header", v) =>
+        v
       } { header =>
         respondWithHeader(RawHeader("Response-Header", "response value")) {
           // curl -v 'localhost:9000/headers' -H 'Request-Header: request value'
           complete(header)
-          }
+        }
       }
     } ~ path("cookies") {
       cookie("request-cookie") { cookie =>
@@ -71,10 +71,10 @@ object AkkaServer extends App {
   val entityRoute = {
     final case class Hello(name: String)
 
-    val NameRegex = """\((.*)\)""".r
+    val NameRegex                  = """\((.*)\)""".r
     implicit val helloUnmarshaller = Unmarshaller.stringUnmarshaller.map {
       case NameRegex(s) => Hello(s)
-      case s => throw new IllegalArgumentException(s"Invalid value: $s")
+      case s            => throw new IllegalArgumentException(s"Invalid value: $s")
     }
 
     (post & path("entity")) {
@@ -108,8 +108,8 @@ object AkkaServer extends App {
   // WebSockets
 
   val wsEchoRoute = path("wsecho") {
-    val flow = Flow[Message].collect {
-      case TextMessage.Strict(msg) => TextMessage.Strict(msg)
+    val flow = Flow[Message].collect { case TextMessage.Strict(msg) =>
+      TextMessage.Strict(msg)
     }
 
     // websocat 'ws://127.0.0.1:9000/wsecho'

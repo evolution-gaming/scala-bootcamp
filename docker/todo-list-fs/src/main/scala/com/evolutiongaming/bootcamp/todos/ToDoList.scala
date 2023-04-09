@@ -11,25 +11,25 @@ import org.http4s.{HttpApp, HttpRoutes}
 object ToDoList extends IOApp with Http4sDsl[IO] with CirceEntityEncoder {
 
   def toDoRoutes(todos: ToDos[IO]): HttpRoutes[IO] = HttpRoutes.of[IO] {
-    case GET -> Root =>
+    case GET -> Root        =>
       todos.listAll.flatMap(Ok(_))
-    case req@POST -> Root =>
+    case req @ POST -> Root =>
       for {
         text <- req.bodyText.compile.string
         todo <- todos.create(text)
-        res <- Created(todo)
+        res  <- Created(todo)
       } yield res
   }
 
   def killRoutes(switch: KillSwitch): HttpRoutes[IO] =
-    HttpRoutes.of[IO] {
-      case POST -> Root => switch.flip *> Ok("Killed")
+    HttpRoutes.of[IO] { case POST -> Root =>
+      switch.flip *> Ok("Killed")
     }
 
   def app(todos: ToDos[IO], killSwitch: KillSwitch): HttpApp[IO] =
     Router(
       "/todos" -> toDoRoutes(todos),
-      "/kill" -> killRoutes(killSwitch),
+      "/kill"  -> killRoutes(killSwitch),
     ).orNotFound
 
   override def run(args: List[String]): IO[ExitCode] =
@@ -49,7 +49,7 @@ object ToDoList extends IOApp with Http4sDsl[IO] with CirceEntityEncoder {
   object KillSwitch {
     def of: IO[KillSwitch] =
       for {
-        signal <- SignallingRef[IO, Boolean](false)
+        signal   <- SignallingRef[IO, Boolean](false)
         exitCode <- Ref.of[IO, ExitCode](ExitCode.Success)
       } yield KillSwitch(signal, exitCode)
   }

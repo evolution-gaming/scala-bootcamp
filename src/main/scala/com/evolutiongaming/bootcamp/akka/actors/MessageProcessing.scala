@@ -19,7 +19,6 @@ object MessageProcessing extends App {
   // processing one message is the atomic unit of execution
   // blocking is replaced by simply enqueueing messages, for later execution.
 
-
   object BankAccount {
     final case class Deposit(x: Int)
     final case class Withdraw(x: Int)
@@ -34,13 +33,13 @@ object MessageProcessing extends App {
     override def receive: Receive = bankAccount(balance = 0)
 
     private def bankAccount(balance: Int): Receive = LoggingReceive {
-      case Deposit(x) =>
+      case Deposit(x)                  =>
         context.become(bankAccount(balance + x))
         sender() ! Done
       case Withdraw(x) if x <= balance =>
         context.become(bankAccount(balance - x))
         sender() ! Done
-      case _ =>
+      case _                           =>
         sender() ! Failure
     }
   }
@@ -54,15 +53,14 @@ object MessageProcessing extends App {
   final class WireTransfer extends Actor {
     import WireTransfer._
 
-    override def receive: Receive = LoggingReceive {
-      case Transfer(from, to, amount) =>
-        // 1. need to get amount from
-        from ! BankAccount.Withdraw(amount)
-        context.become(awaitWithdraw(to, amount, sender()))
+    override def receive: Receive = LoggingReceive { case Transfer(from, to, amount) =>
+      // 1. need to get amount from
+      from ! BankAccount.Withdraw(amount)
+      context.become(awaitWithdraw(to, amount, sender()))
     }
 
     private def awaitWithdraw(to: ActorRef, amount: Int, client: ActorRef): Receive = LoggingReceive {
-      case BankAccount.Done =>
+      case BankAccount.Done    =>
         // 2. make deposit to
         to ! BankAccount.Deposit(amount)
         context.become(awaitDeposit(client))
@@ -71,10 +69,9 @@ object MessageProcessing extends App {
         context.stop(self)
     }
 
-    private def awaitDeposit(client: ActorRef): Receive = LoggingReceive {
-      case BankAccount.Done =>
-        client ! Done
-        context.stop(self)
+    private def awaitDeposit(client: ActorRef): Receive = LoggingReceive { case BankAccount.Done =>
+      client ! Done
+      context.stop(self)
     }
   }
 
@@ -87,16 +84,15 @@ object MessageProcessing extends App {
     // make positive balance for one account
     accA ! BankAccount.Deposit(100)
 
-    override def receive: Receive = LoggingReceive {
-      case BankAccount.Done => makeTransfer(50)
+    override def receive: Receive = LoggingReceive { case BankAccount.Done =>
+      makeTransfer(50)
     }
 
     private def makeTransfer(x: Int): Unit = {
       val transfer = context.actorOf(Props[WireTransfer](), "transfer")
       transfer ! WireTransfer.Transfer(from = accA, to = accB, amount = x)
 
-      context.become {
-        case WireTransfer.Done =>
+      context.become { case WireTransfer.Done =>
         println("done")
         context.stop(self)
       }

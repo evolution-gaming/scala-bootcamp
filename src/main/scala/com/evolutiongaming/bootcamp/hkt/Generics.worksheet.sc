@@ -18,9 +18,9 @@ secondElementOfIntList(List(1, 4, 3))
 secondElementOfIntList(List(1))
 
 case class Triple[+A](first: A, second: A, third: A) {
-  def toList: List[A] = List(first, second, third)
+  def toList: List[A]                       = List(first, second, third)
   def withFirst[A1 >: A](a: A1): Triple[A1] = Triple(a, second, third)
-  def map[B](f: A => B): Triple[B] = ???
+  def map[B](f: A => B): Triple[B]          = ???
 }
 
 val t = Triple[String]("a", "b", "c")
@@ -33,7 +33,7 @@ t.toList
 val tripleDogs = Triple(Dog(), Dog(), Dog())
 tripleDogs.withFirst(Cat())
 // changeTriple(tripleDogs: Triple[Animal])
-val dogs = List(Dog(), Dog(), Dog())
+val dogs       = List(Dog(), Dog(), Dog())
 
 val dogsAndCat = Cat() :: dogs
 // tripleDogs
@@ -51,15 +51,14 @@ val u: Matrix[Any] = m :+ Vector("aaa", "bbb")
 // least upper bound / LUBg
 Map("cat" -> Cat()) ++ Map("dog" -> Dog())
 
-
 type Printers[-A] = List[A => String]
 
 val printers: Printers[Animal] = List(
-    {
-        case _: Cat => "I'm a cat"
-        case _: Dog => "I'm a dog"
-    },
-    x => x.toString
+  {
+    case _: Cat => "I'm a cat"
+    case _: Dog => "I'm a dog"
+  },
+  x => x.toString,
 )
 
 printers.map(_.apply(Dog()))

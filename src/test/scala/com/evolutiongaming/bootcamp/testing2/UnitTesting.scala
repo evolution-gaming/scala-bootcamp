@@ -59,7 +59,6 @@ import scala.concurrent.Promise
 // Besides we use contract driven test here such as https://docs.pact.io/,
 // but the adoption is relatively small for now.
 
-
 // *Structure*
 //
 // In Java world one of the most used build tools is called Maven. The idea
@@ -75,7 +74,6 @@ import scala.concurrent.Promise
 //
 // The classes under test for this workshop are stored in `src/main/scala/testing2`
 // and the tests themselves are stored in `src/test/scala/testing2`.
-
 
 // *Exercise 1*
 //
@@ -213,8 +211,7 @@ class Exercise2Spec extends AnyFreeSpec {
 //
 // sbt:scala-bootcamp> testOnly *testing2.Exercise3Spec
 //
-class Exercise3Spec extends AnyWordSpec {
-}
+class Exercise3Spec extends AnyWordSpec {}
 
 // *Note*
 //
@@ -244,7 +241,7 @@ class Exercise4Spec extends AnyFreeSpec with Matchers {
   "calculator" - {
     "enters the number correctly" in {
       val calculator = Calculator()
-      calculator.enter(1) should be (Right(Calculator(1, 0, None)))
+      calculator.enter(1) should be(Right(Calculator(1, 0, None)))
       assert(calculator.enter(7) == Right(Calculator(7, 0, None)))
       assert(calculator.enter(12) == Left("digit out of range"))
     }
@@ -381,8 +378,7 @@ class Exercise7Spec extends AnyFunSuite {
 //
 class Exercise8Spec extends AnyFunSuite {
 
-  test("HAL 9000 behaves as expected when asked to open the door") {
-  }
+  test("HAL 9000 behaves as expected when asked to open the door") {}
 
 }
 
@@ -457,7 +453,7 @@ object Exercise10 {
 
       // NOTE: We do not have a returned type annotation and documentation here, why?
       def deleteWorst(minimumScore: Int) = ???
-      def celebrate(bonus: Int) = ???
+      def celebrate(bonus: Int)          = ???
 
     }
 
@@ -501,8 +497,8 @@ class Exercise10Spec extends AnyFunSuite {
 
     // construct fixture
     val repository = ???
-    val logging = ???
-    val service = PlayerService(repository, logging)
+    val logging    = ???
+    val service    = PlayerService(repository, logging)
 
     // perform the test
     service.deleteWorst(???)
@@ -515,8 +511,8 @@ class Exercise10Spec extends AnyFunSuite {
 
     // construct fixture
     val repository = ???
-    val logging = ???
-    val service = PlayerService(repository, logging)
+    val logging    = ???
+    val service    = PlayerService(repository, logging)
 
     // perform the test
     service.celebrate(???)
@@ -559,12 +555,12 @@ object Exercise12 {
   import scala.concurrent.ExecutionContext.Implicits.global
 
   // 1. The type wrapped by `Future` could be changed by using `map`:
-  def dogs: Future[Int] = ???
+  def dogs: Future[Int]        = ???
   def message1: Future[String] = dogs map { dogs =>
     s"We have $dogs of dogs"
   }
   // 2. Two `Future` classes could be combined by `flatMap`:
-  def cats: Future[Int] = ???
+  def cats: Future[Int]        = ???
   def message2: Future[String] = dogs flatMap { dogs =>
     cats map { cats =>
       s"We have $dogs of dogs and $cats of cats"
@@ -581,14 +577,14 @@ object Exercise12 {
   //
   // The simplest is just to wrap your code into `Future { ... }`.
   // It will start executing in a different thread as soon as the code is called.
-  def future1: Future[Int] = Future { 7 }
+  def future1: Future[Int]                = Future { 7 }
   //
   // Another way is to create it using a `Promise`.
   // It will not start executing anything and will complete when the promise is
   // fulfilled.
   //
-  val promise: Promise[Int] = Promise()
-  def future2: Future[Int] = promise.future
+  val promise: Promise[Int]               = Promise()
+  def future2: Future[Int]                = promise.future
   //
   // Now let complete our Future:
   promise.success(7)
@@ -603,7 +599,7 @@ object Exercise12 {
   // Set the value to another one:
   storage.set(List(5, 6, 7))
   // Get the current value from the storage:
-  val list = storage.get()
+  val list                                = storage.get()
 
   case class Player(id: String, name: String, email: String, score: Int)
   trait PlayerRepository {
@@ -637,7 +633,7 @@ object Exercise12 {
     def apply(repository: PlayerRepository, logging: Logging): PlayerService = new PlayerService {
 
       def deleteWorst(minimumScore: Int) = ???
-      def celebrate(bonus: Int) = ???
+      def celebrate(bonus: Int)          = ???
 
     }
 
@@ -658,8 +654,8 @@ class Exercise12Spec extends AsyncFunSuite {
 
     // construct fixture
     val repository = ???
-    val logging = ???
-    val service = PlayerService(repository, logging)
+    val logging    = ???
+    val service    = PlayerService(repository, logging)
 
     // perform the test
     service.deleteWorst(???) map { _ =>
@@ -672,8 +668,8 @@ class Exercise12Spec extends AsyncFunSuite {
 
     // construct fixture
     val repository = ???
-    val logging = ???
-    val service = PlayerService(repository, logging)
+    val logging    = ???
+    val service    = PlayerService(repository, logging)
 
     // perform the test
     service.celebrate(???) map { _ =>
@@ -720,7 +716,7 @@ object Exercise14 {
   // classes like this?
   def function1[T](list: List[T]): Option[T] = list.headOption
   // And then call the function like this?
-  val result: Option[Int] = function1(List(1, 2, 3))
+  val result: Option[Int]                    = function1(List(1, 2, 3))
 
   // We will use the same trick now and pass `Option` instead of `Future`
   // to the code.
@@ -762,12 +758,13 @@ object Exercise14 {
     // You will learn more about `cats` library in next lecture.
 
     /** Creates a new service working with existing repository */
-    def apply[F[_]: Monad](repository: PlayerRepository[F], logging: Logging[F]): PlayerService[F] = new PlayerService[F] {
+    def apply[F[_]: Monad](repository: PlayerRepository[F], logging: Logging[F]): PlayerService[F] =
+      new PlayerService[F] {
 
-      def deleteWorst(minimumScore: Int) = ???
-      def celebrate(bonus: Int) = ???
+        def deleteWorst(minimumScore: Int) = ???
+        def celebrate(bonus: Int)          = ???
 
-    }
+      }
 
   }
 
@@ -785,8 +782,8 @@ class Exercise14FutureSpec extends AsyncFunSuite {
 
     // construct fixture
     val repository = ???
-    val logging = ???
-    val service = PlayerService[Future](repository, logging)
+    val logging    = ???
+    val service    = PlayerService[Future](repository, logging)
 
     // perform the test
     service.deleteWorst(???) map { _ =>
@@ -799,8 +796,8 @@ class Exercise14FutureSpec extends AsyncFunSuite {
 
     // construct fixture
     val repository = ???
-    val logging = ???
-    val service = PlayerService[Future](repository, logging)
+    val logging    = ???
+    val service    = PlayerService[Future](repository, logging)
 
     // perform the test
     service.celebrate(???) map { _ =>
@@ -828,8 +825,8 @@ class Exercise14OptionSpec extends AnyFunSuite {
 
     // construct fixture
     val repository = ???
-    val logging = ???
-    val service = PlayerService[Option](repository, logging)
+    val logging    = ???
+    val service    = PlayerService[Option](repository, logging)
 
     // perform the test
     service.deleteWorst(???) map { _ =>
@@ -842,8 +839,8 @@ class Exercise14OptionSpec extends AnyFunSuite {
 
     // construct fixture
     val repository = ???
-    val logging = ???
-    val service = PlayerService[Option](repository, logging)
+    val logging    = ???
+    val service    = PlayerService[Option](repository, logging)
 
     // perform the test
     service.celebrate(???) map { _ =>
@@ -872,7 +869,6 @@ class Exercise14OptionSpec extends AnyFunSuite {
 //
 // We will not do property testing this time, but you can read more about it here:
 // https://www.scalatest.org/user_guide/property_based_testing
-
 
 // What is the big problem with the code we wrote above? We use `var` and
 // `AtomicReference` in our stubs a lot. It is a mutable state. Scala developers
@@ -908,19 +904,19 @@ class Exercise14StateSpec extends AnyFunSuite {
 
     // construct fixture
     val repository = new PlayerRepository[F] {
-      def byId(id: String) = State.pure(None)
-      def all = State.get
+      def byId(id: String)       = State.pure(None)
+      def all                    = State.get
       def update(player: Player) = State.modify { players =>
         players map { p =>
           if (p.id == player) player else p
         }
       }
-      def delete(id: String) = State.modify { players =>
+      def delete(id: String)     = State.modify { players =>
         players filterNot (_.id == id)
       }
     }
-    val logging = ???
-    val service = PlayerService[F](repository, logging)
+    val logging    = ???
+    val service    = PlayerService[F](repository, logging)
 
     // perform the test
     service.deleteWorst(???) map { _ =>
@@ -933,8 +929,8 @@ class Exercise14StateSpec extends AnyFunSuite {
 
     // construct fixture
     val repository = ???
-    val logging = ???
-    val service = PlayerService[F](repository, logging)
+    val logging    = ???
+    val service    = PlayerService[F](repository, logging)
 
     // perform the test
     service.celebrate(???) map { _ =>

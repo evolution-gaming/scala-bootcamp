@@ -13,25 +13,19 @@ object Bounds {
 
   case object Orange extends Fruit
 
-
-
   // Type bounds are needed if you want to restrict type parameters in order to get more information about them
-
-
 
   // Upper type bound restricts type parameter to be a subtype of some other type
 
   def box1(head: Fruit, tail: Fruit*): List[Fruit] = head :: tail.toList
-  val fruits: List[Fruit] = box1(RedApple, GreenApple)
+  val fruits: List[Fruit]                          = box1(RedApple, GreenApple)
 //  val apples: List[Apple] = box1(RedApple, GreenApple)
 
   def box2[A <: Fruit](head: A, tail: A*): List[A] = head :: tail.toList
-  var fruit2: List[Fruit] = box2(RedApple, GreenApple, Orange)
-  val apples: List[Apple] = box2(RedApple, GreenApple)
+  var fruit2: List[Fruit]                          = box2(RedApple, GreenApple, Orange)
+  val apples: List[Apple]                          = box2(RedApple, GreenApple)
   box2(Orange)
   fruit2 = apples
-
-
 
   // Lower type bound restricts type parameter to be a supertype of the given type
   def addToBox1[A](box: List[A], value: A): List[A] = value :: box
@@ -42,11 +36,8 @@ object Bounds {
 
   addToBox2[Apple, Fruit](apples, Orange)
 
-
-
   // Sometimes you may want to check type boundaries dynamically
   // Scala has two handy classes for that: <:< (upper bound) and =:= (strict match)
-
 
   final implicit class OptionOps[A](private val value: Option[A]) extends AnyVal {
 

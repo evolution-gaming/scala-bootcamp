@@ -13,7 +13,7 @@ class ClassesAndTraitsSpec extends AnyFlatSpec with ScalaCheckDrivenPropertyChec
 
   it should "correctly calculate total balance for list of Users" in {
     val numberGen = Gen.choose[Int](1, 10)
-    val loginGen = Gen.oneOf("potter", "smith", "jonson")
+    val loginGen  = Gen.oneOf("potter", "smith", "jonson")
 
     forAll(numberGen, loginGen) { (number, login) =>
       val users = List.fill(number)(RegularUser(login, 1.0))

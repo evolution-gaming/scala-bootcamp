@@ -142,7 +142,7 @@ object MultiThreading1 extends App {
 
 object MultiThreading2 extends App {
 
-  var x = 0
+  var x     = 0
   val other = new Thread(() => {
     println(s"other thread x = $x")
     x = 50
@@ -390,7 +390,7 @@ object Volatility3 extends App {
 
 object ComplexState extends App {
   class WordCounter {
-    val wordMap = mutable.Map.empty[String, Int]
+    val wordMap    = mutable.Map.empty[String, Int]
     val wordBuffer = mutable.ArrayBuffer.empty[String]
 
     def addWord(word: String): Unit = synchronized {
@@ -404,7 +404,7 @@ object ComplexState extends App {
   }
 
   val counter = new WordCounter
-  val done = new AtomicLong(10)
+  val done    = new AtomicLong(10)
 
   val words = Array(
     "Abolition",
@@ -426,7 +426,7 @@ object ComplexState extends App {
     "Absolution",
     "Absolutism",
     "Absolve",
-    "Absorb"
+    "Absorb",
   )
 
   for (_ <- 0 until 10) {
@@ -476,8 +476,8 @@ object ComplexState extends App {
 object ComplexState2 extends App {
 
   case class WordCounter(
-      wordMap: Map[String, Int] = Map.empty[String, Int],
-      wordBuffer: Vector[String] = Vector.empty
+    wordMap: Map[String, Int] = Map.empty[String, Int],
+    wordBuffer: Vector[String] = Vector.empty,
   ) {
     def addWord(word: String): WordCounter =
       wordMap.get(word) match {
@@ -488,7 +488,7 @@ object ComplexState2 extends App {
   }
 
   val counter = new AtomicReference(WordCounter())
-  val done = new AtomicLong(10)
+  val done    = new AtomicLong(10)
 
   val words = Array(
     "Abolition",
@@ -510,7 +510,7 @@ object ComplexState2 extends App {
     "Absolution",
     "Absolutism",
     "Absolve",
-    "Absorb"
+    "Absorb",
   )
 
   for (_ <- 0 until 10) {
@@ -597,7 +597,7 @@ object ComplexStateEC extends App {
   import scala.concurrent.ExecutionContext
 
   class WordCounter {
-    val wordMap = mutable.Map.empty[String, Int]
+    val wordMap    = mutable.Map.empty[String, Int]
     val wordBuffer = mutable.ArrayBuffer.empty[String]
 
     def addWord(word: String): Unit = synchronized {
@@ -610,7 +610,7 @@ object ComplexStateEC extends App {
     }
   }
   val counter = new WordCounter
-  val done = new AtomicLong(10)
+  val done    = new AtomicLong(10)
 
   val words = Array(
     "Abolition",
@@ -632,7 +632,7 @@ object ComplexStateEC extends App {
     "Absolution",
     "Absolutism",
     "Absolve",
-    "Absorb"
+    "Absorb",
   )
 
   def addWordTask() = counter.addWord(words(Random.nextInt(20)))
@@ -685,8 +685,8 @@ object ComplexStateFuture extends App {
   import scala.concurrent.Await
 
   case class WordCounter(
-      wordMap: Map[String, Int] = Map.empty[String, Int],
-      wordBuffer: Vector[String] = Vector.empty
+    wordMap: Map[String, Int] = Map.empty[String, Int],
+    wordBuffer: Vector[String] = Vector.empty,
   ) {
     def addWord(word: String): WordCounter = {
       wordMap.get(word) match {
@@ -697,7 +697,7 @@ object ComplexStateFuture extends App {
   }
 
   object counter {
-    val state = new AtomicReference(WordCounter())
+    val state                                                              = new AtomicReference(WordCounter())
     def addWord(word: String)(implicit ec: ExecutionContext): Future[Unit] =
       Future(state.updateAndGet(_.addWord(word)))
   }
@@ -724,7 +724,7 @@ object ComplexStateFuture extends App {
     "Absolution",
     "Absolutism",
     "Absolve",
-    "Absorb"
+    "Absorb",
   )
 
   def task()(implicit ec: ExecutionContext): Future[Unit] =
@@ -795,12 +795,12 @@ object ComplexStateActor extends App {
     "Absolution",
     "Absolutism",
     "Absolve",
-    "Absorb"
+    "Absorb",
   )
 
   sealed trait CounterMessage
-  case class AddWord(word: String) extends CounterMessage
-  case class GetWordCount(result: Promise[Long]) extends CounterMessage
+  case class AddWord(word: String)                    extends CounterMessage
+  case class GetWordCount(result: Promise[Long])      extends CounterMessage
   case class AreWordInOrder(result: Promise[Boolean]) extends CounterMessage
 
   type ActorRef[A] = BlockingQueue[A]
@@ -812,14 +812,14 @@ object ComplexStateActor extends App {
   }
 
   def counter(ref: ActorRef[CounterMessage]) = new Thread(() => {
-    var wordMap: Map[String, Int] = Map.empty[String, Int]
+    var wordMap: Map[String, Int]  = Map.empty[String, Int]
     var wordBuffer: Vector[String] = Vector.empty
 
     def addWord(word: String): Unit = {
       wordMap.get(word) match {
         case Some(count) =>
           wordMap = wordMap.updated(word, count + 1)
-        case None =>
+        case None        =>
           wordMap = wordMap.updated(word, 1)
           wordBuffer = wordBuffer :+ word
       }
@@ -846,7 +846,7 @@ object ComplexStateActor extends App {
       }
 
   def job(implicit ec: ExecutionContext): Future[String] = {
-    val ref = new LinkedBlockingQueue[CounterMessage]()
+    val ref          = new LinkedBlockingQueue[CounterMessage]()
     counter(ref).start()
     def runFutures() = Future.sequence(
       for (i <- 0 until 10)
@@ -854,8 +854,8 @@ object ComplexStateActor extends App {
     )
 
     for {
-      _ <- runFutures()
-      count <- ask(ref, GetWordCount)
+      _       <- runFutures()
+      count   <- ask(ref, GetWordCount)
       inOrder <- ask(ref, AreWordInOrder)
     } yield s"""|total count of words: $count
                 |wordBuffer is the same as wordMap.keys: $inOrder

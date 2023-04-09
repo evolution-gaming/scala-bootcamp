@@ -10,7 +10,7 @@ class IntroSpec extends AnyFlatSpec with Matchers {
     import cats.effect.unsafe.implicits.global
     import cats.effect.IO
 
-    val log: Log = _       => IO.unit
+    val log: Log       = _ => IO.unit
     val sendTrue: Send = _ => IO.pure(Response(200, true))
 
     logAndSend(42, log, sendTrue).unsafeRunSync() shouldBe true

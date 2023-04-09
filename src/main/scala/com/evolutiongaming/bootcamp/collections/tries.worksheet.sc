@@ -33,5 +33,4 @@ def collectWords[M[k, +v] <: MapOps[k, v, M, M[k, v]]](factory: {
 
 // LazyList.from(1).reverse
 
-
 collectWords(TrieHashMap) == collectWords(HashMap)

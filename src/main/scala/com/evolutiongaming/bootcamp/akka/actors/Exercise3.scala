@@ -30,7 +30,8 @@ object Exercise3 extends App {
   final class EntityRouterActor(
     entityProps: Props,
     extractEntityId: PartialFunction[Any, String],
-  ) extends Actor with ActorLogging {
+  ) extends Actor
+      with ActorLogging {
 
     private var entityRefs: Map[String, ActorRef] = Map.empty
 
@@ -49,9 +50,8 @@ object Exercise3 extends App {
     }
   }
 
-
   object ActorNameSanitizer {
-    def sanitize(name: String): String = URLEncoder.encode(name, StandardCharsets.UTF_8)
+    def sanitize(name: String): String   = URLEncoder.encode(name, StandardCharsets.UTF_8)
     def desanitize(name: String): String = URLDecoder.decode(name, StandardCharsets.UTF_8)
   }
 
@@ -69,24 +69,25 @@ object Exercise3 extends App {
       log.info("Entity {} stopping!", id)
     }
 
-    override def receive: Receive = {
-      case cmd: PrintNum =>
-        log.info("Entity {} received command {}", id, cmd)
-        sender() ! Done(cmd)
+    override def receive: Receive = { case cmd: PrintNum =>
+      log.info("Entity {} received command {}", id, cmd)
+      sender() ! Done(cmd)
     }
   }
 
-  implicit val system: ActorSystem = ActorSystem("Exercise3")
+  implicit val system: ActorSystem  = ActorSystem("Exercise3")
   implicit val ec: ExecutionContext = system.dispatcher
-  implicit val timeout: Timeout = Timeout(2.seconds)
+  implicit val timeout: Timeout     = Timeout(2.seconds)
 
   val router: ActorRef = system.actorOf(
-    Props(new EntityRouterActor(
-      entityProps = Props(new MyEntity),
-      extractEntityId = {
-        case cmd: PrintNum => cmd.entityId
-      },
-    )),
+    Props(
+      new EntityRouterActor(
+        entityProps = Props(new MyEntity),
+        extractEntityId = { case cmd: PrintNum =>
+          cmd.entityId
+        },
+      )
+    ),
     "router",
   )
 

@@ -28,7 +28,7 @@ import cats.syntax.option._
 import cats.syntax.validated._
 
 // Let's try adding two numbers in various F[_]s
-def wrapSum[F[_] : Applicative](fa: F[Int], fb: F[Int]): F[Int] =
+def wrapSum[F[_]: Applicative](fa: F[Int], fb: F[Int]): F[Int] =
   (fa, fb).mapN(_ + _)
 
 // Option[_]
@@ -60,7 +60,8 @@ val futureSum = wrapSum(
   },
   Future {
     println("Computing 2"); 2
-  })
+  },
+)
 futureSum.foreach(println)
 
 // IO

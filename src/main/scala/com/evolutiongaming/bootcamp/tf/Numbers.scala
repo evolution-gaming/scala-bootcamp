@@ -34,8 +34,8 @@ object Numbers extends IOApp {
 
   sealed trait Expression
 
-  final case class Const(x: Int) extends Expression
-  final case class Negate(x: Expression) extends Expression
+  final case class Const(x: Int)                            extends Expression
+  final case class Negate(x: Expression)                    extends Expression
   final case class Add(left: Expression, right: Expression) extends Expression
   // XXX: Uncomment this line to *break* evaluate and show functions.
   // final case class Multiply(left: Expression, right: Expression) extends Expression
@@ -83,14 +83,14 @@ object Numbers extends IOApp {
   }
 
   val intInterpreter = new ExpressionArith[Int] {
-    override def const(x: Int): Int = x
-    override def negate(x: Int): Int = -x
+    override def const(x: Int): Int              = x
+    override def negate(x: Int): Int             = -x
     override def add(left: Int, right: Int): Int = left + right
   }
 
   val stringInterpreter = new ExpressionArith[String] {
-    override def const(x: Int): String = s"$x"
-    override def negate(x: String): String = s"-($x)"
+    override def const(x: Int): String                    = s"$x"
+    override def negate(x: String): String                = s"-($x)"
     override def add(left: String, right: String): String = s"($left) + ($right)"
   }
 
@@ -125,8 +125,8 @@ object Numbers extends IOApp {
             "final mult:",
             expressionAM(intInterpreter, intMultInterpreter),
             expressionAM(stringInterpreter, stringMultInterpreter),
-          ),
-        ),
+          )
+        )
       )
     } yield ExitCode.Success
 }

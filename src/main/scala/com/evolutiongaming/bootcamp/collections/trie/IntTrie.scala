@@ -16,9 +16,9 @@ import scala.annotation.tailrec
 sealed trait IntTrie[+A] extends Map[Int, A] {
   import IntTrie._
   protected def insert[A1 >: A](key: Int, mask: Int, value: A1): IntTrie[A1] = this match {
-    case Empty          => Cell(key, value)
-    case Cell(`key`, _) => Cell(key, value)
-    case c: Cell[A]     => c.extend(mask).insert(key, mask, value)
+    case Empty             => Cell(key, value)
+    case Cell(`key`, _)    => Cell(key, value)
+    case c: Cell[A]        => c.extend(mask).insert(key, mask, value)
     case Branch(zero, one) =>
       if ((key & mask) == 0) Branch(zero.insert(key, mask >>> 1, value), one)
       else Branch(zero, one.insert(key, mask >>> 1, value))
@@ -27,14 +27,14 @@ sealed trait IntTrie[+A] extends Map[Int, A] {
   protected def remove[A1 >: A](key: Int, mask: Int): IntTrie[A1] = this match {
     case Empty | Cell(`key`, _) => Empty
     case _: Cell[_]             => this
-    case Branch(zero, one) =>
+    case Branch(zero, one)      =>
       if ((key & mask) == 0) Branch(zero.remove(key, mask >>> 1), one)
       else Branch(zero, one.remove(key, mask >>> 1))
   }
 
   protected def getOption(key: Int, mask: Int): Option[A] = this match {
-    case Cell(`key`, value) => Some(value)
-    case Branch(zero, one) =>
+    case Cell(`key`, value)   => Some(value)
+    case Branch(zero, one)    =>
       if ((key & mask) == 0) zero.getOption(key, mask >>> 1)
       else one.getOption(key, mask >>> 1)
     case Empty | (_: Cell[_]) => None
@@ -45,7 +45,6 @@ sealed trait IntTrie[+A] extends Map[Int, A] {
     case Cell(key, value)  => Iterator.single(key -> value)
     case Branch(zero, one) => zero.iterator ++ one.iterator
   }
-
 
   def get(key: Int): Option[A] = getOption(key, 1 << 31)
 
@@ -58,11 +57,10 @@ sealed trait IntTrie[+A] extends Map[Int, A] {
 }
 
 object IntTrie {
-  case object Empty extends IntTrie[Nothing]
-  final case class Cell[+A](key: Int, value: A) extends IntTrie[A] {
+  case object Empty                                              extends IntTrie[Nothing]
+  final case class Cell[+A](key: Int, value: A)                  extends IntTrie[A] {
     def extend(mask: Int): Branch[A] =
       if ((key & mask) == 0) Branch(this, Empty) else Branch(Empty, this)
   }
   final case class Branch[+A](zero: IntTrie[A], one: IntTrie[A]) extends IntTrie[A]
 }
-

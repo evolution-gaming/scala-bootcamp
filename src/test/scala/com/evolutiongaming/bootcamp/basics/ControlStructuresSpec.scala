@@ -11,7 +11,109 @@ class ControlStructuresSpec extends AnyFlatSpec with ScalaCheckDrivenPropertyChe
   private def checkFizzBuzz(f: Int => String): Assertion = {
     val obtained = (0 to 100).toList map f
     // we're doing it this way here to avoid providing the answer to the exercise by implementing the function
-    val expected = List("fizzbuzz", "1", "2", "fizz", "4", "buzz", "fizz", "7", "8", "fizz", "buzz", "11", "fizz", "13", "14", "fizzbuzz", "16", "17", "fizz", "19", "buzz", "fizz", "22", "23", "fizz", "buzz", "26", "fizz", "28", "29", "fizzbuzz", "31", "32", "fizz", "34", "buzz", "fizz", "37", "38", "fizz", "buzz", "41", "fizz", "43", "44", "fizzbuzz", "46", "47", "fizz", "49", "buzz", "fizz", "52", "53", "fizz", "buzz", "56", "fizz", "58", "59", "fizzbuzz", "61", "62", "fizz", "64", "buzz", "fizz", "67", "68", "fizz", "buzz", "71", "fizz", "73", "74", "fizzbuzz", "76", "77", "fizz", "79", "buzz", "fizz", "82", "83", "fizz", "buzz", "86", "fizz", "88", "89", "fizzbuzz", "91", "92", "fizz", "94", "buzz", "fizz", "97", "98", "fizz", "buzz")
+    val expected = List(
+      "fizzbuzz",
+      "1",
+      "2",
+      "fizz",
+      "4",
+      "buzz",
+      "fizz",
+      "7",
+      "8",
+      "fizz",
+      "buzz",
+      "11",
+      "fizz",
+      "13",
+      "14",
+      "fizzbuzz",
+      "16",
+      "17",
+      "fizz",
+      "19",
+      "buzz",
+      "fizz",
+      "22",
+      "23",
+      "fizz",
+      "buzz",
+      "26",
+      "fizz",
+      "28",
+      "29",
+      "fizzbuzz",
+      "31",
+      "32",
+      "fizz",
+      "34",
+      "buzz",
+      "fizz",
+      "37",
+      "38",
+      "fizz",
+      "buzz",
+      "41",
+      "fizz",
+      "43",
+      "44",
+      "fizzbuzz",
+      "46",
+      "47",
+      "fizz",
+      "49",
+      "buzz",
+      "fizz",
+      "52",
+      "53",
+      "fizz",
+      "buzz",
+      "56",
+      "fizz",
+      "58",
+      "59",
+      "fizzbuzz",
+      "61",
+      "62",
+      "fizz",
+      "64",
+      "buzz",
+      "fizz",
+      "67",
+      "68",
+      "fizz",
+      "buzz",
+      "71",
+      "fizz",
+      "73",
+      "74",
+      "fizzbuzz",
+      "76",
+      "77",
+      "fizz",
+      "79",
+      "buzz",
+      "fizz",
+      "82",
+      "83",
+      "fizz",
+      "buzz",
+      "86",
+      "fizz",
+      "88",
+      "89",
+      "fizzbuzz",
+      "91",
+      "92",
+      "fizz",
+      "94",
+      "buzz",
+      "fizz",
+      "97",
+      "98",
+      "fizz",
+      "buzz",
+    )
     obtained shouldEqual expected
   }
 
@@ -24,9 +126,8 @@ class ControlStructuresSpec extends AnyFlatSpec with ScalaCheckDrivenPropertyChe
   }
 
   "applyNTimesForInts" should "work correctly" in {
-    forAll(choose(1, 1000), choose(1, 1000)) {
-      case (a: Int, b: Int) =>
-        applyNTimesForInts(_ + 1, a)(b) shouldEqual a + b
+    forAll(choose(1, 1000), choose(1, 1000)) { case (a: Int, b: Int) =>
+      applyNTimesForInts(_ + 1, a)(b) shouldEqual a + b
     }
   }
 
@@ -72,39 +173,40 @@ class ControlStructuresSpec extends AnyFlatSpec with ScalaCheckDrivenPropertyChe
     def updateAccount(userId: UserId, previousBalance: Amount, delta: Amount): Either[ErrorMessage, Amount] = {
       for {
         balance <- findBalance(userId)
-        result <- if (balance == previousBalance) {
-          val newBalance = previousBalance + delta
-          balances = balances + (userId -> newBalance)
-          Right[ErrorMessage, Amount](newBalance)
-        } else {
-          Left(s"previousBalance was expected to be $balance  but was provided as $previousBalance")
-        }
+        result  <-
+          if (balance == previousBalance) {
+            val newBalance = previousBalance + delta
+            balances = balances + (userId -> newBalance)
+            Right[ErrorMessage, Amount](newBalance)
+          } else {
+            Left(s"previousBalance was expected to be $balance  but was provided as $previousBalance")
+          }
       } yield result
     }
   }
 
   "makeTransfer" should "work correctly in 200 - 50 => 25 + 50" in {
-    val service = new TestUserService
+    val service  = new TestUserService
     val obtained = for {
-      _       <- service.updateAccount("a", 200)
-      _       <- service.updateAccount("b", 25)
-      result  <- makeTransfer(service, "a", "b", 50)
+      _      <- service.updateAccount("a", 200)
+      _      <- service.updateAccount("b", 25)
+      result <- makeTransfer(service, "a", "b", 50)
     } yield result
     obtained shouldEqual Right((150, 75))
   }
 
   it should "work correctly in 10 - 7 => 20 + 7" in {
-    val service = new TestUserService
+    val service  = new TestUserService
     val obtained = for {
-      _       <- service.updateAccount("a", 10)
-      _       <- service.updateAccount("b", 20)
-      result  <- makeTransfer(service, "a", "b", 7)
+      _      <- service.updateAccount("a", 10)
+      _      <- service.updateAccount("b", 20)
+      result <- makeTransfer(service, "a", "b", 7)
     } yield result
     obtained shouldEqual Right((3, 27))
   }
 
   it should "detect incorrect userIds" in {
-    val service = new TestUserService
+    val service  = new TestUserService
     val obtained = makeTransfer(service, "invalid", "valid", 50)
     obtained shouldBe a[Left[_, _]]
   }
@@ -122,8 +224,11 @@ class ControlStructuresSpec extends AnyFlatSpec with ScalaCheckDrivenPropertyChe
 
   "ASumB" should "contain all the elements in `A + B`" in {
     ASumB should contain theSameElementsAs Set(
-      Left(0), Left(1), Left(2),
-      Right(true), Right(false),
+      Left(0),
+      Left(1),
+      Left(2),
+      Right(true),
+      Right(false),
     )
   }
 

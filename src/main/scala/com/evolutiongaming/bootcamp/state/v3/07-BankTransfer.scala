@@ -14,12 +14,13 @@ import scala.concurrent.duration._
 object BankTransferDemo extends IOApp.Simple {
   // question: how to check if there were any retries?
   def withdraw(account: Ref[IO, Int], amount: Int): IO[Unit] =
-    account.access.flatMap {
-      case (prev, setter) => if(prev < amount) IO.raiseError(new Exception("insufficient funds"))
-      else setter(prev - amount).flatMap {
-        case false => withdraw(account, amount)
-        case true => IO.unit
-      }
+    account.access.flatMap { case (prev, setter) =>
+      if (prev < amount) IO.raiseError(new Exception("insufficient funds"))
+      else
+        setter(prev - amount).flatMap {
+          case false => withdraw(account, amount)
+          case true  => IO.unit
+        }
     }
 
   def deposit(account: Ref[IO, Int], amount: Int) = account.update(_ + amount)
@@ -34,12 +35,12 @@ object BankTransferDemo extends IOApp.Simple {
 
   override def run: IO[Unit] =
     for {
-      a <- Ref.of[IO, Int](100)
-      b <- Ref.of[IO, Int](0)
-      _ <- List.fill(100)(0).parTraverse(_ => transfer(a, b, 1))
+      a    <- Ref.of[IO, Int](100)
+      b    <- Ref.of[IO, Int](0)
+      _    <- List.fill(100)(0).parTraverse(_ => transfer(a, b, 1))
       aRes <- a.get
       bRes <- b.get
-      _ <- IO.println(s"a: $aRes, b: $bRes")
+      _    <- IO.println(s"a: $aRes, b: $bRes")
     } yield ()
 }
 
@@ -65,30 +66,32 @@ object STMDemo extends IOApp.Simple {
     def withdraw(account: TVar[Int], amount: Int): Txn[Unit] =
       for {
         balance <- account.get
-        _ <- if(balance < amount) stm.raiseError(new Exception())
-             else account.set(balance - amount)
+        _       <-
+          if (balance < amount) stm.raiseError(new Exception())
+          else account.set(balance - amount)
       } yield ()
 
     def deposit(account: TVar[Int], amount: Int): Txn[Unit] = account.modify(_ + amount)
 
     def transfer(a: TVar[Int], b: TVar[Int], amount: Int): IO[Unit] = {
-    commit {
-      for {
-        _ <- withdraw(a, amount)
-        _ <- deposit(b, amount)
-      } yield ()
-    }}
+      commit {
+        for {
+          _ <- withdraw(a, amount)
+          _ <- deposit(b, amount)
+        } yield ()
+      }
+    }
 
     for {
-      a <- commit(TVar.of(1000))
-      b <- commit(TVar.of(1000))
-      _ <- (
+      a       <- commit(TVar.of(1000))
+      b       <- commit(TVar.of(1000))
+      _       <- (
         List.fill(1000)(0).parTraverse(_ => transfer(a, b, 1).attempt),
-        List.fill(1500)(0).parTraverse(_ => transfer(b, a, 1).attempt)
+        List.fill(1500)(0).parTraverse(_ => transfer(b, a, 1).attempt),
       ).parTupled
       aResult <- commit(a.get)
       bResult <- commit(b.get)
-      _ <- IO.println(s"result a: $aResult, result b: $bResult")
+      _       <- IO.println(s"result a: $aResult, result b: $bResult")
     } yield ()
   }
 
@@ -107,14 +110,14 @@ object TMVarDemo extends IOApp.Simple {
     import stm._
 
     for {
-      tm <- commit(TMVar.empty[String])
-      _ <- (IO.sleep(3.seconds) *> commit(tm.put("full")) *> IO.sleep(
+      tm      <- commit(TMVar.empty[String])
+      _       <- (IO.sleep(3.seconds) *> commit(tm.put("full")) *> IO.sleep(
         3.seconds
       ) *> commit(tm.put("full again"))).start
       result1 <- IO.println("waiting") *> commit(tm.take)
-      _ <- IO.println(s"result: $result1")
+      _       <- IO.println(s"result: $result1")
       result2 <- IO.println("waiting again") *> commit(tm.take)
-      _ <- IO.println(s"result: $result2")
+      _       <- IO.println(s"result: $result2")
     } yield ()
   }
 

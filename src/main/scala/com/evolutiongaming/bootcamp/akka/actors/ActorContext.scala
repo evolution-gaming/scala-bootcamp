@@ -44,10 +44,9 @@ object ActorContext extends App {
     (1 to 10).foreach(_ => counter ! "inc")
     counter ! "get"
 
-    override def receive: Receive = {
-      case count: Int =>
-        println(s"count = $count")
-        context.stop(self)
+    override def receive: Receive = { case count: Int =>
+      println(s"count = $count")
+      context.stop(self)
     }
   }
 

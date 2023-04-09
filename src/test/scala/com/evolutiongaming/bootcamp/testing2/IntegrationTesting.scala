@@ -35,7 +35,7 @@ class EvolutionSiteSpec extends AnyFunSuite with WebBrowser {
   test("new Evolution Gaming domain could be found using Duck Duck Go") {
     goTo("https://duckduckgo.com/")
 
-    assert(pageTitle.startsWith( "DuckDuckGo"))
+    assert(pageTitle.startsWith("DuckDuckGo"))
     textField("q").value = "Evolution Gaming"
     submit()
     assert(pageSource contains "evolution.com")
@@ -92,19 +92,19 @@ class UserServiceSpec extends AnyFunSuite {
   }
 
   test("that we can create a table in a database") {
-    val f = new Fixture
+    val f       = new Fixture
     val service = new UserService(f.connection)
     service.createTable()
   }
 
   test("that we can insert a player") {
-    val f = new Fixture
+    val f       = new Fixture
     val service = new UserService(f.connection)
     ???
   }
 
   test("that we can select a player") {
-    val f = new Fixture
+    val f       = new Fixture
     val service = new UserService(f.connection)
     ???
   }

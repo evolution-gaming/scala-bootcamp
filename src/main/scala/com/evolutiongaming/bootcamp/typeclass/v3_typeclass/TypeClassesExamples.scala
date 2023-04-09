@@ -45,7 +45,7 @@ object TypeClassesExamples extends App {
   }
 
   object Functor {
-    def apply[F[_] : Functor]: Functor[F] = implicitly[Functor[F]]
+    def apply[F[_]: Functor]: Functor[F] = implicitly[Functor[F]]
   }
 
   implicit class FunctorOps[F[_]: Functor, A](fa: F[A]) {
@@ -87,10 +87,10 @@ object TypeClassesExamples extends App {
   }
 
   object Applicative {
-    def apply[F[_] : Applicative]: Applicative[F] = implicitly
+    def apply[F[_]: Applicative]: Applicative[F] = implicitly
   }
 
-  implicit class ApplicativeValueOps[F[_] : Applicative, A](a: A) {
+  implicit class ApplicativeValueOps[F[_]: Applicative, A](a: A) {
     def pure: F[A] = Applicative[F].pure(a)
   }
 
@@ -116,7 +116,6 @@ object TypeClassesExamples extends App {
   // traverseA(List(1, 2, 3)) { i =>
   //   Right(i + 1): Either[Int, Any]
   // } == Right(List(2, 3, 4))
-
 
   // Scala Typeclassopedia: https://github.com/lemastero/scala_typeclassopedia
 }

@@ -16,10 +16,9 @@ stringGen.sample
 val listGen = Arbitrary.arbitrary[List[Int]]
 listGen.sample
 
-
 sealed trait Pet
 object Pet {
-  case object Cat extends Pet
+  case object Cat               extends Pet
   case class Dog(breed: String) extends Pet
 }
 

@@ -44,8 +44,8 @@ leftError.onError { case _: String =>
 // E.g. this is used in Circe, where decoders return Either[DecodingFailure, T]
 // DecodingFailure extends io.circe.Error, which is a sealed class extending Exception
 sealed abstract class InvalidTime extends Exception with NoStackTrace
-final case class InvalidHour() extends InvalidTime
-final case class InvalidMinute() extends InvalidTime
+final case class InvalidHour()    extends InvalidTime
+final case class InvalidMinute()  extends InvalidTime
 
 final case class Time(hour: Int, minute: Int)
 object Time {
@@ -55,7 +55,7 @@ object Time {
       else NonEmptyList.one(error).raiseError
     }
 
-    val validHour = checkRange(0 to 23, hour, InvalidHour())
+    val validHour   = checkRange(0 to 23, hour, InvalidHour())
     val validMinute = checkRange(0 to 59, minute, InvalidMinute())
 
     (validHour, validMinute).mapN(Time.apply)

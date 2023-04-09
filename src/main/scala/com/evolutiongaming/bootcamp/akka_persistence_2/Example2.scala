@@ -19,24 +19,22 @@ object Example2 extends App {
         basket = basketFromSnapshot
 
       case RecoveryCompleted =>
-        // log that we covered from snapshot successfully
-        // measure recovery time
+      // log that we covered from snapshot successfully
+      // measure recovery time
 
       case event: String =>
         basket = event :: basket
         println(s"Received $event")
     }
 
-    override def receiveCommand: Receive = {
-      case item: String =>
-
-        persist(item) { e =>
-          basket = item :: basket // storing item to basket
-          println(s"Storing event $e")
-          // As we only add items, in sake of simplicity, let's store snapshot each 5th item.
-          if (basket.size % 5 == 0)
-            saveSnapshot(basket)
-        }
+    override def receiveCommand: Receive = { case item: String =>
+      persist(item) { e =>
+        basket = item :: basket // storing item to basket
+        println(s"Storing event $e")
+        // As we only add items, in sake of simplicity, let's store snapshot each 5th item.
+        if (basket.size % 5 == 0)
+          saveSnapshot(basket)
+      }
     }
 
     // user id, we will see how to deal with it in future

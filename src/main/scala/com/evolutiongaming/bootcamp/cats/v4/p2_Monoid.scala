@@ -35,7 +35,7 @@ object p2_Monoid {
 
   def boolMonoid: Monoid[Boolean] = Monoid.instance[Boolean](
     ???,
-    (x: Boolean, y: Boolean) => ???
+    (x: Boolean, y: Boolean) => ???,
   )
 
   // as you might already guessed, there are plenty of instances already defined in cats library:

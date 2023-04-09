@@ -13,4 +13,3 @@ metals.sbt
 target/
 
 .DS_Store
-.scalafmt.conf

@@ -21,7 +21,7 @@ object Functions {
   // Higher-order functions take and/or return other functions.
 
   // Question. Are these first-order of higher order functions?
-  val normalize: String => String = message => message.trim.toLowerCase
+  val normalize: String => String                       = message => message.trim.toLowerCase
   val processText: (String, String => String) => String = (message, f) => f.apply(message)
 
   // Scala has both functions and methods. Most of the time we can ignore this distinction (as done in this
@@ -47,6 +47,7 @@ object Functions {
   // `A` and `B` are type parameters. Here is how simplified version of `Function1[A, B]` looks like.
   object Functions {
     trait Function1[A, B] {
+
       /** Defines how to transform `A` to `B`. */
       def apply(a: A): B
     }
@@ -56,12 +57,15 @@ object Functions {
   processText("Hello, world", _ + "!")
 
   // Anonymous functions also expand to the implementation of the `Function1[A, B]` trait.
-  processText("Hello, world", new Function1[String, String] {
-    override def apply(a: String): String = a + "!"
-  })
+  processText(
+    "Hello, world",
+    new Function1[String, String] {
+      override def apply(a: String): String = a + "!"
+    },
+  )
 
   // Methods can be passed where functions are required, in such cases Scala automatically converts them.
-  def trimAndWrap(v: String): String = s"<${ v.trim }>"
+  def trimAndWrap(v: String): String = s"<${v.trim}>"
   processText(" abc ", trimAndWrap)
 
   // One interesting aspect of functions being traits is that we can subclass function types.
@@ -82,7 +86,7 @@ object Functions {
 
   // FUNCTION COMPOSITION
 
-  val strToInt: String => Int = _.length
+  val strToInt: String => Int   = _.length
   val intToBool: Int => Boolean = _ > 10
 
   // Function traits provide handy methods to compose multiple functions into one.
@@ -93,8 +97,8 @@ object Functions {
   // PARTIAL FUNCTIONS
 
   // Pattern matching blocks expand to `Function1` instances.
-  val pingPong: String => String = {
-    case "ping" => "pong"
+  val pingPong: String => String = { case "ping" =>
+    "pong"
   }
 
   // Question. What happens next?
@@ -102,8 +106,8 @@ object Functions {
 
   // With standard functions we cannot find out beforehand whether the function is applicable to a certain
   // argument or not. `PartialFunction` extends `Function` and helps to solve this via `isDefinedAt` method.
-  val pingPongPF: PartialFunction[String, String] = {
-    case "ping" => "pong"
+  val pingPongPF: PartialFunction[String, String] = { case "ping" =>
+    "pong"
   }
   pingPongPF.isDefinedAt("ping") // true
   pingPongPF.isDefinedAt("hi") // false
@@ -115,7 +119,7 @@ object Functions {
   // In Scala, if a function accepts multiple parameters, by default they can only be supplied all at once.
   val translate: (Language, Language, String) => String =
     (from, to, text) => if (from == to) text else text.reverse
-  val translateResult: String = translate("en", "lv", "Hello, world!")
+  val translateResult: String                           = translate("en", "lv", "Hello, world!")
 
   // However, sometimes it makes more sense to supply arguments one by one. Curring helps to achieve that.
   // It transforms a function that takes multiple arguments into a function that takes a single argument
@@ -128,8 +132,8 @@ object Functions {
   val translateCurried2: Language => Language => String => String = translate.curried
 
   val translateEn: Language => String => String = translateCurried("en")
-  val translateEnToLv: String => String = translateEn("lv")
-  val translateResult2: String = translateEnToLv("Hello, world!")
+  val translateEnToLv: String => String         = translateEn("lv")
+  val translateResult2: String                  = translateEnToLv("Hello, world!")
 
   val translateResult3: String = translateCurried("en")("lv")("Hello, world!")
   val translateResult4: String = translate.curried("en")("lv")("Hello, world!")
@@ -181,18 +185,18 @@ object Functions {
   def parseDate(s: String): Instant = Instant.parse(s)
   def parseDatePure(s: String): ??? = ???
 
-  def divide(a: Int, b: Int): Int = a / b
+  def divide(a: Int, b: Int): Int     = a / b
   def dividePure(a: Int, b: Int): ??? = ???
 
-  def isAfterNow(date: Instant): Boolean = date.isAfter(Instant.now())
-  def isAfterNowPure(/* ??? */): Boolean = ???
+  def isAfterNow(date: Instant): Boolean   = date.isAfter(Instant.now())
+  def isAfterNowPure( /* ??? */ ): Boolean = ???
 
   case class NonEmptyList[T](head: T, rest: List[T])
   def makeNonEmptyList[T](list: List[T]): NonEmptyList[T] = {
     if (list.isEmpty) println("Error: list must not be empty")
     NonEmptyList(list.head, list.tail)
   }
-  def makeNonEmptyListPure[T](list: List[T]): ??? = ???
+  def makeNonEmptyListPure[T](list: List[T]): ???         = ???
 
   // Attributions and useful links:
   // https://jim-mcbeath.blogspot.com/2009/05/scala-functions-vs-methods.html

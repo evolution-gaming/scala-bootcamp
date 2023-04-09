@@ -53,8 +53,7 @@ object ContextShifts extends IOApp {
     } yield ()
   }
 
-  /**
-    * https://typelevel.org/cats-effect/docs/2.x/datatypes/contextshift#blocker
+  /** https://typelevel.org/cats-effect/docs/2.x/datatypes/contextshift#blocker
     *
     * Special pool with explicit construct for blocking operations.
     * Widely used together with blocking API's/Java API's, blocking db drivers etc.

@@ -78,12 +78,16 @@ object ErrorHandling extends App {
   // Note that this is a superficial example. Always think how detailed you want your error cases to be.
   sealed trait TransferError
   object TransferError {
+
     /** Returned when amount to credit is negative. */
     final case object NegativeAmount extends TransferError
+
     /** Returned when amount to credit is zero. */
     final case object ZeroAmount extends TransferError
+
     /** Returned when amount to credit is equal or greater than 1 000 000. */
     final case object AmountIsTooLarge extends TransferError
+
     /** Returned when amount to credit is within the valid range, but has more than 2 decimal places. */
     final case object TooManyDecimals extends TransferError
   }
@@ -110,21 +114,21 @@ object ErrorHandling extends App {
   // particular error on each iteration. Here is where Validated from Cats library can help.
 
   final case class Username(value: String) extends AnyVal
-  final case class Age(value: Int) extends AnyVal
+  final case class Age(value: Int)         extends AnyVal
   final case class Student(username: Username, age: Age)
 
   sealed trait ValidationError
   object ValidationError {
-    final case object UsernameLengthIsInvalid extends ValidationError {
+    final case object UsernameLengthIsInvalid      extends ValidationError {
       override def toString: String = "Username must be between 3 and 30 characters"
     }
     final case object UsernameHasSpecialCharacters extends ValidationError {
       override def toString: String = "Username cannot contain special characters"
     }
-    final case object AgeIsNotNumeric extends ValidationError {
+    final case object AgeIsNotNumeric              extends ValidationError {
       override def toString: String = "Age must be a number"
     }
-    final case object AgeIsOutOfBounds extends ValidationError {
+    final case object AgeIsOutOfBounds             extends ValidationError {
       override def toString: String = "Student must be of age 18 to 75"
     }
   }

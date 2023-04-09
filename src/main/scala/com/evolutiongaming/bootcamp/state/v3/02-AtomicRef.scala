@@ -29,7 +29,7 @@ object AtomicRef extends IOApp.Simple {
         def loop(): Unit = {
           val prev = ref.get()
           val next = f(prev)
-          if(ref.compareAndSet(prev, next)) ()
+          if (ref.compareAndSet(prev, next)) ()
           else loop()
         }
         IO(loop())
@@ -37,9 +37,9 @@ object AtomicRef extends IOApp.Simple {
 
       override def modify[B](f: A => (A, B)): IO[B] = {
         def loop(): B = {
-          val prev = ref.get()
+          val prev           = ref.get()
           val (next, result) = f(prev)
-          if(ref.compareAndSet(prev, next)) result
+          if (ref.compareAndSet(prev, next)) result
           else loop()
         }
         IO(loop())
@@ -78,10 +78,10 @@ object AtomicRef extends IOApp.Simple {
 
   def compareAndSetDemo(modifyRef: AtomicRef[Int] => IO[Unit]) =
     for {
-      ref <- createAtomicRef(0)
-      _ <- modifyRef(ref)
+      ref    <- createAtomicRef(0)
+      _      <- modifyRef(ref)
       result <- ref.get
-      _ <- IO.println(s"result: $result")
+      _      <- IO.println(s"result: $result")
     } yield ()
 
   override def run: IO[Unit] = compareAndSetDemo(modifyAndIOPrint)
@@ -127,8 +127,8 @@ object AtomicRefCounter extends IOApp.Simple {
   override def run: IO[Unit] =
     for {
       counter <- makeRefCounter
-      _ <- List.fill(1000)(0).parTraverse(_ => counter.inc)
-      result <- counter.get
-      _ <- IO.println(s"result: $result")
+      _       <- List.fill(1000)(0).parTraverse(_ => counter.inc)
+      result  <- counter.get
+      _       <- IO.println(s"result: $result")
     } yield ()
 }

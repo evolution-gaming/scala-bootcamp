@@ -1,4 +1,3 @@
-
 object Sartre extends App {
 
   println("""

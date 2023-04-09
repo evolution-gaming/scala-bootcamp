@@ -23,7 +23,8 @@ object Exercise2 extends App {
     }
 
     final case class TimeoutException(msg: Any, timeout: Timeout)
-      extends RuntimeException(s"Ask timeout after $timeout on message $msg") with NoStackTrace
+        extends RuntimeException(s"Ask timeout after $timeout on message $msg")
+        with NoStackTrace
 
     /*
     Actor should implement ask pattern:
@@ -50,15 +51,15 @@ object Exercise2 extends App {
     override def receive: Receive = {
       case "ping"    =>
         sender() ! "pong"
-      case "timeout" => //do nothing
+      case "timeout" => // do nothing
     }
   }
 
   import AskPattern._
 
-  implicit val system: ActorSystem = ActorSystem("Exercise2")
+  implicit val system: ActorSystem  = ActorSystem("Exercise2")
   implicit val ec: ExecutionContext = system.dispatcher
-  implicit val timeout: Timeout = Timeout(2.seconds)
+  implicit val timeout: Timeout     = Timeout(2.seconds)
 
   val workerRef = system.actorOf(Props(new WorkerActor), "worker")
 

@@ -18,7 +18,7 @@ object ImplicitConversionChaining extends App {
   case class B(x: Int)
   case class C(x: Int)
 
-  implicit def conversion(a: A): B = B(a.x)
+  implicit def conversion(a: A): B  = B(a.x)
   implicit def conversion2(b: B): C = C(b.x)
 
   def myMethod(c: C): Unit = println(c)
@@ -29,19 +29,18 @@ object ImplicitConversionChaining extends App {
 
 object ImplicitConversionExample extends App {
 
-  implicit val nameDoesntMatter: ((Int, Int)) => Point = {
-    case (x, y) => Point(x, y)
+  implicit val nameDoesntMatter: ((Int, Int)) => Point = { case (x, y) =>
+    Point(x, y)
   }
 
-  implicit val nameDoesntMatter2: Int => Point = {
-    x => Point(x, x)
+  implicit val nameDoesntMatter2: Int => Point = { x =>
+    Point(x, x)
   }
 
   println(Point(4, 5).double)
 
   println((4, 5).double)
   println(4.double)
-
 
   case class Point(x: Int, y: Int) {
     def double: Point = Point(2 * x, 2 * y)

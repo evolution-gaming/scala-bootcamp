@@ -27,12 +27,12 @@ object ex3 {
     def make[F[_]](unsafe: UnsafeUserRepository): UserRepository[F] =
       new UserRepository[F] {
         def findUser(id: Long): F[Option[User]] = ???
-        def addUser(user: User): F[Unit] = ???
+        def addUser(user: User): F[Unit]        = ???
       }
   }
 
   // Hint:
-  def futureToIO[A](f: => Future[A]): IO[A] = IO.fromFuture(IO.delay(f))
+  def futureToIO[A](f: => Future[A]): IO[A]    = IO.fromFuture(IO.delay(f))
   def futureToZIO[A](f: => Future[A]): Task[A] = ZIO.fromFuture(_ => f)
 
   /*

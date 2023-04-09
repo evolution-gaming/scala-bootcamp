@@ -24,29 +24,29 @@ object Exercise1 extends App {
     //    or
     //    private var buffer: Vector[Task] = Vector.empty
 
-    override def receive: Receive = {
-      case task: Task =>
-        ???
+    override def receive: Receive = { case task: Task =>
+      ???
     }
   }
 
   final class WorkerActor extends Actor with ActorLogging {
     import Protocol._
 
-    override def receive: Receive = {
-      case Tasks(tasks) =>
-        log.info("Tasks received: {}", tasks)
+    override def receive: Receive = { case Tasks(tasks) =>
+      log.info("Tasks received: {}", tasks)
     }
   }
 
   val system = ActorSystem("Exercise1")
 
-  val workerRef = system.actorOf(Props(new WorkerActor), "worker")
+  val workerRef  = system.actorOf(Props(new WorkerActor), "worker")
   val batcherRef = system.actorOf(
-    Props(new BatcherActor(
-      batchSize = 2,
-      sinkRef = workerRef,
-    )),
+    Props(
+      new BatcherActor(
+        batchSize = 2,
+        sinkRef = workerRef,
+      )
+    ),
     "batcher",
   )
 

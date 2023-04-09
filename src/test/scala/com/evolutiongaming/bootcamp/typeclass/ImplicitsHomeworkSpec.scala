@@ -23,20 +23,20 @@ class ImplicitsHomeworkSpec extends AnyFreeSpec with Matchers {
       cache.get(val1) shouldEqual Some(val2)
       cache.get(val3) shouldEqual Some(val4)
 
-      cache.put(val1, val5) //overwrite
+      cache.put(val1, val5) // overwrite
       cache.get(val1) shouldEqual Some(val5)
     }
     "when not enough capacity should evict first inserted values" in {
       val cache = new MutableBoundedCache[TestValue, TestValue](maxSizeScore = 12)
 
-      cache.put(val3, val3) //score +6
-      cache.put(val2, val2) //score +4
-      cache.put(val1, val1) //score +2, total score 12
+      cache.put(val3, val3) // score +6
+      cache.put(val2, val2) // score +4
+      cache.put(val1, val1) // score +2, total score 12
       cache.get(val3) shouldEqual Some(val3)
       cache.get(val2) shouldEqual Some(val2)
       cache.get(val1) shouldEqual Some(val1)
 
-      cache.put(val4, val4) //score +8, first 2 should be evicted
+      cache.put(val4, val4) // score +8, first 2 should be evicted
       cache.get(val3) shouldEqual None
       cache.get(val2) shouldEqual None
       cache.get(val1) shouldEqual Some(val1)
@@ -135,27 +135,29 @@ class ImplicitsHomeworkSpec extends AnyFreeSpec with Matchers {
   "TwitCache" - {
     import com.evolutiongaming.bootcamp.typeclass.ImplicitsHomework.MyTwitter._
 
-    val id1 = 1L //8
-    val twit1 = Twit( //12
-      id = id1, //8
-      userId = 1, //4
-      hashTags = Vector.empty, //12
-      attributes = PackedMultiMap.empty, //12
-      fbiNotes = Nil, //12
-    ) //first entry score: 8 *2 + 4*12 + 4 = 68
+    val id1   = 1L // 8
+    val twit1 = Twit( // 12
+      id = id1, // 8
+      userId = 1, // 4
+      hashTags = Vector.empty, // 12
+      attributes = PackedMultiMap.empty, // 12
+      fbiNotes = Nil, // 12
+    ) // first entry score: 8 *2 + 4*12 + 4 = 68
 
-    val id2 = 2L
+    val id2   = 2L
     val twit2 = Twit(
       id2,
       userId = 2,
-      hashTags = Vector("foodie"), //+12 + 6 * 2 for chars = +24
-      attributes = PackedMultiMap("hasNoFriends" -> "true"), //2 * 12 + 16 * 2 for chars = +56
-      fbiNotes = List(FbiNote( //+12
-        month = "september", //+ 12 + 9 * 2 = +30
-        favouriteChar = 'E', //+2
-        watchedPewDiePieTimes = 2568L, //+8
-      ))
-    ) //second entry score: 68 + 24 + 56 + 12 + 30 + 2 + 8 = 200
+      hashTags = Vector("foodie"), // +12 + 6 * 2 for chars = +24
+      attributes = PackedMultiMap("hasNoFriends" -> "true"), // 2 * 12 + 16 * 2 for chars = +56
+      fbiNotes = List(
+        FbiNote( // +12
+          month = "september", // + 12 + 9 * 2 = +30
+          favouriteChar = 'E', // +2
+          watchedPewDiePieTimes = 2568L, // +8
+        )
+      ),
+    ) // second entry score: 68 + 24 + 56 + 12 + 30 + 2 + 8 = 200
 
     "should limit the size score of data stored" in {
       val cache = createTwitCache(maxSizeScore = 200)

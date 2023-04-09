@@ -11,7 +11,7 @@ lazy val root = project
     Test / testForkedParallel := true,
     Compile / packageDoc / publishArtifact := false,
     Compile / doc / sources := Seq.empty,
-    Test / publishArtifact := false
+    Test / publishArtifact := false,
   )
   .enablePlugins(DockerPlugin, JavaServerAppPackaging)
   .aggregate(domain, api) // `sbt test` will execute tests of root + domain and api modules

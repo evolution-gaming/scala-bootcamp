@@ -35,11 +35,11 @@ class p1_SemigroupSpec extends AnyFlatSpec with Matchers {
 
     combine(
       NonEmptyList.one(1),
-      combine(NonEmptyList.one(2), NonEmptyList.one(3))
+      combine(NonEmptyList.one(2), NonEmptyList.one(3)),
     ) shouldBe
       combine(
         combine(NonEmptyList.one(1), NonEmptyList.one(2)),
-        NonEmptyList.one(3)
+        NonEmptyList.one(3),
       )
   }
 

@@ -42,8 +42,8 @@ final class BinaryTreeSet extends Actor {
 
   private val root = createRoot
 
-  override def receive: Receive = {
-    case m: Operation => root ! m
+  override def receive: Receive = { case m: Operation =>
+    root ! m
   }
 
   private def createRoot: ActorRef = context.actorOf(BinaryTreeNode.props(0, initiallyRemoved = true))

@@ -9,8 +9,8 @@ class SimplePersistenceStashActor extends Actor with Stash {
 object SimplePersistenceStashActor {
   sealed trait Command
   case class Init(actorRef: ActorRef) extends Command
-  case class Event(entity: Any) extends Command
+  case class Event(entity: Any)       extends Command
   case class Recover(actor: ActorRef) extends Command
-  private case object SwitchContext extends Command
-  case object RecoverCompleted extends Command
+  private case object SwitchContext   extends Command
+  case object RecoverCompleted        extends Command
 }

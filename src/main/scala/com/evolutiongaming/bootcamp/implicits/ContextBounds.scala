@@ -47,10 +47,10 @@ object ContextBounds {
     def concat(a: T, b: T): T
   }
   object Concatenable {
-    val forInt: Concatenable[Int] = new Concatenable[Int] {
+    val forInt: Concatenable[Int]           = new Concatenable[Int] {
       def concat(a: Int, b: Int): Int = ???
     }
-    val forString: Concatenable[String] = new Concatenable[String] {
+    val forString: Concatenable[String]     = new Concatenable[String] {
       def concat(a: String, b: String): String = ???
     }
     val forListInt: Concatenable[List[Int]] = new Concatenable[List[Int]] {
@@ -78,7 +78,7 @@ object ContextBounds {
   // Exercise 5: implement the methods using `repeat` we just made.
   object Exercise5 {
 
-    def repeatTenTimes[T](a: T)(implicit concatenable: Concatenable[T]): Unit = ???
+    def repeatTenTimes[T](a: T)(implicit concatenable: Concatenable[T]): Unit                           = ???
     def repeatTenTimesIfTrue[T](condition: Boolean)(a: T)(implicit concatenable: Concatenable[T]): Unit = ???
 
   }
@@ -92,11 +92,11 @@ object ContextBounds {
   //
   // The following two methods are exactly the same:
   def method1[T](a: T)(implicit concatenable: Concatenable[T]): Unit = ()
-  def method2[T: Concatenable](a: T): Unit = ()
+  def method2[T: Concatenable](a: T): Unit                           = ()
 
   // Exercise 6: Use context bound to tidy up `repeat` method above
   object Exercise6 {
-     // def repeat[T: ...](...): T = ???
+    // def repeat[T: ...](...): T = ???
   }
 
   // Do you find this way convenient / readable? What else we could do to

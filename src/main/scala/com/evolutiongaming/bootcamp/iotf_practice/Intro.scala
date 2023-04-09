@@ -8,7 +8,7 @@ object Intro {
    * Let's look at two simple functions:
    * Question: what can we say about their operation in the first and second cases?
    */
-  def parse1(in: Any): Any = ???
+  def parse1(in: Any): Any            = ???
   def parse2(in: String): Option[Int] = ???
 
   /*

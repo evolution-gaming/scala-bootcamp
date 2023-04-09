@@ -23,8 +23,6 @@ class SomeImplicits {
     def myFancyMethod(k: Int): Set[String] = s.grouped(k).toSet
   }
 
-
-
   // Implicit Parameters
   def printEc()(implicit ec: ExecutionContext): Unit = {
     println(ec)
@@ -41,14 +39,11 @@ class SomeImplicits {
     list.combineAll
   }
 
-
-
   // Context Bounds
   def sugaredSum[T: Monoid](list: List[T]): T = {
     import cats.instances.all._
     import cats.syntax.all._
     list.combineAll
   }
-
 
 }

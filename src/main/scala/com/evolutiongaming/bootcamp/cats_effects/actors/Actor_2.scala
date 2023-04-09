@@ -9,23 +9,25 @@ trait Actor_2[In] {
   protected def name: String
   protected def handleMessage[SenderIn]: (
     IO[In],
-      IO[Context[SenderIn]],
-      IO[In => SenderIn],
-      IO[SenderIn => In]
-    ) => IO[Unit]
+    IO[Context[SenderIn]],
+    IO[In => SenderIn],
+    IO[SenderIn => In],
+  ) => IO[Unit]
 
   def sendMessage[SenderIn](
     entity: IO[In],
     context: IO[Context[SenderIn]],
     f: IO[In => SenderIn],
-    f1: IO[SenderIn => In]
+    f1: IO[SenderIn => In],
   ): IO[Unit] =
-    semaphore.permit.surround(
-      handleMessage(
-        entity,
-        context,
-        f,
-        f1
+    semaphore.permit
+      .surround(
+        handleMessage(
+          entity,
+          context,
+          f,
+          f1,
+        )
       )
-    ).start *> IO.unit
+      .start *> IO.unit
 }

@@ -8,7 +8,7 @@ import com.evolution.services._
 import java.util.UUID
 
 class UserController(
-    userService: UserService,
+  userService: UserService
 ) extends Controller {
   // get: api/user/$userId
   def userById(id: String): Option[UserDto] =
@@ -33,7 +33,7 @@ class UserController(
         UserId(UUID.randomUUID().toString),
         UserLogin(user.login),
         UserFirstName(user.name),
-        UserLastName(user.lastName)
+        UserLastName(user.lastName),
       )
     )
 

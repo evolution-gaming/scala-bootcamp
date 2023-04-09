@@ -28,12 +28,11 @@ object CustomMappings extends IOApp {
   override def run(args: List[String]): IO[ExitCode] = {
     val xa = DbTransactor.make[IO]
     setup().transact(xa) *>
-      selectAll()
-        .nel
+      selectAll().nel
         .transact(xa)
         .map(println)
         .as(ExitCode.Success)
-}
+  }
 
   def selectAll(): Query0[Point] =
     sql"select name, x, y from points".query[Point]
@@ -57,7 +56,7 @@ object CustomMappings extends IOApp {
         ("A", 0, 0),
         ("B", 5, 5),
         ("C", 10, 10),
-      ),
+      )
     )
 
     (create, inserts).mapN(_ + _).as(())

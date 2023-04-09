@@ -16,7 +16,7 @@ type A_B = {
 }
 
 object SimpleObject {
-  val a = 1
+  val a         = 1
   def b(x: Int) = s"squirrel $x"
 }
 
@@ -46,7 +46,7 @@ eq[
     def a: Int
     def b(x: Int): String
     def c[A]: A
-  }
+  },
 ]
 
 sub[
@@ -54,7 +54,7 @@ sub[
     val a: Int
   }, {
     def a: Int
-  }
+  },
 ]
 
 sub[
@@ -62,7 +62,7 @@ sub[
     def calc(x: Int): String
   }, {
     def calc(x: Int): Any
-  }
+  },
 ]
 
 // sub[
@@ -83,7 +83,7 @@ sub[
     def calc: SomeType
   }, {
     def calc: Int
-  }
+  },
 ]
 
 sub[
@@ -93,7 +93,7 @@ sub[
   }, {
     type SomeType
     def calc: SomeType
-  }
+  },
 ]
 
 
@@ -126,4 +126,4 @@ class SumTransformer extends Transformer[Long, Long] {
   def result(state: State): Long = state
 }
 
-val transformer: Transformer[Long, Long]{type State = Long} = new SumTransformer
+val transformer: Transformer[Long, Long] { type State = Long } = new SumTransformer

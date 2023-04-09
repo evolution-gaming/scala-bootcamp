@@ -8,9 +8,8 @@ object Broadcasting extends App {
   case object Pong
 
   final class Child extends Actor {
-    override def receive: Receive = {
-      case Ping =>
-        context.parent ! Pong
+    override def receive: Receive = { case Ping =>
+      context.parent ! Pong
     }
   }
 
@@ -39,7 +38,7 @@ object Broadcasting extends App {
   }
 
   val evoActorSystem: ActorSystem = ActorSystem("evo-actor-system")
-  val parent = evoActorSystem.actorOf(Props[Parent](), "parent")
+  val parent                      = evoActorSystem.actorOf(Props[Parent](), "parent")
 
   parent ! Parent.PingChildren
   parent ! Parent.PingSelection

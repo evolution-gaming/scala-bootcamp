@@ -9,23 +9,23 @@ import atto.Parser
 
 object Json {
   sealed trait Json
-  case object JNull extends Json
-  final case class JBoolean(value: Boolean) extends Json
-  final case class JNumber(value: Double) extends Json
-  final case class JString(value: String) extends Json
-  final case class JArray(value: Vector[Json]) extends Json
+  case object JNull                                  extends Json
+  final case class JBoolean(value: Boolean)          extends Json
+  final case class JNumber(value: Double)            extends Json
+  final case class JString(value: String)            extends Json
+  final case class JArray(value: Vector[Json])       extends Json
   final case class JObject(value: Map[String, Json]) extends Json
 
   object Parser {
-    val jNull: Parser[JNull.type] =
+    val jNull: Parser[JNull.type]     =
       string("null") >| JNull
-    val jBoolean: Parser[JBoolean] =
+    val jBoolean: Parser[JBoolean]    =
       (string("true") >| true | string("false") >| false) -| JBoolean
-    val jNumber: Parser[JNumber] =
+    val jNumber: Parser[JNumber]      =
       double -| JNumber
-    val jString: Parser[JString] =
+    val jString: Parser[JString]      =
       stringLiteral -| JString
-    lazy val jArray: Parser[JArray] =
+    lazy val jArray: Parser[JArray]   =
       (char('[') ~> json.sepBy1(char(',')) <~ char(']')) -| { l =>
         JArray(l.toList.toVector)
       }
@@ -33,9 +33,9 @@ object Json {
       (char('{') ~> ((stringLiteral <~ char(':')) ~ json).sepBy1(char(',')) <~ char('}')) -| { l =>
         JObject(l.toList.toMap)
       }
-    lazy val json: Parser[Json] =
+    lazy val json: Parser[Json]       =
       jNull | jBoolean | jNumber | jString | jArray | jObject
-    lazy val jsonOnly: Parser[Json] =
+    lazy val jsonOnly: Parser[Json]   =
       json <~ endOfInput
   }
 
@@ -43,11 +43,11 @@ object Json {
     Parser.jsonOnly.parseOnly(s).option
 
   def print(json: Json): String = json match {
-    case JNull => ???
+    case JNull       => ???
     case JBoolean(_) => ???
-    case JNumber(_) => ???
-    case JString(_) => ???
-    case JArray(_) => ???
-    case JObject(_) => ???
+    case JNumber(_)  => ???
+    case JString(_)  => ???
+    case JArray(_)   => ???
+    case JObject(_)  => ???
   }
 }

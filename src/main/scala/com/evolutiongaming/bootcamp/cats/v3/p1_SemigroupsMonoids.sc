@@ -69,7 +69,7 @@ import java.time.Instant
 import scala.util.Random
 
 type ProblemKind = String
-type Client = String
+type Client      = String
 
 case class Problem(kind: ProblemKind, client: Client)
 
@@ -83,27 +83,28 @@ def aggregateProblems(log: Iterator[(Instant, Seq[Problem])]): AggregatedResult 
 
 // Without monoids, aggregating into that shape is already pretty cumbersome
 def aggregateManually(log: Iterator[(Instant, Seq[Problem])]): AggregatedResult = {
-  log.flatMap(_._2).foldLeft(Map.empty[ProblemKind, (Int, Map[Client, Int])]) {
-    case (acc, Problem(kind, client)) =>
-      val (oldKindTotal, oldPerClient) = acc.getOrElse(kind, (0, Map.empty[Client, Int]))
-      val newKindTotal = oldKindTotal + 1
-      val oldProblemsForClient = oldPerClient.getOrElse(client, 0)
-      val newPerClient = oldPerClient.updated(client, oldProblemsForClient + 1)
-      acc.updated(kind, newKindTotal -> newPerClient)
+  log.flatMap(_._2).foldLeft(Map.empty[ProblemKind, (Int, Map[Client, Int])]) { case (acc, Problem(kind, client)) =>
+    val (oldKindTotal, oldPerClient) = acc.getOrElse(kind, (0, Map.empty[Client, Int]))
+    val newKindTotal                 = oldKindTotal + 1
+    val oldProblemsForClient         = oldPerClient.getOrElse(client, 0)
+    val newPerClient                 = oldPerClient.updated(client, oldProblemsForClient + 1)
+    acc.updated(kind, newKindTotal -> newPerClient)
   }
 }
 
 val random = new Random(42)
 
-val problems = random.shuffle {
-  for {
-    kind <- Vector("it_broke", "works_for_me", "out_of_magic_smoke")
-    client <- Vector("important", "maybe_important")
-    amount = random.between(2, 20)
+val problems = random
+  .shuffle {
+    for {
+      kind   <- Vector("it_broke", "works_for_me", "out_of_magic_smoke")
+      client <- Vector("important", "maybe_important")
+      amount  = random.between(2, 20)
 
-    problem <- Vector.fill(amount)(Problem(kind, client))
-  } yield problem
-}.grouped(5)
+      problem <- Vector.fill(amount)(Problem(kind, client))
+    } yield problem
+  }
+  .grouped(5)
   .map(Instant.now().minusSeconds(Random.nextInt(100)) -> _)
   .toVector
 

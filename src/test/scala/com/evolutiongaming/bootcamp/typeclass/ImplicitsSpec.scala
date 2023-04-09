@@ -11,7 +11,7 @@ class ImplicitsSpec extends AnyFreeSpec with Matchers {
           |import com.evolutiongaming.bootcamp.typeclass.Implicits.Exercise1.Implicits._
           |
           |CommonEraStart.isBce
-          |""".stripMargin,
+          |""".stripMargin
       )
     }
     "isCe function works as expected" in {
@@ -42,19 +42,21 @@ class ImplicitsSpec extends AnyFreeSpec with Matchers {
       secondBiggestValue(List.empty[Int]) shouldEqual None
       secondBiggestValue(List(1)) shouldEqual None
       secondBiggestValue(Vector(1, 3, 2)) shouldEqual Some(2)
-      secondBiggestValue(Vector(
-        HDEYears(1),
-        HDEYears(3),
-        HDEYears(2),
-      )) shouldEqual Some(HDEYears(2))
+      secondBiggestValue(
+        Vector(
+          HDEYears(1),
+          HDEYears(3),
+          HDEYears(2),
+        )
+      ) shouldEqual Some(HDEYears(2))
     }
 
     "average" in {
       average(List.empty[Double]) shouldEqual None
       average(List(BigDecimal("1.0"), BigDecimal("2.0"))) shouldEqual Some(BigDecimal("1.5"))
-      val customAvg = average(Vector(CustomNumber(1F), CustomNumber(2F)))
-      assert(customAvg.exists(_.value > 1F))
-      assert(customAvg.exists(_.value < 2F))
+      val customAvg = average(Vector(CustomNumber(1f), CustomNumber(2f)))
+      assert(customAvg.exists(_.value > 1f))
+      assert(customAvg.exists(_.value < 2f))
     }
   }
 }

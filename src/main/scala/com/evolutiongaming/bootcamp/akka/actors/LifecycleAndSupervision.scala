@@ -10,16 +10,16 @@ object LifecycleAndSupervision extends App {
     import Worker._
 
     // Hooks
-    override def preStart(): Unit = {
+    override def preStart(): Unit                                          = {
       println("pre start")
     }
-    override def postStop(): Unit = {
+    override def postStop(): Unit                                          = {
       println("post stop")
     }
     override def preRestart(reason: Throwable, message: Option[Any]): Unit = {
-      println(s"pre restart reason: ${ reason.getMessage }")
+      println(s"pre restart reason: ${reason.getMessage}")
     }
-    override def postRestart(reason: Throwable): Unit = {
+    override def postRestart(reason: Throwable): Unit                      = {
       println("post restart")
     }
 
@@ -41,11 +41,10 @@ object LifecycleAndSupervision extends App {
     case object ResumeCommand
   }
 
-
   final class SupervisorActor extends Actor {
     // when supervisorStrategy is not specified, actor uses SupervisorStrategy.defaultDecider
     override val supervisorStrategy: SupervisorStrategy =
-    // one for one - only for one failed child actor
+      // one for one - only for one failed child actor
       OneForOneStrategy(maxNrOfRetries = 2, withinTimeRange = 1.second) {
         case _: NoSuchElementException =>
           println("worker resumes")
@@ -74,7 +73,7 @@ object LifecycleAndSupervision extends App {
 
   // playground
   val evoActorSystem: ActorSystem = ActorSystem("evo-actor-system")
-  val supervisorActor: ActorRef = evoActorSystem.actorOf(Props[SupervisorActor]())
+  val supervisorActor: ActorRef   = evoActorSystem.actorOf(Props[SupervisorActor]())
   import Worker._
 
   // 1
@@ -116,7 +115,6 @@ object LifecycleAndSupervision extends App {
   // worker escalate
   // post stop
   // pre start
-
 
   import evoActorSystem.dispatcher
   // evoActorSystem.scheduler.scheduleOnce(10.seconds) { evoActorSystem.terminate() }

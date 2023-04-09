@@ -16,7 +16,7 @@ object FoldableExercise {
         case Some(t) => f(s, t)
       }
   }
-  implicit val listFoldable: Foldable[List] = new Foldable[List] {
+  implicit val listFoldable: Foldable[List]     = new Foldable[List] {
     override def foldLeft[T, S](ft: List[T], s: S)(f: (S, T) => S): S =
       ft.foldLeft(s)(f)
   }
@@ -33,7 +33,7 @@ object FoldableExercise {
   Define an Foldable instance for Triple (should behave like a collection of 3 elements)
    */
 
-  //implicit val tripleFoldable: Foldable[Triple] = ???
+  // implicit val tripleFoldable: Foldable[Triple] = ???
 
   /*
   Part 2.

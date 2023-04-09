@@ -23,7 +23,7 @@ object Practically extends IOApp {
     // assume precisely users with ids 1..100 exist in our imaginary database
     // users must have different ids
     def findAgeMatch[F[_]: Monad](
-      findUser: FindUser[F],
+      findUser: FindUser[F]
     ): F[Option[(User, User)]] = ???
 
     // // for different users
@@ -56,7 +56,7 @@ object Practically extends IOApp {
 
     // def largestOfThree[F[_]: Applicative: BasicRandom]: F[Int] =
     def largestOfThree[F[_]: Applicative](implicit
-      random: BasicRandom[F],
+      random: BasicRandom[F]
     ): F[Int] =
       (
         random.nextIntBounded(100),
@@ -68,10 +68,10 @@ object Practically extends IOApp {
 
     def main: IO[Unit] =
       for {
-        random <- Random.scalaUtilRandom[IO].map(BasicRandom.fromRandom)
+        random         <- Random.scalaUtilRandom[IO].map(BasicRandom.fromRandom)
         largestOfThree <- largestOfThree[IO](implicitly[Applicative[IO]], random)
-        line2 = s"largestOfThree: ${largestOfThree}"
-        _ <- Console[IO].println(line2)
+        line2           = s"largestOfThree: ${largestOfThree}"
+        _              <- Console[IO].println(line2)
       } yield ()
   }
 

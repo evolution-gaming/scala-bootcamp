@@ -8,8 +8,8 @@ object Routing extends App {
 
   final class Worker extends Actor {
     import Worker._
-    override def receive: Receive = {
-      case Request(id) => sender() ! Answer(self.path, id)
+    override def receive: Receive = { case Request(id) =>
+      sender() ! Answer(self.path, id)
     }
   }
   object Worker {

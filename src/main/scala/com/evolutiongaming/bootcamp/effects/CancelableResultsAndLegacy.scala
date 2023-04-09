@@ -18,7 +18,7 @@ import scala.concurrent.duration._
  */
 object CancelableResultsAndLegacy extends IOApp {
 
-  private val cancelableLegacyIntegrationProgram = {
+  private val cancelableLegacyIntegrationProgram     = {
     class UglyLegacyCode {
       private val cancelled = new AtomicBoolean(false)
 
@@ -50,8 +50,8 @@ object CancelableResultsAndLegacy extends IOApp {
     }
 
     for {
-      _ <- putString("Launching cancelable")
-      io = IO.async[Long] { cb =>
+      _     <- putString("Launching cancelable")
+      io     = IO.async[Long] { cb =>
         IO {
           val legacy = new UglyLegacyCode
           legacy.compute(2L, Long.MaxValue)(res => cb(Right(res)), e => cb(Left(e)))
@@ -59,12 +59,12 @@ object CancelableResultsAndLegacy extends IOApp {
         }
       }
       fiber <- io.start
-      _ <- putString(s"Started $fiber")
-      res <- IO.race(IO.sleep(10.seconds), fiber.join)
-      _ <-
+      _     <- putString(s"Started $fiber")
+      res   <- IO.race(IO.sleep(10.seconds), fiber.join)
+      _     <-
         res.fold(
           _ => putString(s"cancelling $fiber...") *> fiber.cancel *> putString("IO cancelled"),
-          i => putString(s"IO completed with: $i")
+          i => putString(s"IO completed with: $i"),
         )
     } yield ()
   }

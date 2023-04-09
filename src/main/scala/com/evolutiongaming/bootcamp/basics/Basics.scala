@@ -44,7 +44,7 @@ object Basics {
   // Types can be explicitly specified ...
   val int3: Int = 7
   // ... or inferred by the compiler ...
-  val int4 = 3
+  val int4      = 3
 
   // Your IDE has features that "Add type annotation to value definition", show "Type Info" and others.
 
@@ -181,7 +181,7 @@ object Basics {
   // I hope the way they are used is obvious enough, and if not, please ask questions.
 
   // Unit is a special type with only one possible value - `()`
-  val unit1: Unit = ()
+  val unit1: Unit              = ()
   val allUnitValues: Set[Unit] = Set(())
 
   // Where `void` is used in Java to indicate that a method doesn't return a value,
@@ -261,8 +261,8 @@ object Basics {
 
   // Methods can have default parameters
   def addNTimes(x: Int, y: Int, times: Int = 1): Int = x + y * times
-  val sum2 = addNTimes(2, 3) // 5, because 2 + 3 * 1
-  val sum3 = addNTimes(2, 3, 4) // 14, because 2 + 3 * 4
+  val sum2                                           = addNTimes(2, 3) // 5, because 2 + 3 * 1
+  val sum3                                           = addNTimes(2, 3, 4) // 14, because 2 + 3 * 4
 
   // Functions are defined with the following syntax:
   //
@@ -320,10 +320,10 @@ object Basics {
   // Example of a function passed as a parameter to the `map` method in `List`:
   // The following yield the same results:
   private def stringToInt(s: String): Int = s.toInt
-  val listOfInts1: List[Int] = listOfStrings.map(stringToInt)
-  val listOfInts2: List[Int] = listOfStrings.map(s => s.toInt)
-  val listOfInts3: List[Int] = listOfStrings.map((s: String) => s.toInt)
-  val listOfInts4: List[Int] = listOfStrings.map(_.toInt)
+  val listOfInts1: List[Int]              = listOfStrings.map(stringToInt)
+  val listOfInts2: List[Int]              = listOfStrings.map(s => s.toInt)
+  val listOfInts3: List[Int]              = listOfStrings.map((s: String) => s.toInt)
+  val listOfInts4: List[Int]              = listOfStrings.map(_.toInt)
 
   // We will discuss `map` in more details in later lectures.
   //
@@ -336,10 +336,10 @@ object Basics {
   }
 
   val hello: String => String = greeter("Hello")
-  val helloWorld: String = hello("World") // Hello, World!
+  val helloWorld: String      = hello("World") // Hello, World!
 
   val goodMorning: String => String = greeter("Good morning")
-  val goodMorningWorld: String = goodMorning("World") // Good morning, World!
+  val goodMorningWorld: String      = goodMorning("World") // Good morning, World!
 
   // Exercise. Implement `power` method which takes a Byte `n` and returns a function from Int to
   // Long, raising the Int parameter provided to the n-th power using `Math.pow`.
@@ -352,10 +352,10 @@ object Basics {
   }
 
   private val squared: Int => Long = power(2)
-  private val fourSquared = squared(4)
+  private val fourSquared          = squared(4)
 
   private val cubed: Int => Long = power(3)
-  private val fiveCubed = cubed(5)
+  private val fiveCubed          = cubed(5)
 
   // Polymorphic methods, or methods which take type parameters
   //
@@ -365,7 +365,7 @@ object Basics {
   // Thus instead of having to implement similar or identical methods for each type, you can
   // implement polymorphic methods:
   import cats.data.NonEmptyList
-  def allEqualInt(list: NonEmptyList[Int]): Boolean = list.tail.forall(_ == list.head)
+  def allEqualInt(list: NonEmptyList[Int]): Boolean       = list.tail.forall(_ == list.head)
   def allEqualString(list: NonEmptyList[String]): Boolean = list.tail.forall(_ == list.head)
 
   def allEqual[A](list: NonEmptyList[A]): Boolean = list.tail.forall(_ == list.head)
@@ -390,12 +390,12 @@ object Basics {
   //
   // A tuple is a value that contains a fixed number of elements, each with a distinct type. Tuples are immutable.
 
-  val tuple1: (String, Double) = ("Pepper", 4.5)
+  val tuple1: (String, Double)      = ("Pepper", 4.5)
   val tuple2: (String, Double, Int) = ("Onions", 2.24, 16)
 
   // Tuples are sometimes useful but should not be over-used as their elements aren't named.
   // Tuple elements can be accessed using `._1`, `._2` and similar, for example:
-  val pepper1 = tuple1._1
+  val pepper1      = tuple1._1
   val pepperPrice1 = tuple1._2
 
   // However this should be done sparingly as it can lead to poorly readable code if over-used.
@@ -411,7 +411,7 @@ object Basics {
   // None or an instance of Some containing a value.
 
   val nameUnknown: Option[String] = None
-  val nameKnown: Option[String] = Some("Name")
+  val nameKnown: Option[String]   = Some("Name")
 
   // Either
   //
@@ -420,7 +420,7 @@ object Basics {
   //
   // Commonly, Left is used to indicate an error while Right to indicate a normal execution.
 
-  val errorOccurred: Either[String, Int] = Left("Failed to parse")
+  val errorOccurred: Either[String, Int]   = Left("Failed to parse")
   val normalExecution: Either[String, Int] = Right(4)
 
   // More exercises to help internalise the "types define the set of possible values that a value can have":

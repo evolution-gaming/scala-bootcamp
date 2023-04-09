@@ -14,10 +14,10 @@
 sealed trait Parent[A, B]
 object Parent {
   case class Child1[A, B](as: List[A], bs: List[B]) extends Parent[A, B]
-  case class Child2[A, B](a: A, b: B) extends Parent[A, B]
+  case class Child2[A, B](a: A, b: B)               extends Parent[A, B]
 }
 
-// Parent[String, Int] 
+// Parent[String, Int]
 // Child1[String, Int]
 // Child2[String, Int]
 
@@ -26,7 +26,7 @@ object Parent {
 sealed trait Parent1[A, B]
 object Parent1 {
   case class Child1[A, B, C, D](a: A, b: B, c: C, d: D) extends Parent1[A, B]
-  case class Child2[C, D](c: C, d: D) extends Parent1[String, (C, D)]
+  case class Child2[C, D](c: C, d: D)                   extends Parent1[String, (C, D)]
 }
 
 // Parent1[Double, String]
@@ -47,8 +47,8 @@ object Parent1 {
 sealed trait InfoGetter
 object InfoGetter {
   case class Impl[A](
-      getInfo: Long => A,
-      printInfo: A => String
+    getInfo: Long => A,
+    printInfo: A => String,
   ) extends InfoGetter
 }
 
@@ -87,31 +87,30 @@ def getInfos(keys: Long*)(getter: InfoGetter): Vector[String] =
 // └───────────────┘
 // List[String]
 
-
 sealed trait Tag[A]
 
 object Tag {
-  case object OfInt extends Tag[Int]
-  case object OfString extends Tag[String]
+  case object OfInt                            extends Tag[Int]
+  case object OfString                         extends Tag[String]
   case class Tuple[A, B](a: Tag[A], b: Tag[B]) extends Tag[(A, B)]
 }
 
 case class TaggedVector[A](tag: Tag[A], vec: Vector[A])
 
 def combineAll[A](lst: TaggedVector[A]): A = lst match {
-  case TaggedVector(Tag.OfInt, vec)    => vec.sum
-  case TaggedVector(Tag.OfString, vec) => vec.mkString(",")
+  case TaggedVector(Tag.OfInt, vec)             => vec.sum
+  case TaggedVector(Tag.OfString, vec)          => vec.mkString(",")
   case TaggedVector(Tag.Tuple(tagA, tagB), vec) =>
     (
       combineAll(TaggedVector(tagA, vec.map(_._1))),
-      combineAll(TaggedVector(tagB, vec.map(_._2)))
+      combineAll(TaggedVector(tagB, vec.map(_._2))),
     )
 }
 
 combineAll(
   TaggedVector(
     Tag.Tuple(Tag.OfInt, Tag.Tuple(Tag.OfInt, Tag.OfString)),
-    Vector((1, (2, "3")), (4, (5, "6")))
+    Vector((1, (2, "3")), (4, (5, "6"))),
   )
 )
 
@@ -150,7 +149,7 @@ val bigCompose =
 import scala.annotation.tailrec
 
 case class Compose[A, B, C](first: A => B, second: B => C) extends (A => C) {
-  def apply(a: A): C = Compose.run(this, a)
+  def apply(a: A): C                         = Compose.run(this, a)
   override def andThen[D](g: C => D): A => D = Compose(this, g)
   override def compose[D](g: D => A): D => C = Compose(g, this)
 }
@@ -162,7 +161,7 @@ object Compose {
         case Compose(u, v) => run(Compose(u, Compose(v, b)), x)
         case _             => run(b, a(x))
       }
-    case f => f(x)
+    case f             => f(x)
   }
 }
 
@@ -183,9 +182,9 @@ val bigCompose1 =
       case ac: Compose[A, y, x] =>
         run1[A, B](
           Compose[A, y, B](ac.first, Compose[y, x, B](ac.second, fc.second)),
-          x
+          x,
         )
-      case _ => run1[X, B](fc.second, fc.first(x))
+      case _                    => run1[X, B](fc.second, fc.first(x))
     }
-  case f => f(x)
+  case f                    => f(x)
 }

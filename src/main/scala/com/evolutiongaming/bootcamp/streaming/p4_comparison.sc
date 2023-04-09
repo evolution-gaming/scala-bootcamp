@@ -5,14 +5,13 @@ import monix.reactive.{Observable, OverflowStrategy}
 import scala.concurrent.ExecutionContext
 import scala.concurrent.duration._
 
-implicit val timer: Timer[IO] = IO.timer(ExecutionContext.parasitic)
+implicit val timer: Timer[IO]     = IO.timer(ExecutionContext.parasitic)
 implicit val cs: ContextShift[IO] = IO.contextShift(ExecutionContext.global)
 
 // Comparison
 
 val stream: Stream[IO, Int] = Stream.range(1, 20).zipLeft(Stream.fixedRate[IO](100.millis))
-val obs: Observable[Long] = Observable.range(1, 20).throttle(100.millis, 1)
-
+val obs: Observable[Long]   = Observable.range(1, 20).throttle(100.millis, 1)
 
 // For linear pipelines, API for both fs2 and monix are mostly the same
 
@@ -28,16 +27,21 @@ val inputStr =
     |foO Foo fOO""".stripMargin
 
 val httpResultFs2: IO[Stream[IO, Byte]] = IO {
-  Stream.iterable[IO, Byte](inputStr.getBytes)
-    .chunkLimit(5).flatMap(Stream.chunk)
+  Stream
+    .iterable[IO, Byte](inputStr.getBytes)
+    .chunkLimit(5)
+    .flatMap(Stream.chunk)
 }
 
 // This can easily be processed per-line
-Stream.eval(httpResultFs2)
+Stream
+  .eval(httpResultFs2)
   .flatten
   .through(fs2.text.utf8Decode)
   .through(fs2.text.lines)
-  .compile.toList.unsafeRunSync()
+  .compile
+  .toList
+  .unsafeRunSync()
 
 // Along with a lot of utilities for decoding, compression, etc.
 fs2.text.base64.encode[IO]
@@ -66,7 +70,6 @@ obs.throttle(150.millis, 2) // Limit throughput to 2 items per 150 millis, backp
 // there is equivalent for that in fs2
 stream.metered(75.millis) // 1 item per 75 millis ~= 2 per 150 millis
 
-
 // Buffering
 // fs2: groupWithin
 // Collect items, emit when collected 5 items, or when 100 millis passes
@@ -90,6 +93,6 @@ obs.asyncBoundary(OverflowStrategy.DropOld(5))
 obs.whileBusyDropEvents
 
 // Aggregate events into batches while downstream is busy, emit batches at once
-obs.whileBusyAggregateEvents(event => Vector(event)) {
-  case (agg, event) => agg :+ event
+obs.whileBusyAggregateEvents(event => Vector(event)) { case (agg, event) =>
+  agg :+ event
 }

@@ -23,7 +23,10 @@ object CatsExercises {
 
   // Implement applicative composition via map2
   // I.e. for applicatives F and G, implement applicative for F[G[_]]
-  def composedAltApplicative[F[_], G[_]](implicit F: AltApplicative[F], G: AltApplicative[G]): AltApplicative[Lambda[T => F[G[T]]]] = {
+  def composedAltApplicative[F[_], G[_]](implicit
+    F: AltApplicative[F],
+    G: AltApplicative[G],
+  ): AltApplicative[Lambda[T => F[G[T]]]] = {
     new AltApplicative[Lambda[T => F[G[T]]]] {
       override def pure[A](x: A): F[G[A]] = F.pure(G.pure(x))
 

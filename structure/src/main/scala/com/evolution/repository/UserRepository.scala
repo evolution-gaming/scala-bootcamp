@@ -7,16 +7,16 @@ class UserRepository extends AbstractRepository {
     read[User].filter(_.id == id)
 
   def userPermissions(id: UserId): List[Permission] = Nil
-  def userGroups(id: UserId): List[Group] = Nil
+  def userGroups(id: UserId): List[Group]           = Nil
 
-  def addUser(user: User): Unit = add(user)
+  def addUser(user: User): Unit    = add(user)
   def deleteUser(user: User): Unit = delete(user)
   def updateUser(user: User): Unit = userById(user.id).update(user)
 
-  def addPermission(value: Permission): Unit = ()
+  def addPermission(value: Permission): Unit    = ()
   def deletePermission(value: Permission): Unit = ()
 
-  def addGroup(value: Group): Unit = ()
+  def addGroup(value: Group): Unit    = ()
   def deleteGroup(value: Group): Unit = ()
 
   def casinoUsersCount(casinoId: CasinoId): Int = 0

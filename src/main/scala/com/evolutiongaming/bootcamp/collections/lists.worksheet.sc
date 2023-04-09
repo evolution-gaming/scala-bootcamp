@@ -23,7 +23,7 @@ uniqueRefs(subsets(1 to 10 to MyList))
 def subsets1[A](xs: MyList[A]): MyList[MyList[A]] = xs match {
   case Cons(head, tail) =>
     for (t <- subsets1(tail); l <- Array(t, head :: t)) yield l
-  case MyList.Nil => MyList(MyList.Nil)
+  case MyList.Nil       => MyList(MyList.Nil)
 }
 
 subsets1(MyList(1, 2, 3))

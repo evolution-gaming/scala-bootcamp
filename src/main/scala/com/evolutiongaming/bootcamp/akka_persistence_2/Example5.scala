@@ -10,30 +10,30 @@ import com.evolutiongaming.bootcamp.akka_persistence_2.Example4.EmployeeShopping
 
 object Example5 extends App {
 
-  val system = ActorSystem("AkkaPersistenceSystem",
-    ConfigFactory.parseString(
-    """ |akka.actor.provider="akka.cluster.ClusterActorRefProvider"
-        |
-        |akka.persistence.journal.plugin = "akka.persistence.journal.leveldb"
-        |akka.persistence.snapshot-store.plugin = "akka.persistence.snapshot-store.local"
-        |
-        |akka {
-        |  cluster {
-        |    seed-nodes = [
-        |      "akka://AkkaPersistenceSystem@127.0.0.1:25520"
-        |    ]
-        |  }
-        |}""".stripMargin)
+  val system = ActorSystem(
+    "AkkaPersistenceSystem",
+    ConfigFactory.parseString(""" |akka.actor.provider="akka.cluster.ClusterActorRefProvider"
+                                |
+                                |akka.persistence.journal.plugin = "akka.persistence.journal.leveldb"
+                                |akka.persistence.snapshot-store.plugin = "akka.persistence.snapshot-store.local"
+                                |
+                                |akka {
+                                |  cluster {
+                                |    seed-nodes = [
+                                |      "akka://AkkaPersistenceSystem@127.0.0.1:25520"
+                                |    ]
+                                |  }
+                                |}""".stripMargin),
   )
 
-  def extractEntityId: ShardRegion.ExtractEntityId = {
-    case cmd: AddItem => cmd.enityId -> cmd
+  def extractEntityId: ShardRegion.ExtractEntityId = { case cmd: AddItem =>
+    cmd.enityId -> cmd
   }
 
   val maxNodes = 10
 
-  val extractShardId: ShardRegion.ExtractShardId = {
-    case cmd: AddItem => (cmd.enityId.hashCode % maxNodes).toString
+  val extractShardId: ShardRegion.ExtractShardId = { case cmd: AddItem =>
+    (cmd.enityId.hashCode % maxNodes).toString
   }
 
   val shard = ClusterSharding(system).start(
@@ -41,7 +41,7 @@ object Example5 extends App {
     entityProps = Props(new EmployeeShoppingBasketActor()),
     settings = ClusterShardingSettings(system),
     extractEntityId = extractEntityId,
-    extractShardId = extractShardId
+    extractShardId = extractShardId,
   )
 
   shard ! AddItem("entity_id_1", "apple")

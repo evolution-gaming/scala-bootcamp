@@ -44,10 +44,10 @@ object TryWithResource extends App {
       var closed = false
       try {
         Try(f(resource)) match {
-          case Success(result) =>
+          case Success(result)    =>
             closed = true
             Try(close(resource)).map(_ => result)
-          case Failure(exception)  =>
+          case Failure(exception) =>
             closed = true
             Try(close(resource)) match {
               case Success(_)     => Failure(exception)

@@ -14,9 +14,9 @@ class p6_MonadErrorSpec extends AnyFlatSpec with Matchers {
     */
   object Retrier {
     private def _retry[F[_], E, A](
-        f: Int => F[A],
-        numAttempts: Int,
-        maxAttempts: Int
+      f: Int => F[A],
+      numAttempts: Int,
+      maxAttempts: Int,
     )(implicit AE: ApplicativeError[F, E]): F[A] =
       // implement using handleErrorWith and raiseError
       // import cats.syntax.applicativeError._

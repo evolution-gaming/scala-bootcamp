@@ -12,15 +12,15 @@ object QueueDemo extends IOApp.Simple {
 
   def consumer(delay: FiniteDuration, queue: Queue[IO, Int]): IO[Unit] = queue.take.flatMap {
     case -1 => IO.println("consumer finished")
-    case n => IO.println(s"consumed: $n") *> consumer(delay, queue).delayBy(delay)
+    case n  => IO.println(s"consumed: $n") *> consumer(delay, queue).delayBy(delay)
   }
 
   override def run: IO[Unit] =
     for {
-      queue <- Queue.unbounded[IO, Int]
+      queue  <- Queue.unbounded[IO, Int]
       handle <- producer(50, 10.millis, queue).start
-      _ <- consumer(30.millis, queue)
-      _ <- handle.join
+      _      <- consumer(30.millis, queue)
+      _      <- handle.join
     } yield ()
 
   // question: how the bounded queue would behave?

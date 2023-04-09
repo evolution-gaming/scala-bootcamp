@@ -48,8 +48,8 @@ import cats.syntax.monoid._
 val collectWords: Flow[String, Map[String, Int], NotUsed] =
   Flow[String]
     .map(_.toLowerCase)
-    .scan(Map.empty[String, Int]) {
-      case (acc, word) => acc combine Map(word -> 1)
+    .scan(Map.empty[String, Int]) { case (acc, word) =>
+      acc combine Map(word -> 1)
     }
 
 val splitAndCount: Flow[String, Map[String, Int], NotUsed] = toWords.via(collectWords)
@@ -66,7 +66,7 @@ val lastElement: Sink[Map[String, Int], Future[Map[String, Int]]] = Sink.last[Ma
 // Last argument is a function to combine those two: (NotUsed, Future[...]) => ...
 // We only care about Future, shorthand Keep.right is useful here. (_, future) => future also works
 val graph: RunnableGraph[Future[Map[String, Int]]] =
-wordCounts.toMat(lastElement)(Keep.right)
+  wordCounts.toMat(lastElement)(Keep.right)
 
 // Usually stage combinators (like via) keep the left argument; use *Mat for overrides
 val kindOfUseless: RunnableGraph[NotUsed] = wordCounts.to(lastElement)
@@ -80,14 +80,14 @@ await {
   lines.via(toWords).via(collectWords).runWith(Sink.last)
 }
 
-
 // Example with potentially infinite streams
 // Source.cycle will repeat data from inputStr until explicitly stopped
 val lotsOfData: RunnableGraph[(UniqueKillSwitch, Future[Map[String, Int]])] =
-Source.cycle(() => inputStr.linesIterator)
-  .viaMat(KillSwitches.single)(Keep.right) // Allows to stop stream externally
-  .via(splitAndCount)
-  .toMat(Sink.last)(Keep.both) // We need both KillSwitch and stream result
+  Source
+    .cycle(() => inputStr.linesIterator)
+    .viaMat(KillSwitches.single)(Keep.right) // Allows to stop stream externally
+    .via(splitAndCount)
+    .toMat(Sink.last)(Keep.both) // We need both KillSwitch and stream result
 
 def runLots(): Map[String, Int] = {
   val (stop, resultFuture) = lotsOfData.run()
@@ -98,7 +98,6 @@ def runLots(): Map[String, Int] = {
   await(resultFuture)
 }
 //runLots()
-
 
 // Inputs
 
@@ -111,15 +110,14 @@ Source.tick(initialDelay = 1.second, interval = 10.seconds, tick = "tick")
 // unfold can be useful
 // Takes State => Option[(Next State, Output)]
 // There's unfoldAsync, unfoldResource, ... Can be used for e.g. polling a database
-val fib = Source.unfold(0 -> 1) {
-  case (a, b) => Some((b, a + b) -> a)
+val fib = Source.unfold(0 -> 1) { case (a, b) =>
+  Some((b, a + b) -> a)
 }
 debugPrint(fib.take(10))
 
 // Materializes into a queue. Elements inserted into that queue go into stream
 val external: Source[Int, SourceQueueWithComplete[Int]] =
   Source.queue[Int](10, OverflowStrategy.backpressure)
-
 
 // Processing
 
@@ -130,8 +128,8 @@ words.mapAsyncUnordered(2)(word => Future.successful(word.toLowerCase))
 // FSMs and stateful transformations
 // You've already seen scan
 // There's scanAsync, f returns Future[Output]
-words.scanAsync(Map.empty[String, Int]) {
-  case (acc, word) => Future.successful(acc combine Map(word -> 1))
+words.scanAsync(Map.empty[String, Int]) { case (acc, word) =>
+  Future.successful(acc combine Map(word -> 1))
 }
 
 // statefulMapConcat allows processing with mutable state
@@ -142,7 +140,7 @@ def zipWithPrevious2[T]: Flow[T, (T, T), NotUsed] = {
     value => {
       val result = prev match {
         case Some(prev) => Seq(prev -> value)
-        case None => Seq()
+        case None       => Seq()
       }
       prev = Some(value)
       result
@@ -150,7 +148,6 @@ def zipWithPrevious2[T]: Flow[T, (T, T), NotUsed] = {
   }
 }
 debugPrint(words.via(zipWithPrevious2))
-
 
 // Outputs
 
@@ -169,7 +166,6 @@ val collectedWords = await {
   words.runWith(Sink.seq)
 }
 
-
 // Print each element within pipeline, useful for debugging
 // .wireTap can also take any sink
 await {
@@ -178,7 +174,6 @@ await {
     .map(_.toLowerCase)
     .runWith(Sink.fold(Set.empty[String])(_ + _))
 }
-
 
 // Two sinks, words + counts
 // Difference between alsoTo and wireTap: alsoTo can backpressure, wireTap will skip elements
@@ -191,11 +186,10 @@ await {
     .run()
 }
 
-
 // Non-linear pipelines
 // Merges
 
-val int123 = Source(Seq(1, 2, 3))
+val int123  = Source(Seq(1, 2, 3))
 val int4567 = Source(Seq(4, 5, 6, 7))
 
 // Merge combines two streams of same type, ordering not guaranteed
@@ -206,26 +200,24 @@ debugPrint(int123.zip(int4567))
 debugPrint(int123.zipAll(int4567, -1, -2))
 
 val dualTicks = {
-  val left = int123.throttle(1, 20.millis).map(l => s"l:$l")
+  val left  = int123.throttle(1, 20.millis).map(l => s"l:$l")
   val right = int4567.throttle(1, 30.millis).map(r => s"r:$r")
   left.zipLatest(right)
 }
 debugPrint(dualTicks)
 
-
 // More involved non-linear pipelines generally require GraphDSL
 // Docs: https://doc.akka.io/docs/akka/current/stream/stream-graphs.html
 // Example: incoming integers, process odds and evens differently, merge outputs
 val processEven = Flow[Int].filter(_ % 2 == 0).map(even => s"Even: $even")
-val processOdd = Flow[Int].filter(_ % 2 != 0).map(odd => s"Odd: $odd")
+val processOdd  = Flow[Int].filter(_ % 2 != 0).map(odd => s"Odd: $odd")
 
 val splitOddEvens: Flow[Int, String, NotUsed] = Flow.fromGraph {
   GraphDSL.create() { implicit builder =>
     import GraphDSL.Implicits._
 
     val broadcast = builder.add(Broadcast[Int](2))
-    val merge = builder.add(Merge[String](2))
-
+    val merge     = builder.add(Merge[String](2))
 
     broadcast.out(0) ~> processEven ~> merge.in(0)
     broadcast.out(1) ~> processOdd ~> merge.in(1)
@@ -243,5 +235,3 @@ debugPrint {
 
 // Not covered: custom operators aka GraphStage
 // https://doc.akka.io/docs/akka/current/stream/stream-customize.html
-
-

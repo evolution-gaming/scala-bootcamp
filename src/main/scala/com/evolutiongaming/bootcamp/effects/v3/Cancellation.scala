@@ -48,15 +48,15 @@ object FutureTimeout extends IOApp {
   def run(args: List[String]): IO[ExitCode] =
     for {
       _ <- IO.fromFuture(
-             IO.delay(
-               Future.firstCompletedOf[Unit](
-                 Seq(
-                   runTask(10),
-                   completeAfter(5.seconds)
-                 )
-               )
-             )
-           )
+        IO.delay(
+          Future.firstCompletedOf[Unit](
+            Seq(
+              runTask(10),
+              completeAfter(5.seconds),
+            )
+          )
+        )
+      )
       //      _ <- IO.sleep(5.seconds)
     } yield ExitCode.Success
 }
@@ -173,9 +173,9 @@ object Cancellable extends IOApp {
       _     <- IO.delay(println(s"Started $fiber"))
       res   <- IO.race(IO.sleep(10.seconds), fiber.join)
       _     <- res.fold(
-                 _ => IO.delay(println(s"cancelling $fiber...")) *> fiber.cancel *> IO.delay(println("IO cancelled")),
-                 i => IO.delay(println(s"IO completed with: $i"))
-               )
+        _ => IO.delay(println(s"cancelling $fiber...")) *> fiber.cancel *> IO.delay(println("IO cancelled")),
+        i => IO.delay(println(s"IO completed with: $i")),
+      )
     } yield ExitCode.Success
 
     program.guarantee(IO(ec.shutdown()))
@@ -208,7 +208,7 @@ object CancelBoundaries extends IOApp {
 
   val nonCancelableProgram: IO[Unit] = {
 
-    //program has no context shift and no cancel boundary set, it's not cancellable
+    // program has no context shift and no cancel boundary set, it's not cancellable
     def nonCancellableTimes(rec: Int): IO[Unit] =
       for {
         _ <- IO.delay(println(s"Running remaining iterations: $rec"))
@@ -222,14 +222,14 @@ object CancelBoundaries extends IOApp {
       _   <- IO.sleep(5.seconds)
       _   <- fib.cancel
       _   <- IO.delay(println("Cancelled nonCancelableProgram"))
-      _   <- IO.sleep(5.seconds) //just to keep program alive
+      _   <- IO.sleep(5.seconds) // just to keep program alive
       _   <- IO.delay(println("End nonCancelableProgram"))
     } yield ()
   }
 
   val cancelableProgram: IO[Unit] = {
 
-    //on every iteration cancel boundary is set, program is cancellable
+    // on every iteration cancel boundary is set, program is cancellable
     def cancellableTimes(rec: Int): IO[Unit] =
       for {
         _ <- IO.delay(println(s"Running remaining iterations: $rec"))
@@ -243,7 +243,7 @@ object CancelBoundaries extends IOApp {
       _   <- IO.sleep(5.seconds)
       _   <- fib.cancel
       _   <- IO.delay(println("Cancelled cancelableProgram"))
-      _   <- IO.sleep(5.seconds) //just to keep program alive
+      _   <- IO.sleep(5.seconds) // just to keep program alive
       _   <- IO.delay(println("End cancelableProgram"))
     } yield ()
   }
@@ -268,34 +268,33 @@ object CancelBoundariesExercise extends IOApp {
       def retry(
         id: String,
         maxRetries: Int,
-        interval: FiniteDuration
+        interval: FiniteDuration,
       ): IO[A] =
         task
-          .handleErrorWith {
-            case NonFatal(e) =>
-              IO
-                .delay(println(s"$id Retrying... retries left: $maxRetries"))
-                .flatMap { _ =>
-                  if (maxRetries <= 0) IO.raiseError(e)
-                  else
-                    delay(interval) *> IO.defer(
-                      task.retry(
-                        id,
-                        maxRetries - 1,
-                        interval
-                      )
+          .handleErrorWith { case NonFatal(e) =>
+            IO
+              .delay(println(s"$id Retrying... retries left: $maxRetries"))
+              .flatMap { _ =>
+                if (maxRetries <= 0) IO.raiseError(e)
+                else
+                  delay(interval) *> IO.defer(
+                    task.retry(
+                      id,
+                      maxRetries - 1,
+                      interval,
                     )
-                }
+                  )
+              }
           }
     }
 
     val io = IO.delay(if (Random.nextBoolean()) throw new RuntimeException("kaboom!") else "SUCCESS!")
     for {
       fib <- (0 to 10).toList
-               .map(id => io.retry(s"id:$id", 10, 5.second))
-               .parSequence
-               .flatMap(ll => IO.delay(println(ll.toString())))
-               .start
+        .map(id => io.retry(s"id:$id", 10, 5.second))
+        .parSequence
+        .flatMap(ll => IO.delay(println(ll.toString())))
+        .start
       _   <- IO.sleep(5.seconds)
       _   <- fib.cancel
       _   <- IO.delay(println("No more work after this point"))

@@ -40,28 +40,30 @@ wordCount.runSyncUnsafe()
 // Task[T] can be converted to other CE-compatible F[_]s, e.g. IO
 val wordCountIO: IO[Map[String, Int]] = wordCount.to[IO]
 
-
 // For reuse in following samples
 val words = lines.pipe(splitWords)
-
 
 // Inputs
 Observable(1, 2, 3)
 Observable.fromIterable(Seq(1, 2, 3))
 
 // Task => single-element Observable
-Observable.fromTask(Task {
-  println("Side-effect!")
-  42
-})
-  .toListL.runSyncUnsafe()
+Observable
+  .fromTask(Task {
+    println("Side-effect!")
+    42
+  })
+  .toListL
+  .runSyncUnsafe()
 
 // Also works for IO
-Observable.fromTaskLike(IO {
-  println("Also side-effect!")
-  43
-})
-  .toListL.runSyncUnsafe()
+Observable
+  .fromTaskLike(IO {
+    println("Also side-effect!")
+    43
+  })
+  .toListL
+  .runSyncUnsafe()
 
 // Construct from single-element effect types
 Observable.from(Task(42))
@@ -72,12 +74,12 @@ Observable.from(io.circe.parser.parse("[]")) // From Either[Throwable, T]
 Observable.from(Seq(1, 2, 3))
 
 // Ticks
-val ticksSample = Observable.intervalWithFixedDelay(100.millis, 400.millis)
+val ticksSample = Observable
+  .intervalWithFixedDelay(100.millis, 400.millis)
   .dump("ticks")
   .takeByTimespan(1.second)
   .completedL
 //ticksSample.runSyncUnsafe()
-
 
 // Observable.create is useful for wrapping callback-style APIs
 trait AsyncCallbackyApi[T] {
@@ -98,15 +100,18 @@ def callbackyToObservable[T](api: AsyncCallbackyApi[T]): Observable[T] = {
 // A => Task[B]
 words.mapEval(word => Task(word.toLowerCase))
 // For generic F[_], e.g. IO
-words.mapEvalF(word => IO {
-  println(s"Processing $word")
-  word.toLowerCase
-})
+words.mapEvalF(word =>
+  IO {
+    println(s"Processing $word")
+    word.toLowerCase
+  }
+)
 
 // "generic F[_]" includes Either
 Observable("{}", "[1, 2, 3]")
   .mapEvalF(io.circe.parser.parse)
-  .toListL.runSyncUnsafe()
+  .toListL
+  .runSyncUnsafe()
 
 // Parallel versions
 words.mapParallelOrdered(4)(word => Task(println(word)))
@@ -115,11 +120,17 @@ words.mapParallelUnorderedF(4)(word => IO(println(word)))
 // FSMs
 
 // scan doesn't emit seed element at start
-words.scan("!") { case (acc, word) => acc + word.take(1) }
-  .dump("scan").completedL.runSyncUnsafe()
+words
+  .scan("!") { case (acc, word) => acc + word.take(1) }
+  .dump("scan")
+  .completedL
+  .runSyncUnsafe()
 // scan0 does. Same is true for other scan variations
-words.scan0("!") { case (acc, word) => acc + word.take(1) }
-  .dump("scan0").completedL.runSyncUnsafe()
+words
+  .scan0("!") { case (acc, word) => acc + word.take(1) }
+  .dump("scan0")
+  .completedL
+  .runSyncUnsafe()
 
 // Async version
 words.scanEval(Task("!")) { case (acc, word) => Task(acc + word.take(1)) }
@@ -128,13 +139,16 @@ words.scanEvalF(IO("!")) { case (acc, word) => IO(acc + word.take(1)) }
 // mapAccumulate, takes (State, T) => (State, Output), returns Observable[Output]
 def zipWithPrevious[T](in: Observable[T]): Observable[(T, T)] = {
   in.mapAccumulate(Option.empty[T]) {
-    case (None, value) => Some(value) -> Option.empty[(T, T)]
+    case (None, value)       => Some(value) -> Option.empty[(T, T)]
     case (Some(prev), value) => Some(value) -> Option(prev -> value)
   }.collect { case Some(value) => value }
 }
 
-words.pipe(zipWithPrevious)
-  .dump("words-prev").completedL.runSyncUnsafe()
+words
+  .pipe(zipWithPrevious)
+  .dump("words-prev")
+  .completedL
+  .runSyncUnsafe()
 
 // doOn* for callbacks on various stream stages
 lines
@@ -143,7 +157,8 @@ lines
   .doOnNext(word => Task(println(s"OnNext: $word")))
   .doOnCompleteF(IO(println("OnComplete")))
   .guaranteeCase(exitCase => Task(println(s"guarantee: $exitCase"))) // cats.effect.ExitCase
-  .completedL.runSyncUnsafe()
+  .completedL
+  .runSyncUnsafe()
 
 // Sinks
 // Basic sinks (returning Task[_]) are available directly on Observable
@@ -168,26 +183,23 @@ words.consumeWith {
 }
 
 // Consumer.loadBalance runs several consumers in parallel, each element is consumed only once
-words.consumeWith {
-  Consumer.loadBalance(3, Consumer.toList[String])
-}.runSyncUnsafe()
+words
+  .consumeWith {
+    Consumer.loadBalance(3, Consumer.toList[String])
+  }
+  .runSyncUnsafe()
 
 // Shorthand for load-balanced foreach
 Consumer.foreachParallelTask[String](4)(word => Task(println(word)))
 
-
 // Splits, merges, non-linear pipelines
 val duellingInts = Observable(
   Observable(1, 2, 3).delayOnNext(10.millis),
-  Observable(4, 5, 6).delayOnNext(10.millis)
+  Observable(4, 5, 6).delayOnNext(10.millis),
 )
-duellingInts.merge
-  .toListL.runSyncUnsafe()
-duellingInts.concat
-  .toListL.runSyncUnsafe()
-duellingInts.delayOnNext(25.millis)
-  .switch
-  .toListL.runSyncUnsafe()
+duellingInts.merge.toListL.runSyncUnsafe()
+duellingInts.concat.toListL.runSyncUnsafe()
+duellingInts.delayOnNext(25.millis).switch.toListL.runSyncUnsafe()
 
 // There are versions of those combined with map()
 // Those take A => Observable[B] argument and combine results in corresponding way
@@ -198,22 +210,28 @@ words.switchMap(_ => Observable.empty)
 words.flatMap(_ => Observable.empty)
 
 // groupBy returns stream of (stream per group)
-words.groupBy(_.take(1))
+words
+  .groupBy(_.take(1))
   .mergeMap(group => group.last.map(group.key -> _))
-  .toListL.runSyncUnsafe()
+  .toListL
+  .runSyncUnsafe()
 
 // combineLatest emits a tuple when either of arguments emits an item
-Observable.combineLatest2(
-  Observable(1, 2, 3).delayOnNext(20.millis),
-  Observable(4, 5, 6).delayOnNext(30.millis)
-).toListL.runSyncUnsafe()
+Observable
+  .combineLatest2(
+    Observable(1, 2, 3).delayOnNext(20.millis),
+    Observable(4, 5, 6).delayOnNext(30.millis),
+  )
+  .toListL
+  .runSyncUnsafe()
 // There is combineLatestMap* taking a function to map tuple to something else
 
 // withLatestFrom is similar to combineLatest, but emits only on items from left side
-words.delayOnNext(5.millis)
+words
+  .delayOnNext(5.millis)
   .withLatestFrom(Observable.intervalWithFixedDelay(1.milli))(_ -> _)
-  .toListL.runSyncUnsafe()
-
+  .toListL
+  .runSyncUnsafe()
 
 // Multiple consumers
 val wordsLogSubscribe = words.doOnStart(_ => Task(println("Starting")))
@@ -239,13 +257,16 @@ wordsLogSubscribe
   .publishSelector { hot: Observable[String] => // can be subscribed multiple times
     val results = countAndCollect(hot)
     Observable.from(results) // Return single-element Observable with results
-  }.lastL.runSyncUnsafe()
+  }
+  .lastL
+  .runSyncUnsafe()
 
 // Split processing example
-Observable.range(1, 10)
+Observable
+  .range(1, 10)
   .publishSelector { hot =>
     Observable(
       hot.filter(_ % 2 != 0).map(odd => s"Odd: $odd"),
-      hot.filter(_ % 2 == 0).map(even => s"Even: $even")
+      hot.filter(_ % 2 == 0).map(even => s"Even: $even"),
     ).merge
   }

@@ -15,13 +15,13 @@ import slick.lifted.{ProvenShape, ForeignKeyQuery}
 object HelloSlick extends App {
   val config = ConfigFactory.parseString(
     """
-       |h2mem1 = {
-       |  url = "jdbc:h2:mem:test1"
-       |  driver = org.h2.Driver
-       |  connectionPool = disabled
-       |  keepAliveConnection = true
-       |}
-       |""".stripMargin,
+      |h2mem1 = {
+      |  url = "jdbc:h2:mem:test1"
+      |  driver = org.h2.Driver
+      |  connectionPool = disabled
+      |  keepAliveConnection = true
+      |}
+      |""".stripMargin
   )
 
   val db = Database.forConfig("h2mem1", config)
@@ -47,7 +47,7 @@ object HelloSlick extends App {
 
     val f = setupFuture
       .flatMap { _ =>
-        //#insertAction
+        // #insertAction
         // Insert some coffees (using JDBC's batch insert feature)
         val insertAction: DBIO[Option[Int]] = coffees ++= Seq(
           ("Colombian", 101, 7.99, 0, 0),
@@ -63,7 +63,7 @@ object HelloSlick extends App {
             println(s"Inserted $numRows rows into the Coffees table")
           }
         }
-        //#insertAction
+        // #insertAction
 
         val allSuppliersAction: DBIO[Seq[(Int, String, String, String, String, String)]] =
           suppliers.result
@@ -148,7 +148,7 @@ object HelloSlick extends App {
 
         println(
           "Generated SQL for query sorted by price:\n" +
-            sortByPriceQuery.result.statements,
+            sortByPriceQuery.result.statements
         )
 
         // Execute the query
@@ -163,7 +163,7 @@ object HelloSlick extends App {
 
         println(
           "Generated SQL for composed query:\n" +
-            composedQuery.result.statements,
+            composedQuery.result.statements
         )
 
         // Execute the composed query
@@ -188,10 +188,10 @@ object HelloSlick extends App {
       .flatMap { _ =>
         /* Computed Values */
 
-        //#maxPrice
+        // #maxPrice
         // Create a new scalar value that calculates the maximum price
         val maxPrice: Rep[Option[Double]] = coffees.map(_.price).max
-        //#maxPrice
+        // #maxPrice
 
         println("Generated SQL for max price column:\n" + maxPrice.result.statements)
 
@@ -200,7 +200,7 @@ object HelloSlick extends App {
 
       }
       .flatMap { _ =>
-        //#plainSql
+        // #plainSql
         /* Manual SQL / String Interpolation */
 
         // A value to insert into the statement
@@ -208,7 +208,7 @@ object HelloSlick extends App {
 
         // Construct a SQL statement manually with an interpolated value
         val plainQuery = sql"select SUP_NAME from SUPPLIERS where STATE = $state".as[String]
-        //#plainSql
+        // #plainSql
 
         println("Generated SQL for plain query:\n" + plainQuery.statements)
 
@@ -224,12 +224,12 @@ object HelloSlick extends App {
   class Suppliers(tag: Tag) extends Table[(Int, String, String, String, String, String)](tag, "SUPPLIERS") {
 
     // This is the primary key column:
-    def id: Rep[Int] = column[Int]("SUP_ID", O.PrimaryKey)
-    def name: Rep[String] = column[String]("SUP_NAME")
+    def id: Rep[Int]        = column[Int]("SUP_ID", O.PrimaryKey)
+    def name: Rep[String]   = column[String]("SUP_NAME")
     def street: Rep[String] = column[String]("STREET")
-    def city: Rep[String] = column[String]("CITY")
-    def state: Rep[String] = column[String]("STATE")
-    def zip: Rep[String] = column[String]("ZIP")
+    def city: Rep[String]   = column[String]("CITY")
+    def state: Rep[String]  = column[String]("STATE")
+    def zip: Rep[String]    = column[String]("ZIP")
 
     // Every table needs a * projection with the same type as the table's type parameter
     def * : ProvenShape[(Int, String, String, String, String, String)] =
@@ -239,11 +239,11 @@ object HelloSlick extends App {
   // A Coffees table with 5 columns: name, supplier id, price, sales, total
   class Coffees(tag: Tag) extends Table[(String, Int, Double, Int, Int)](tag, "COFFEES") {
 
-    def name: Rep[String] = column[String]("COF_NAME", O.PrimaryKey)
-    def supID: Rep[Int] = column[Int]("SUP_ID")
+    def name: Rep[String]  = column[String]("COF_NAME", O.PrimaryKey)
+    def supID: Rep[Int]    = column[Int]("SUP_ID")
     def price: Rep[Double] = column[Double]("PRICE")
-    def sales: Rep[Int] = column[Int]("SALES")
-    def total: Rep[Int] = column[Int]("TOTAL")
+    def sales: Rep[Int]    = column[Int]("SALES")
+    def total: Rep[Int]    = column[Int]("TOTAL")
 
     def * : ProvenShape[(String, Int, Double, Int, Int)] =
       (name, supID, price, sales, total)

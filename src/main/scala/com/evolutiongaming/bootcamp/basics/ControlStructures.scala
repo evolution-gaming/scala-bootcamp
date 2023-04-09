@@ -70,8 +70,8 @@ object ControlStructures {
   sealed trait Shape
 
   object Shape {
-    case object Origin extends Shape
-    final case class Circle(radius: Double) extends Shape
+    case object Origin                                        extends Shape
+    final case class Circle(radius: Double)                   extends Shape
     final case class Rectangle(width: Double, height: Double) extends Shape
   }
 
@@ -86,9 +86,9 @@ object ControlStructures {
 
   // Exhaustiveness checking (pay attention to compilation warning)
   def matchOnShape2(s: Shape): String = s match {
-    case Origin               => s"Found the origin."
-    case circle: Circle       => s"Found a circle $circle."
-    //case rectangle: Rectangle => s"Found a rectangle $rectangle."
+    case Origin         => s"Found the origin."
+    case circle: Circle => s"Found a circle $circle."
+    // case rectangle: Rectangle => s"Found a rectangle $rectangle."
   }
 
   // Unapply the instance of Shape
@@ -267,7 +267,7 @@ object ControlStructures {
     service: UserService,
     fromUserWithName: String,
     toUserWithName: String,
-    amount: Amount
+    amount: Amount,
   ): Either[ErrorMessage, (Amount, Amount)] = {
     // Replace with a proper implementation that uses validateUserName on each name,
     // findUserId to find UserId, validateAmount on the amount, findBalance to find previous
@@ -314,12 +314,12 @@ object ControlStructures {
     // This code is only here to illustrate try-catch-finally, it shouldn't be considered as good code
     val source = Source.fromFile(fileName)
     try // executed until an exception happens
-    source.getLines() foreach println
+      source.getLines() foreach println
     catch { // exception handlers
       case e: FileNotFoundException => println(s"Couldn't find the file: $e")
       case e: Exception             => println(s"Exception occurred: $e")
     } finally // executed even if an exception happens
-    source.close
+      source.close
   }
 
   // Question. What issues can you find with the above `printFile` method?

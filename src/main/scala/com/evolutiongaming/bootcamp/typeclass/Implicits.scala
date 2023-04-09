@@ -19,7 +19,7 @@ object Implicits {
   automagically? Today is your lucky day!
    */
   object ImplicitConversions {
-    //implicit conversions defined in the lexical scope
+    // implicit conversions defined in the lexical scope
     implicit def intToString(value: Int): String = value.toString
 
     def repeatStrTwice(string: String): String = string * 2
@@ -28,8 +28,8 @@ object Implicits {
     Here we have a String arg required but we passed an Int. Before stopping compilation with an error, the
     Scala compiler tries to find an implicit conversion functions chain which would give us Int => String.
      */
-    //equivalent to repeatStrTwice(intToString(42))
-    repeatStrTwice(42) //If God does not exist, everything is permitted
+    // equivalent to repeatStrTwice(intToString(42))
+    repeatStrTwice(42) // If God does not exist, everything is permitted
   }
 
   /*
@@ -48,7 +48,7 @@ object Implicits {
     }
 
     object Workspace {
-      //implicit conversion coming from an import
+      // implicit conversion coming from an import
       import Implicits._
 
       def veryImportantPieceOfWork(): Unit = {
@@ -57,8 +57,8 @@ object Implicits {
           String doesn't have "def yolo()" method. What are we going to do?
           Find an implicit conversion String => T, where T has the right method!
            */
-          //equivalent to stringToYoloRichString("my very important value").yolo()
-          //which is the same as new YoloRichString("my very important value").yolo()
+          // equivalent to stringToYoloRichString("my very important value").yolo()
+          // which is the same as new YoloRichString("my very important value").yolo()
           "my very important value".yolo()
         )
       }
@@ -87,7 +87,7 @@ object Implicits {
     }
 
     object Workspace {
-      //implicit class coming from an import
+      // implicit class coming from an import
       import Implicits._
 
       /*
@@ -115,11 +115,11 @@ object Implicits {
     val CommonEraStart: Instant = Instant.parse("0000-01-01T00:00:00.000Z")
 
     object Implicits {
-      //put your implicit class or implicit conversion function here
+      // put your implicit class or implicit conversion function here
     }
 
     object Workspace {
-      //use isBce extension method to implement this one
+      // use isBce extension method to implement this one
       def isCe(instant: Instant): Boolean = ???
     }
   }
@@ -138,36 +138,36 @@ object Implicits {
     The last parameter list of a method can be marked as implicit - in this case the last parameter list can
     be omitted when the method is called, given that required implicit values can be obtained from the scope.
      */
-    //just one implicit parameters list
+    // just one implicit parameters list
     def openTheBox(implicit key: MagicKey): String = s"Magic box opened with $key"
 
-    //multiple parameter lists with multiple implicit parameters in the end
+    // multiple parameter lists with multiple implicit parameters in the end
     def putNumbersInTheBox(
-      number1: Int,
+      number1: Int
     )(
-      number2: Int,
+      number2: Int
     )(implicit
       key: MagicKey,
       potion: MagicPotion,
     ): String = s"Number $number1 and $number2 have been put in the magic box using $key and $potion"
 
     object Implicits {
-      //implicit values can be a 'val'
+      // implicit values can be a 'val'
       implicit val magicKey: MagicKey = MagicKey("open-sesame")
-      //could be an object
+      // could be an object
       implicit object TheMagicPotion extends MagicPotion
-      //even could be a def! but more on that later
+      // even could be a def! but more on that later
     }
 
     object Workspace {
       import Implicits._
 
       lazy val myStory: Vector[String] = Vector(
-        openTheBox, //equivalent to openTheBox(Implicits.magicKey)
+        openTheBox, // equivalent to openTheBox(Implicits.magicKey)
         putNumbersInTheBox(1)(2),
-        //= putNumbersInTheBox(1)(2)(Implicits.magicKey, Implicits.TheMagicPotion),
+        // = putNumbersInTheBox(1)(2)(Implicits.magicKey, Implicits.TheMagicPotion),
 
-        //implicit parameters can also be passed directly:
+        // implicit parameters can also be passed directly:
         openTheBox(MagicKey("another-key")),
       )
     }
@@ -180,7 +180,7 @@ object Implicits {
    * And this is where the real magic begin!
    */
   object MoreImplicitParameters {
-    //Let's call this thing a type-class!
+    // Let's call this thing a type-class!
     trait Show[-T] {
       def apply(value: T): String
     }
@@ -195,7 +195,7 @@ object Implicits {
       implicitly[Show[T]].apply(value)
 
     object syntax {
-      //our old friend implicit conversion but now with an implicit value requirement
+      // our old friend implicit conversion but now with an implicit value requirement
       implicit class ShowOps[T: Show](inner: T) {
         def show: String = MoreImplicitParameters.show(inner)
       }
@@ -208,11 +208,11 @@ object Implicits {
       Here we extend all the possible logic working on Show, to work on some standard library types.
        */
 
-      //for String's
-      implicit val stringShow: Show[String] = (value: String) => value
-      //for Int's
-      implicit val intShow: Show[Int] = (value: Int) => value.toString
-      //even for any Seq[T] where T itself has a Show instance
+      // for String's
+      implicit val stringShow: Show[String]       = (value: String) => value
+      // for Int's
+      implicit val intShow: Show[Int]             = (value: Int) => value.toString
+      // even for any Seq[T] where T itself has a Show instance
       implicit def seqShow[T: Show]: Show[Seq[T]] =
         (value: Seq[T]) => value.map(show(_)).mkString("(", ", ", ")")
     }
@@ -227,7 +227,7 @@ object Implicits {
       case class MyLuckyNumber(value: Int)
       object MyLuckyNumber {
         implicit val myLuckyNumberShow: Show[MyLuckyNumber] =
-          (luckyNumber: MyLuckyNumber) => s"lucky ${ luckyNumber.value }"
+          (luckyNumber: MyLuckyNumber) => s"lucky ${luckyNumber.value}"
       }
 
       def showEverything(): Unit = {
@@ -246,7 +246,7 @@ object Implicits {
   Let us create a reverseShow method which should be defined for any T which has a Show type-class instance
    */
   object Exercise2 {
-    //change the method signature accordingly
+    // change the method signature accordingly
     def reverseShow(value: Any): String = ???
   }
 
@@ -258,10 +258,10 @@ object Implicits {
   Let's get to know them better!
    */
   object Exercise3 {
-    /**
-     * Amount of years since the invention of the
-     * hyper-drive technology (we are certainly in negative values at the moment).
-     */
+
+    /** Amount of years since the invention of the
+      * hyper-drive technology (we are certainly in negative values at the moment).
+      */
     case class HDEYears(value: Long)
 
     /*
@@ -274,11 +274,9 @@ object Implicits {
      */
     def secondBiggestValue[T](values: Seq[T]): Option[T] = ???
 
-
-    /**
-     * Custom number type!
-     * For now it just wraps a Float but more interesting stuff could come in the future, who knows...
-     */
+    /** Custom number type!
+      * For now it just wraps a Float but more interesting stuff could come in the future, who knows...
+      */
     case class CustomNumber(value: Float)
 
     /*
@@ -316,7 +314,7 @@ object Implicits {
           case Some(t) => f(s, t)
         }
     }
-    implicit val listFoldable: Foldable[List] = new Foldable[List] {
+    implicit val listFoldable: Foldable[List]     = new Foldable[List] {
       override def foldLeft[T, S](ft: List[T], s: S)(f: (S, T) => S): S =
         ft.foldLeft(s)(f)
     }

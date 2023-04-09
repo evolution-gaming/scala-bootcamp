@@ -6,11 +6,11 @@ import org.scalatest.matchers.should.Matchers._
 
 val number = 3
 
-number should equal (3) // can customize equality
-number should === (3)   // can customize equality and enforce type constraints
-number should be (3)    // cannot customize equality, so fastest to compile
-number shouldEqual 3    // can customize equality, no parentheses required
-number shouldBe 3       // cannot customize equality, so fastest to compile, no parentheses required
+number should equal(3) // can customize equality
+number should ===(3) // can customize equality and enforce type constraints
+number should be(3) // cannot customize equality, so fastest to compile
+number shouldEqual 3 // can customize equality, no parentheses required
+number shouldBe 3 // cannot customize equality, so fastest to compile, no parentheses required
 
 // Checking size, length, emptiness
 
@@ -25,9 +25,9 @@ list should not be empty
 
 val string = "Hello world"
 
-string should startWith ("Hello")
-string should endWith ("world")
-string should include ("ll")
+string should startWith("Hello")
+string should endWith("world")
+string should include("ll")
 
 string should startWith regex "Hel*o"
 string should endWith regex "wo.ld"
@@ -44,21 +44,21 @@ number should be >= 0
 
 // Checking an object's class
 
-list shouldBe a [List[_]]
-list should not be a [Set[_]]
-list should not be an [Int]
+list shouldBe a[List[_]]
+list should not be a[Set[_]]
+list should not be an[Int]
 
 // Checking numbers against a range
 
-number should equal (4 +- 1)
-number should === (4 +- 1)
-number should be (4 +- 1)
+number should equal(4 +- 1)
+number should ===(4 +- 1)
+number should be(4 +- 1)
 number shouldEqual 4 +- 1
 number shouldBe 4 +- 1
 
 // Working with containers
 
-list should contain (2)
+list should contain(2)
 
 list should contain oneOf (0, 3, 9)
 list should contain oneElementOf Set(0, 3, 9)

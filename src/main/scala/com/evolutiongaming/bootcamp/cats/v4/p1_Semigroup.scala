@@ -39,13 +39,13 @@ object p1_Semigroup {
   // final case class User()
   // implicitly[Semigroup[User]]
 
-  val result: Int = 1 combine 2 //  = 3
+  val result: Int  = 1 combine 2 //  = 3
   // we also can use a shorter alias
   val result2: Int = 1 |+| 2
 
   import cats.syntax.option._
 
-  val optResult: Option[Int] = Option(3) |+| Option(7) // Some(10)
+  val optResult: Option[Int]     = Option(3) |+| Option(7) // Some(10)
   val someOptResult: Option[Int] = 3.some |+| 7.some // Some(10)
 
   import cats.data.NonEmptyList

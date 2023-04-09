@@ -18,8 +18,8 @@ case class Calculator(memory: Int = 0, screen: Int = 0, operation: Option[Operat
 
   def plus: Calculator = this.copy(operation = Some(Operation.Plus))
 
-  def calculate: Calculator = operation.fold(this) {
-    case Operation.Plus => Calculator(memory = 0, screen = screen + memory)
+  def calculate: Calculator = operation.fold(this) { case Operation.Plus =>
+    Calculator(memory = 0, screen = screen + memory)
   }
 
 }

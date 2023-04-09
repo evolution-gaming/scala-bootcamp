@@ -34,16 +34,16 @@ object TrieVector extends StrictOptimizedSeqFactory[TrieVector] {
   def from[A](source: IterableOnce[A]): TrieVector[A] =
     source.iterator.foldLeft(empty[A])(_ :+ _)
 
-  val emptyVector: TrieVector[Nothing] = new TrieVector(PackedIntTrie.Empty, 0, 0)
-  def empty[A]: TrieVector[A] = emptyVector
+  val emptyVector: TrieVector[Nothing]         = new TrieVector(PackedIntTrie.Empty, 0, 0)
+  def empty[A]: TrieVector[A]                  = emptyVector
   def newBuilder[A]: Builder[A, TrieVector[A]] = new ReusableBuilder[A, TrieVector[A]] {
-    var trie = empty[A]
+    var trie                       = empty[A]
     def addOne(elem: A): this.type = {
       trie :+= elem
       this
     }
-    def clear(): Unit = trie = empty[A]
-    def result(): TrieVector[A] = trie
+    def clear(): Unit              = trie = empty[A]
+    def result(): TrieVector[A]    = trie
   }
 }
 

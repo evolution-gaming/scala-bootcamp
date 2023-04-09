@@ -31,10 +31,10 @@ object ImplicitResolution extends App {
     def default: Printer = new Printer {
       def print(string: String) = println(string)
     }
-    def evil: Printer = new Printer {
+    def evil: Printer    = new Printer {
       def print(string: String) = sys.error(string)
     }
-    def silent: Printer = new Printer {
+    def silent: Printer  = new Printer {
       def print(string: String) = ()
     }
   }
@@ -52,7 +52,7 @@ object ImplicitResolution extends App {
     destroyTheWorld()
     congratulate(name)
   }
-  def doNotCallThisIsUnsafe()(implicit printer: Printer): Unit = {
+  def doNotCallThisIsUnsafe()(implicit printer: Printer): Unit                  = {
     disappoint()
   }
 

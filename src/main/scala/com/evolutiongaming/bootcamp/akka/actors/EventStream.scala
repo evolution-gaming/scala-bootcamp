@@ -11,9 +11,8 @@ object EventStream extends App {
 
   // listener
   final class AlertListener extends Actor with ActorLogging {
-    override def receive: Receive = {
-      case Alert(time, source) =>
-        log.warning(s"something bad happened from $source at $time")
+    override def receive: Receive = { case Alert(time, source) =>
+      log.warning(s"something bad happened from $source at $time")
     }
   }
   object AlertListener {

@@ -52,8 +52,8 @@ object PersonTL {
 
   // add with Singleton
   def apply[name <: String with Singleton, age <: Int with Singleton](
-      name: name,
-      age: age
+    name: name,
+    age: age,
   ): PersonTL[name, age] = person
 }
 
@@ -62,7 +62,7 @@ PersonTL("Oleg", 37)
 val persons = (
   PersonTL("Oleg", 37),
   PersonTL("Tbilisi", 1568),
-  PersonTL("Miyuki", 16)
+  PersonTL("Miyuki", 16),
 )
 
 object Collect {
@@ -72,8 +72,8 @@ object Collect {
 
   object Materialize extends Poly1 {
     implicit def casePersonTL[name <: String, age <: Int](implicit
-        name: ValueOf[name],
-        age: ValueOf[age]
+      name: ValueOf[name],
+      age: ValueOf[age],
     ) = at[PersonTL[name, age]](person => Person(name.value, age.value))
   }
 
@@ -220,15 +220,15 @@ abstract class EntityService[e <: Entity with Singleton](val e: e) {
   def codecs: EntityCodecs[e.type]
 
   def read(id: String): Either[String, String] = for {
-    id <- codecs.decodeId(id)
+    id   <- codecs.decodeId(id)
     data <- reader.read(id).toRight("Not found")
   } yield codecs.encodeData(data)
 }
 
 object EntityService {
   def apply(e: Entity)(
-      eReader: EntityReader[e.type],
-      eCodecs: EntityCodecs[e.type]
+    eReader: EntityReader[e.type],
+    eCodecs: EntityCodecs[e.type],
   ): EntityService[e.type] = new EntityService[e.type](e) {
     override val reader: EntityReader[e.type] = eReader
     override val codecs: EntityCodecs[e.type] = eCodecs

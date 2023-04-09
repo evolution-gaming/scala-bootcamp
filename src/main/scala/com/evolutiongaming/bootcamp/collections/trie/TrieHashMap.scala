@@ -25,7 +25,7 @@ final class TrieHashMap[K, +V](values: PackedIntTrie[List[(K, V)]])
   override def removed(key: K): TrieHashMap[K, V] = {
     val hash = key.hashCode()
     values.get(hash) match {
-      case None => this
+      case None       => this
       case Some(list) =>
         new TrieHashMap(values.updated(hash, list.filter(_._1 != key)))
     }
@@ -57,13 +57,13 @@ object TrieHashMap extends MapFactory[TrieHashMap] {
 
   override def newBuilder[K, V]: Builder[(K, V), TrieHashMap[K, V]] =
     new ReusableBuilder[(K, V), TrieHashMap[K, V]] {
-      private var map = empty[K, V]
+      private var map                              = empty[K, V]
       override def addOne(elem: (K, V)): this.type = {
         map = map.updated(elem._1, elem._2)
         this
       }
-      override def clear(): Unit = map = empty
-      override def result(): TrieHashMap[K, V] = map
+      override def clear(): Unit                   = map = empty
+      override def result(): TrieHashMap[K, V]     = map
     }
 
 }

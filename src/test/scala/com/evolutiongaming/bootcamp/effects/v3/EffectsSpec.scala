@@ -26,20 +26,20 @@ class EffectsSpec extends AsyncFreeSpec with AsyncIOSpec with Matchers {
 
     override def putString(value: String): IO[Unit] =
       expectedOutput match {
-        case Nil                   =>
+        case Nil =>
           IO.raiseError(sys.error(s"Writing `$value` unexpectedly"))
 
         case x :: xs if x == value =>
           expectedOutput = xs
           IO.unit
 
-        case x :: xs               =>
+        case x :: xs =>
           IO.raiseError(sys.error(s"Writing `$value` but expected `$x` (remaining in buffer $xs)"))
       }
 
     override def readString: IO[String] =
       providedInput match {
-        case Nil     =>
+        case Nil =>
           IO.raiseError(sys.error(s"Cannot read - out of provided input"))
 
         case x :: xs =>
@@ -67,7 +67,7 @@ class EffectsSpec extends AsyncFreeSpec with AsyncIOSpec with Matchers {
         _.expectOutput("What is your favourite animal?")
           .provideInput("dogs")
           .expectOutput("Be the person your dog thinks you are."),
-        ExitCode.Success
+        ExitCode.Success,
       )
     }
 
@@ -76,7 +76,7 @@ class EffectsSpec extends AsyncFreeSpec with AsyncIOSpec with Matchers {
         _.expectOutput("What is your favourite animal?")
           .provideInput("cats")
           .expectOutput("In ancient times cats were worshipped as gods; they have not forgotten this."),
-        ExitCode.Success
+        ExitCode.Success,
       )
     }
 
@@ -91,7 +91,7 @@ class EffectsSpec extends AsyncFreeSpec with AsyncIOSpec with Matchers {
           .expectOutput("What is your favourite animal?")
           .provideInput("elephants")
           .expectOutput("I don't know what to say about 'elephants'."),
-        ExitCode.Success
+        ExitCode.Success,
       )
     }
 
@@ -106,7 +106,7 @@ class EffectsSpec extends AsyncFreeSpec with AsyncIOSpec with Matchers {
           .expectOutput("What is your favourite animal?")
           .provideInput("   ")
           .expectOutput("I am disappointed. You have failed to answer too many times."),
-        ExitCode.Error
+        ExitCode.Error,
       )
     }
   }

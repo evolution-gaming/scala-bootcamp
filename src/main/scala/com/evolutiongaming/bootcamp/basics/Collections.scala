@@ -54,7 +54,8 @@ object CoolArray extends App {
 }
 
 object Sets extends App {
-  val beautifulNumber = Set(3, 5, 7, 123) // they are not special in any way, just beautiful to me at this particular moment
+  val beautifulNumber =
+    Set(3, 5, 7, 123) // they are not special in any way, just beautiful to me at this particular moment
 
   // the same as contains
   println(beautifulNumber(3))
@@ -62,7 +63,7 @@ object Sets extends App {
 }
 
 object Maps extends App {
-  val map = Map(1 -> "a", 2 -> "b")
+  val map  = Map(1 -> "a", 2 -> "b")
   val map2 = Map((1, "a"), (2, "b")) // same map
   println(map(2)) // gets element and throws exception
   println(map.get(3)) // gets element safely
@@ -92,7 +93,7 @@ object LinkedList extends App {
     NonEmpty(1, NonEmpty(2, NonEmpty(3, Empty)))
   }
 
-  val list = List(1, 2, 3, 4, 5, 6)
+  val list  = List(1, 2, 3, 4, 5, 6)
   val list2 = List("a", "b", "c", "d", "e")
 
   // collections nice methods
@@ -165,7 +166,7 @@ object LinkedList extends App {
   // recursion
   def sum(list: List[Int]): Int = list match {
     case h :: tail => h + sum(tail)
-    case Nil => 0
+    case Nil       => 0
   }
 
   // folds
@@ -216,12 +217,12 @@ object LinkedList extends App {
 
     // a two param case class
     list match {
-      case Nil =>
+      case Nil          =>
       case head :: tail =>
     }
 
     list match {
-      case Nil =>
+      case Nil            =>
       case ::(head, tail) =>
     }
 
@@ -232,7 +233,7 @@ object LinkedList extends App {
     }
 
     // all this is very fun but nobody really does this (RIP scalaz \/)
-    val map1: String Map Int = Map("a" -> 1)
+    val map1: String Map Int   = Map("a" -> 1)
     val map2: Map[String, Int] = Map("a" -> 1)
 
     // but you don't need to care just use :: and have fun

@@ -71,9 +71,11 @@ object Doobie extends IOApp {
 
     val xa = DbTransactor.make[IO]
 //      val rng2 = rng.replicateA(5)
-      rng.transact(xa).map(println)
+    rng
+      .transact(xa)
+      .map(println)
       // streaming result
 //      rng.take(3).compile.toList.transact(xa).map(println)
-    .as(ExitCode.Success)
+      .as(ExitCode.Success)
   }
 }
