@@ -48,7 +48,7 @@ object AlgebraicDataTypes {
   // `Age` has a single, public val parameter that is the underlying runtime representation. The type at
   // compile time is `Age`, but at runtime, the representation is `Int`. Case classes can also be used to
   // define value classes, see `Name`.
-  class Age(val value: Int) extends AnyVal
+  class Age(val value: Int)            extends AnyVal
   final case class Name(value: String) extends AnyVal {
     def greeting: String = s"Hello, $value!"
   }
@@ -90,7 +90,7 @@ object AlgebraicDataTypes {
   // A custom boolean type `Bool` can serve as a canonical example.
   sealed trait Bool
   object Bool {
-    final case object True extends Bool
+    final case object True  extends Bool
     final case object False extends Bool
   }
 
@@ -107,13 +107,13 @@ object AlgebraicDataTypes {
   // case where multiple different payment methods need to be supported. (This is an illustrative example and
   // should not be considered complete.)
   final case class AccountNumber(value: String) extends AnyVal
-  final case class CardNumber(value: String) extends AnyVal
+  final case class CardNumber(value: String)    extends AnyVal
   final case class ValidityDate(month: Int, year: Int)
   sealed trait PaymentMethod
   object PaymentMethod {
-    final case class BankAccount(accountNumber: AccountNumber) extends PaymentMethod
+    final case class BankAccount(accountNumber: AccountNumber)                      extends PaymentMethod
     final case class CreditCard(cardNumber: CardNumber, validityDate: ValidityDate) extends PaymentMethod
-    final case object Cash extends PaymentMethod
+    final case object Cash                                                          extends PaymentMethod
   }
 
   import PaymentMethod._

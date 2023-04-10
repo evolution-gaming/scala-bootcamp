@@ -53,11 +53,13 @@ class CirceExercisesSpec extends AnyWordSpec with Matchers {
 }
 
 object CirceExercisesSpec {
-  private val ex1Expected = """{"title":"The Matrix","year":1999,"actors":["Keanu Reeves","Carrie-Anne Moss","Laurence Fishburne"],"isRatedR":true}"""
-  private val ex2Expected = """{"artist":{"name":"The Killers","ontour":true,"stats":{"listeners":4517050,"playcount":216877854},"genres":["indie rock","alternative rock","new wave"],"members":[{"name":"Brandon Flowers","instruments":["vocals","keyboard","bass"]},{"name":"Dave Keuning","instruments":["lead guitar"]},{"name":"Mark Stoermer","instruments":["bass","rhythm guitar"]},{"name":"Ronnie Vanucci Jr.","instruments":["drums","percussion"]}],"url":"https://www.last.fm/music/The+Killers"}}"""
-  private val ex3Expected = ex2Expected
-  private val ex4AlbumTitle = root.title.string
-  private val ex4AlbumYear = root.year.int
+  private val ex1Expected    =
+    """{"title":"The Matrix","year":1999,"actors":["Keanu Reeves","Carrie-Anne Moss","Laurence Fishburne"],"isRatedR":true}"""
+  private val ex2Expected    =
+    """{"artist":{"name":"The Killers","ontour":true,"stats":{"listeners":4517050,"playcount":216877854},"genres":["indie rock","alternative rock","new wave"],"members":[{"name":"Brandon Flowers","instruments":["vocals","keyboard","bass"]},{"name":"Dave Keuning","instruments":["lead guitar"]},{"name":"Mark Stoermer","instruments":["bass","rhythm guitar"]},{"name":"Ronnie Vanucci Jr.","instruments":["drums","percussion"]}],"url":"https://www.last.fm/music/The+Killers"}}"""
+  private val ex3Expected    = ex2Expected
+  private val ex4AlbumTitle  = root.title.string
+  private val ex4AlbumYear   = root.year.int
   private val ex4AlbumSongs1 = root.songs.arr
   private val ex4AlbumSongs2 = root.songs.each.title.string
 

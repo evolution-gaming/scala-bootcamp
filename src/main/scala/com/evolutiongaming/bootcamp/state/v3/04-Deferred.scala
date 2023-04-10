@@ -28,10 +28,10 @@ object DeferredDemo extends IOApp.Simple {
   override def run: IO[Unit] =
     for {
       deferred <- Deferred[IO, Int]
-      _ <- (IO.sleep(3.seconds) *> deferred.complete(0)).start
-      _ <- IO.println("waiting for deferred to complete")
-      result <- deferred.get
-      _ <- IO.println(s"result: $result")
+      _        <- (IO.sleep(3.seconds) *> deferred.complete(0)).start
+      _        <- IO.println("waiting for deferred to complete")
+      result   <- deferred.get
+      _        <- IO.println(s"result: $result")
     } yield ()
   // what happens if deferred is completed for the 2nd time?
 

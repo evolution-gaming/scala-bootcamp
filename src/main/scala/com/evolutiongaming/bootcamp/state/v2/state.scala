@@ -14,8 +14,7 @@ import java.util.concurrent.atomic.AtomicReference
 import scala.annotation.tailrec
 import scala.concurrent.duration._
 
-/**
-  * State is an overloaded term, but here we will say it is any variable, object or memory space that exists in our program.
+/** State is an overloaded term, but here we will say it is any variable, object or memory space that exists in our program.
   * Note: we are only talking about in-memory state, not DB, FS etc.
   *
   * State can be looked at from multiple angles:
@@ -31,8 +30,7 @@ import scala.concurrent.duration._
   *  - Thread Safety (since shared state implies concurrency)
   */
 
-/**
-  * Referential transparency is the core of pure FP, it enables:
+/** Referential transparency is the core of pure FP, it enables:
   *  - substitution model
   *  - functional composition (no statements, only expressions)
   *  - local reasoning
@@ -41,37 +39,35 @@ import scala.concurrent.duration._
   */
 object ReferentialTransparencyDemo extends App {
   // this is pure
-  val x = "hello".reverse
-  val y = x ++ x
+  val x  = "hello".reverse
+  val y  = x ++ x
   val y1 = "hello".reverse ++ "hello".reverse
   println(s"y = $y, y1 = $y1")
 }
 
-/**
-  * Immutable shared state is referentially transparent.
+/** Immutable shared state is referentially transparent.
   */
 object ImmutableSharedStateDemo extends App {
   val ratings = Map(
     "foo" -> 5,
-    "bar" -> 7
+    "bar" -> 7,
   )
 
-  val foo = ratings("foo")
-  val bar = ratings("bar")
-  val total = foo + bar
+  val foo    = ratings("foo")
+  val bar    = ratings("bar")
+  val total  = foo + bar
   val total1 = ratings("foo") + ratings("bar")
   println(s"total=$total, total1=$total1")
 }
 
-/**
-  * Mutable local state is fine as well, it is referentially transparent from the outside.
+/** Mutable local state is fine as well, it is referentially transparent from the outside.
   */
 object MutableLocalStateDemo extends App {
 
   def pureMap[A, B](as: List[A])(f: A => B): List[B] =
     as match {
       case ::(head, tail) => f(head) :: pureMap(tail)(f)
-      case Nil => Nil
+      case Nil            => Nil
     }
 
   def impureMap[A, B](as: List[A])(f: A => B): List[B] = {
@@ -83,15 +79,14 @@ object MutableLocalStateDemo extends App {
 
   def duplicate(s: String): String = s ++ s
 
-  val xs = List("foo", "bar")
-  val mappedPurely = pureMap(xs)(duplicate)
+  val xs             = List("foo", "bar")
+  val mappedPurely   = pureMap(xs)(duplicate)
   val mappedImpurely = impureMap(xs)(duplicate)
 
   println(s"mappedPurely=$mappedPurely, mappedImpurely=$mappedImpurely")
 }
 
-/**
-  * Mutating shared state is not referentially transparent, because it is a side effect (but doesn't have to be).
+/** Mutating shared state is not referentially transparent, because it is a side effect (but doesn't have to be).
   */
 object MutableSharedStateDemo extends App {
   class Counter {
@@ -104,14 +99,13 @@ object MutableSharedStateDemo extends App {
   }
 
   val counter = new Counter
-  val x = counter.incrementAndGet()
-  val y = x + x
-  val y1 = counter.incrementAndGet() + counter.incrementAndGet()
+  val x       = counter.incrementAndGet()
+  val y       = x + x
+  val y1      = counter.incrementAndGet() + counter.incrementAndGet()
   println(s"y=$y, y1=$y1")
 }
 
-/**
-  * The solution - suspend the side effect by wrapping it with some effect type (e.g. IO, ZIO, but not Future).
+/** The solution - suspend the side effect by wrapping it with some effect type (e.g. IO, ZIO, but not Future).
   *
   * Rule: access, modification and creation of mutable state needs suspension in effect.
   */
@@ -192,8 +186,7 @@ object StateSharingAndIsolationDemo extends App {
 
   program.unsafeRunSync()
 
-  /**
-    * !The regions of state sharing are the same as the call graph!
+  /** !The regions of state sharing are the same as the call graph!
     *
     * The state is being shared simply by passing arguments down the call stack, so we are very explicit about which state
     * is shared and which is not. There are no global singletons or other crap.
@@ -207,13 +200,13 @@ object LeakyStateDemo extends App {
 
   val counter = Counter.createUnsafe
 
-  val x = counter.inc *> counter.get
+  val x  = counter.inc *> counter.get
   val x1 = Counter.createUnsafe.inc *> Counter.createUnsafe.get
 
   val program = for {
-    y <- x
+    y  <- x
     y1 <- x1
-    _ <- IO(println(s"y=$y, y1=$y1"))
+    _  <- IO(println(s"y=$y, y1=$y1"))
   } yield ()
 
   program.unsafeRunSync()
@@ -227,14 +220,13 @@ object CounterConcurrencyDemo extends IOApp {
   override def run(args: List[String]): IO[ExitCode] =
     for {
       counter <- Counter.create
-      _ <- incTimes(10000)(counter)
-      c <- counter.get
-      _ <- IO(println(c))
+      _       <- incTimes(10000)(counter)
+      c       <- counter.get
+      _       <- IO(println(c))
     } yield ExitCode.Success
 }
 
-/**
-  * Looks like we have a race condition. The reason is that `count += 1` is not an atomic operation,
+/** Looks like we have a race condition. The reason is that `count += 1` is not an atomic operation,
   * it is in fact 3 operations:
   *
   * - read value of count
@@ -252,9 +244,7 @@ object CounterConcurrencyDemo extends IOApp {
   * Question 1: how do we fix it?
   */
 
-
-/**
-  * We've made shared state mutations pure, but it feels kinda "hacky" to always manually wrap working with state in effects.
+/** We've made shared state mutations pure, but it feels kinda "hacky" to always manually wrap working with state in effects.
   * Can we do better?
   * What if implement a pure wrapper around an `AtomicReference` and use it instead? That way we won't have to manually
   * wrap anything inside `Counter`.
@@ -272,7 +262,7 @@ object AtomicRef {
 
   import cats.syntax.functor._
 
-  def create[F[_] : Sync, A](initialValue: A): F[AtomicRef[F, A]] =
+  def create[F[_]: Sync, A](initialValue: A): F[AtomicRef[F, A]] =
     Sync[F].delay(new AtomicReference[A](initialValue)).map { ref =>
       new AtomicRef[F, A] {
         override def get: F[A] = Sync[F].delay(ref.get())
@@ -283,22 +273,21 @@ object AtomicRef {
           @tailrec
           def loop(): Unit = {
             val current = ref.get()
-            val next = f(current)
+            val next    = f(current)
             if (ref.compareAndSet(current, next)) ()
             else loop()
           }
 
           Sync[F].delay(loop())
         }
-        //Sync[F].delay(ref.updateAndGet(a => f(a))).void
+        // Sync[F].delay(ref.updateAndGet(a => f(a))).void
       }
     }
 }
 
 object MutableVsImmutableStateDemo extends IOApp {
 
-  /**
-    * Should the state "inside" `Ref` be mutable or immutable? Does it matter?
+  /** Should the state "inside" `Ref` be mutable or immutable? Does it matter?
     */
 
   trait EventLog[F[_]] {
@@ -348,13 +337,12 @@ object MutableVsImmutableStateDemo extends IOApp {
 }
 
 object RefAccessDemo {
-  def update[F[_] : Monad, A](ref: Ref[F, A])(f: A => F[A]): F[A] = ???
+  def update[F[_]: Monad, A](ref: Ref[F, A])(f: A => F[A]): F[A] = ???
 }
 
 /** Other Cats-Effect concurrency primitives */
 
-/**
-  * Deferred.
+/** Deferred.
   *
   * Just as `Ref` is a "pure" alternative to `AtomicReference`, `Deferred` is a "pure" alternative to `Promise`.
   * It is a synchronisation primitive represents a single value which may not yet be available.
@@ -378,21 +366,20 @@ object DeferredDemo extends IOApp {
   override def run(args: List[String]): IO[ExitCode] =
     for {
       deferred <- Deferred[IO, String]
-      _ <- completeInThreeSeconds(deferred)
-      _ <- IO(println("Waiting for deferred to complete..."))
-      result <- deferred.get
-      _ <- IO(println(s"Deferred completed: $result"))
+      _        <- completeInThreeSeconds(deferred)
+      _        <- IO(println("Waiting for deferred to complete..."))
+      result   <- deferred.get
+      _        <- IO(println(s"Deferred completed: $result"))
     } yield ExitCode.Success
 }
 
-/**
-  * Semaphore is another synchronization primitive - a "pure" alternative to Java's semaphore.
+/** Semaphore is another synchronization primitive - a "pure" alternative to Java's semaphore.
   * It maintains a set of permits and provides an api to acquire/release them. A call to `acquire` semantically blocks
   * it there are no permits available. A call to `release` adds a permit potentially releasing a blocked acquirer.
   */
 object SemaphoreDemo extends IOApp {
 
-  class PreciousResource private(sem: Semaphore[IO]) {
+  class PreciousResource private (sem: Semaphore[IO]) {
     def use(name: String): IO[Unit] =
       for {
         _ <- sem.acquire
@@ -446,17 +433,17 @@ object RateLimiterDemo extends IOApp {
   override def run(args: List[String]): IO[ExitCode] =
     for {
       limiter <- RateLimiter.create(2)
-      _ <- List.range(1, 10).map(worker).map(limiter(_)).parSequence.void
+      _       <- List.range(1, 10).map(worker).map(limiter(_)).parSequence.void
     } yield ExitCode.Success
 }
 
-/**
-  * Cats Effect also has a pure, concurrent implementation of a queue.
+/** Cats Effect also has a pure, concurrent implementation of a queue.
   */
 object QueueDemo extends IOApp {
 
   def producer(n: Int, delay: FiniteDuration, queue: Queue[IO, Int]): IO[Unit] =
-    List.range(1, n)
+    List
+      .range(1, n)
       .traverse(queue.offer(_).delayBy(delay)) *>
       queue.offer(-1) *>
       IO(println("Producer done"))
@@ -464,41 +451,39 @@ object QueueDemo extends IOApp {
   def consumer(delay: FiniteDuration, queue: Queue[IO, Int]): IO[Unit] =
     queue.take.flatMap {
       case -1 => IO(println("Consumer done"))
-      case i => IO(println(s"Consumer got: $i")) *> consumer(delay, queue).delayBy(delay)
+      case i  => IO(println(s"Consumer got: $i")) *> consumer(delay, queue).delayBy(delay)
     }
 
   override def run(args: List[String]): IO[ExitCode] =
     for {
       queue <- Queue.bounded[IO, Int](10)
-      prod <- producer(50, 10.millis, queue).start
-      _ <- consumer(30.millis, queue)
-      _ <- prod.join
+      prod  <- producer(50, 10.millis, queue).start
+      _     <- consumer(30.millis, queue)
+      _     <- prod.join
     } yield ExitCode.Success
 }
 
-/**
-  * Cats effect std library has many other "pure" and thread-safe concurrency primitives:
+/** Cats effect std library has many other "pure" and thread-safe concurrency primitives:
   * Count Down Latch, Dequeue, and more. Refer to documentation:
   *
   * @see https://typelevel.org/cats-effect/docs/getting-started
   */
 
+/** * Software Transactional Memory **
+  */
 
-/** * Software Transactional Memory ** */
-
-/**
-  * We now know how to modify a piece of state atomically.
+/** We now know how to modify a piece of state atomically.
   * But what if we want to modify multiple pieces of state atomically?
   */
 object BankTransferDemo extends IOApp {
 
   // Exercise 2: make it atomic
   def withdraw(account: Ref[IO, Long], amount: Long): IO[Unit] =
-    account.access.flatMap {
-      case (balance, setter) =>
-        if (balance < amount) IO.raiseError(new Exception("Insufficient funds"))
-        else setter(balance - amount).flatMap {
-          case true => IO.pure(())
+    account.access.flatMap { case (balance, setter) =>
+      if (balance < amount) IO.raiseError(new Exception("Insufficient funds"))
+      else
+        setter(balance - amount).flatMap {
+          case true  => IO.pure(())
           case false => withdraw(account, amount)
         }
     }
@@ -520,23 +505,21 @@ object BankTransferDemo extends IOApp {
   override def run(args: List[String]): IO[ExitCode] =
     for {
       alice <- Ref.of[IO, Long](100)
-      bob <- Ref.of[IO, Long](0)
-      _ <- List.fill(10000)(transfer(alice, bob, 1).attempt).parSequence
-      ab <- alice.get
-      bb <- bob.get
-      _ <- IO(println(s"Alice: $ab, Bob: $bb"))
+      bob   <- Ref.of[IO, Long](0)
+      _     <- List.fill(10000)(transfer(alice, bob, 1).attempt).parSequence
+      ab    <- alice.get
+      bb    <- bob.get
+      _     <- IO(println(s"Alice: $ab, Bob: $bb"))
     } yield ExitCode.Success
 }
 
-/**
-  * Possible solutions:
+/** Possible solutions:
   *  - put all balances under a single `Ref`? (creates contention)
   *  - use pessimistic locking? (would work, but is error-prone and can cause deadlocks)
   *  - use STM
   */
 
-/**
-  * Software Transactional Memory (STM) is a modular composable concurrency data structure.
+/** Software Transactional Memory (STM) is a modular composable concurrency data structure.
   * It allows us to combine and compose a group of memory operations and perform all of them in one single atomic operation.
   *
   * It supports ACI properties:
@@ -566,24 +549,22 @@ object STMDemo extends App {
 
   val program = for {
     alice <- TRef.makeCommit(100L)
-    bob <- TRef.makeCommit(0L)
-    _ <- ZIO.collectAllPar(ZIO.replicate(10000)(transfer(alice, bob, 1).either))
-    ab <- alice.get.commit
-    bb <- bob.get.commit
-    _ <- zio.IO(println(s"Alice: $ab, Bob: $bb"))
+    bob   <- TRef.makeCommit(0L)
+    _     <- ZIO.collectAllPar(ZIO.replicate(10000)(transfer(alice, bob, 1).either))
+    ab    <- alice.get.commit
+    bb    <- bob.get.commit
+    _     <- zio.IO(println(s"Alice: $ab, Bob: $bb"))
   } yield ()
 
   zio.Runtime.default.unsafeRun(program)
 }
 
-/**
-  * Transactional data structures:
+/** Transactional data structures:
   *  - TRef
   *  - TArray
   *  - TSet
   *  - TSemaphore
   *    ...
-  *
   *
   * Benefits of STM:
   *
@@ -598,4 +579,3 @@ object STMDemo extends App {
   * 1. Can't do effects inside STM
   * 2. Large allocations
   */
-

@@ -28,16 +28,14 @@ Stream.eval(IO(println("hello")))
 Stream.random[IO].take(10).compile
 Stream.awakeEvery[IO](1.second)
 
-
 // fs2.Pipe[F[_], I, O] is a type synonym for `Stream[F, I] => Stream[F, O]`
 
 val pipe: Pipe[Pure, Int, Int] = _.map(_ + 1)
 Stream(1, 2, 3).through(pipe)
 
-
 // fs2.Pull[F[_], O, R] pulls values from a stream, writes output of type O, and returns a result of type R.
 
 Stream(1, 2, 3, 4, 5).pull.uncons1.flatMap {
   case Some(head -> tail) => tail.map(_ + head).pull.echo
-  case None => Pull.done
+  case None               => Pull.done
 }.stream

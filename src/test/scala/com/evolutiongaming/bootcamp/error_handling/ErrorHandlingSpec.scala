@@ -8,10 +8,7 @@ import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 
-class ErrorHandlingSpec
-  extends AnyFlatSpec
-    with Matchers
-    with ScalaCheckDrivenPropertyChecks {
+class ErrorHandlingSpec extends AnyFlatSpec with Matchers with ScalaCheckDrivenPropertyChecks {
 
   "parseIntOption" should "handle valid and invalid strings" in {
     forAll { x: Int =>
@@ -57,10 +54,12 @@ class ErrorHandlingSpec
     ) shouldBe Student(Username("username"), Age(33)).validNec
 
     def checkInvalid(username: String, age: String, errors: Set[ValidationError]): Assertion =
-      StudentValidator.validate(
-        username = username,
-        age = age,
-      ).leftMap(_.toList.toSet) shouldBe errors.invalid
+      StudentValidator
+        .validate(
+          username = username,
+          age = age,
+        )
+        .leftMap(_.toList.toSet) shouldBe errors.invalid
 
     checkInvalid(
       username = "a",

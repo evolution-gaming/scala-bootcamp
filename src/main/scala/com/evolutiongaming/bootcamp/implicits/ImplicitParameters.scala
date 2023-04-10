@@ -34,14 +34,17 @@ object ImplicitParameters {
     // - Implement `CreditService` and `DebitService` in terms of operations on `WalletContext`.
     // - Implement `AwardService` in terms of `CreditService` and `DebitService` calls.
     class CreditService {
+
       /** Gives money to wallet, creates a wallet if does not exist yet */
       def credit(context: WalletContext, amount: BigDecimal): Unit = ???
     }
     class DebitService {
+
       /** Removes money from wallet */
       def debit(context: WalletContext, amount: BigDecimal): Unit = ???
     }
     class TransferService(creditService: CreditService, debitService: DebitService) {
+
       /** Either does credit or debit depending on the amount */
       def transfer(context: WalletContext, amount: BigDecimal): Unit = ???
     }
@@ -51,7 +54,7 @@ object ImplicitParameters {
       def getWallet(userId: String): WalletContext
     }
     class WalletController(walletRepository: WalletRepository, transferService: TransferService) {
-      def bet(userId: String, amount: BigDecimal): Unit = {
+      def bet(userId: String, amount: BigDecimal): Unit   = {
         val walletContext = walletRepository.getWallet(userId)
         transferService.transfer(walletContext, -amount)
       }
@@ -109,7 +112,7 @@ object ImplicitParameters {
       def getWallet(userId: String): WalletContext
     }
     class WalletController(walletRepository: WalletRepository, transferService: TransferService) {
-      def bet(userId: String, amount: BigDecimal): Unit = {
+      def bet(userId: String, amount: BigDecimal): Unit   = {
         val walletContext = walletRepository.getWallet(userId)
         transferService.transfer(-amount)(walletContext)
       }
@@ -172,7 +175,7 @@ object ImplicitParameters {
       def getWallet(userId: String): WalletContext
     }
     class WalletController(walletRepository: WalletRepository, transferService: TransferService) {
-      def bet(userId: String, amount: BigDecimal): Unit = {
+      def bet(userId: String, amount: BigDecimal): Unit   = {
         val walletContext = walletRepository.getWallet(userId)
         transferService.transfer(-amount)(walletContext)
       }

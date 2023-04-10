@@ -16,7 +16,6 @@ object ImplementMe {
 
   implicit val listSemigroup: SemigroupK[List] = null
 
-
   // https://github.com/typelevel/kind-projector
 
   implicit def mapFunctor[K]: Functor[Map[K, *]] = null
@@ -24,7 +23,6 @@ object ImplementMe {
   implicit def eitherRightFunctor[L]: Functor[Either[L, *]] = null
 
   implicit def eitherLeftFunctor[R]: Functor[Either[*, R]] = null
-
 
   implicit val bifunctorEither: Bifunctor[Either] = null
 
@@ -36,7 +34,7 @@ object ImplementMe {
 
 object CompileMe {
 
-/*
+  /*
   object Task1 {
     import cats.syntax.show._
 
@@ -46,20 +44,20 @@ object CompileMe {
 
     println(prettyPrint(User("John", 21)))
   }
-*/
+   */
 
-/*
+  /*
   object Task2 {
     val users = List(User("John", 22), User("John", 23), User("John", 21))
     users.min
   }
-*/
+   */
 
-/*
+  /*
   object Task3 {
     import scala.concurrent.Future
     Future { 3 }
   }
-*/
+   */
 
 }

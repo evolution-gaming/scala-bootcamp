@@ -20,23 +20,22 @@ object Threads extends App {
   new HelloThread("world").start()
   new HelloThread("world").start()
 
-  Thread.sleep(5000L) //pausing current thread for 5000ms = 5s
+  Thread.sleep(5000L) // pausing current thread for 5000ms = 5s
   println("That's all, folks!")
 }
 
 object BasicFutures extends App {
   import scala.concurrent.ExecutionContext.Implicits.global
 
-  val completedFuture: Future[Int] = Future.successful(42) //doesn't schedule work
+  val completedFuture: Future[Int] = Future.successful(42) // doesn't schedule work
   completedFuture.foreach(println)
 
-  val failedFuture: Future[Int] = Future.failed(new RuntimeException("oh my")) //doesn't schedule work
+  val failedFuture: Future[Int] = Future.failed(new RuntimeException("oh my")) // doesn't schedule work
   failedFuture.failed.foreach(t => t.printStackTrace())
 
-
   val futureFromBlock: Future[String] = Future {
-    //code block is immediately scheduled for execution on the implicit execution context
-    //if you throw an exception inside the block, it is converted to a failed future case
+    // code block is immediately scheduled for execution on the implicit execution context
+    // if you throw an exception inside the block, it is converted to a failed future case
     println("doing work!")
     "work done!"
   }
@@ -52,11 +51,11 @@ object FutureFromPromise extends App {
 
     future.onComplete {
       case Success(value) =>
-        promise.success(value + 1) //can be called only once
+        promise.success(value + 1) // can be called only once
       case Failure(t)     =>
-        promise.failure(t) //can be called only once
-    } //can be replaced with promise.complete(result: Try[T])
-    //promise can be completed only once!
+        promise.failure(t) // can be called only once
+    } // can be replaced with promise.complete(result: Try[T])
+    // promise can be completed only once!
 
     promise.future
   }
@@ -83,7 +82,7 @@ object FutureFromPromise extends App {
   - tryComplete
 
   Add implicit args to the function if needed!
-   */
+ */
 object Exercise1 extends App {
   def firstCompleted[T](f1: Future[T], f2: Future[T])(implicit ec: ExecutionContext): Future[T] = ???
 
@@ -91,7 +90,7 @@ object Exercise1 extends App {
     import scala.concurrent.ExecutionContext.Implicits.global
 
     val future1 = Future {
-      Thread.sleep(1000L) //normally you don't use thread sleep for async programming in Scala
+      Thread.sleep(1000L) // normally you don't use thread sleep for async programming in Scala
       123
     }
     val future2 = Future {
@@ -109,13 +108,13 @@ object TransformFutures extends App {
 
   def asyncSum2(f1: Future[Int], f2: Future[Int])(implicit ec: ExecutionContext): Future[Int] =
     f1.flatMap { value1 =>
-      //value => Future
+      // value => Future
       f2.map { value2 =>
         value1 + value2
       }
-    } //completes with success when both futures succeed, fails when either of those fail
+    } // completes with success when both futures succeed, fails when either of those fail
 
-  //nicer for-comprehension syntax
+  // nicer for-comprehension syntax
   def asyncMultiply(f1: Future[Int], f2: Future[Int])(implicit ec: ExecutionContext): Future[Int] =
     for {
       value1 <- f1
@@ -134,13 +133,13 @@ object Exercise2 extends App {
     import scala.concurrent.ExecutionContext.Implicits.global
 
     val futures = Vector.fill(10)(1).map(Future.successful)
-    println(Await.result(sumAll(futures), 5.seconds)) //should see 10
+    println(Await.result(sumAll(futures), 5.seconds)) // should see 10
   }
 }
 
 object FutureShenanigans {
   import scala.concurrent.ExecutionContext.Implicits.global
-  //parallel or in sequence?
+  // parallel or in sequence?
 
   def example1(f1: Future[Int], f2: Future[Int]): Future[Int] = {
     for {
@@ -176,7 +175,7 @@ object SharedStateProblems extends App {
 object SharedStateSynchronized extends App {
   import scala.concurrent.ExecutionContext.Implicits.global
 
-  //all variables which are read and written by multiple threads should be declared as volatile
+  // all variables which are read and written by multiple threads should be declared as volatile
   @volatile
   var counter: Int = 0
 
@@ -209,7 +208,7 @@ object SynchronizedDeadlock extends App {
       }
     }
   }
-  val future2 = Future {
+  val future2               = Future {
     resource2.synchronized {
       Thread.sleep(100L)
       resource1.synchronized {
@@ -217,7 +216,7 @@ object SynchronizedDeadlock extends App {
       }
     }
   }
-  val resultFuture = for {
+  val resultFuture          = for {
     _ <- future1
     _ <- future2
   } yield ()
@@ -246,12 +245,11 @@ Make this work correctly a) first with synchronized blocks, b) then with AtomicR
  */
 object Exercise3 extends App {
   import scala.concurrent.ExecutionContext.Implicits.global
-  val tasksCount = 100
+  val tasksCount     = 100
   val taskIterations = 1000
   val initialBalance = 10
 
-
-  //PLACE TO FIX - START
+  // PLACE TO FIX - START
   var balance1: Int = initialBalance
   var balance2: Int = initialBalance
 
@@ -264,8 +262,7 @@ object Exercise3 extends App {
   def printBalancesSum(): Unit = {
     println(balance1 + balance2)
   }
-  //PLACE TO FIX - FINISH
-
+  // PLACE TO FIX - FINISH
 
   def transfer(state: State): State = {
     if (state.balance1 >= state.balance2) {
@@ -275,13 +272,15 @@ object Exercise3 extends App {
     }
   }
 
-  val tasks = (1 to tasksCount).toVector.map(_ => Future {
-    (1 to taskIterations).foreach(_ => doTaskIteration())
-  })
+  val tasks                                   = (1 to tasksCount).toVector.map(_ =>
+    Future {
+      (1 to taskIterations).foreach(_ => doTaskIteration())
+    }
+  )
   val tasksResultFuture: Future[Vector[Unit]] = Future.sequence(tasks)
   Await.ready(tasksResultFuture, 5.seconds)
 
-  printBalancesSum() //should print 20
+  printBalancesSum() // should print 20
 
   final case class State(balance1: Int, balance2: Int)
 }

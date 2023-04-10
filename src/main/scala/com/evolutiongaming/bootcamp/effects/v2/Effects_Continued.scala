@@ -12,7 +12,7 @@ object Cats_Resource_Example1 extends IOApp {
 
   override def run(args: List[String]): IO[ExitCode] = {
     val intValue = 123
-    val pureIO = IO.pure(intValue)
+    val pureIO   = IO.pure(intValue)
 
     Resource.pure[IO, Int](intValue)
     Resource.liftK(pureIO)
@@ -20,10 +20,11 @@ object Cats_Resource_Example1 extends IOApp {
     Resource.make(pureIO)(_ => IO.unit)
     Resource.makeCase(pureIO)((_, exitCase) =>
       exitCase match {
-        case ExitCase.Succeeded => ???
+        case ExitCase.Succeeded  => ???
         case ExitCase.Errored(e) => ???
-        case ExitCase.Canceled => ???
-      })
+        case ExitCase.Canceled   => ???
+      }
+    )
 
     val fileName = "file_name"
     Resource.fromAutoCloseable(
@@ -36,23 +37,25 @@ object Cats_Resource_Example1 extends IOApp {
     Resource.apply(IO.pure[(Int, IO[Unit])]((intValue, IO.unit)))
 
     for {
-      fiber <- Resource.make(
-        IO(println("Acquire Start")) *>
-          IO.sleep(1.second) *>
-          IO(println("Acquire Finish"))
-      )(_ =>
-        IO(println("Release Start")) *>
-          IO.sleep(1.second) *>
-          IO(println("Release Finish"))
-      ).use(_ =>
-        IO(println("Operation Start")) *>
-          IO.sleep(1.second) *>
-          IO(println("Operation Finish"))
-      ).start
-      _ <- IO.sleep(500.milliseconds) *> fiber.cancel
-      _ <- IO.sleep(5.second)
+      fiber <- Resource
+        .make(
+          IO(println("Acquire Start")) *>
+            IO.sleep(1.second) *>
+            IO(println("Acquire Finish"))
+        )(_ =>
+          IO(println("Release Start")) *>
+            IO.sleep(1.second) *>
+            IO(println("Release Finish"))
+        )
+        .use(_ =>
+          IO(println("Operation Start")) *>
+            IO.sleep(1.second) *>
+            IO(println("Operation Finish"))
+        )
+        .start
+      _     <- IO.sleep(500.milliseconds) *> fiber.cancel
+      _     <- IO.sleep(5.second)
     } yield ExitCode.Success
-
 
     //    def recursiveF(v: IO[Int]): IO[Int] =
     //      v.flatMap(v => IO(println(v)) *> recursiveF(IO.pure(v + 1)))
@@ -126,14 +129,13 @@ object Cats_Resource_Example2 extends IOApp {
 
   override def run(args: List[String]): IO[ExitCode] = (for {
     _ <- KafkaModule.of
-    //_ <- Resource.liftF(IO.raiseError[Unit](new RuntimeException))
+    // _ <- Resource.liftF(IO.raiseError[Unit](new RuntimeException))
     _ <- DBModule.of
     _ <- HttpClientModule.of
   } yield ExitCode.Success)
     .use(IO.pure)
 
 }
-
 
 object Cats_Resource_Exercise1 extends IOApp {
 
@@ -143,7 +145,6 @@ object Cats_Resource_Exercise1 extends IOApp {
   override def run(args: List[String]): IO[ExitCode] = ???
 
 }
-
 
 /*
  * https://typelevel.org/cats-effect/docs/2.x/datatypes/contextshift
@@ -160,11 +161,11 @@ object Cats_ContextShift_Example1 extends IOApp {
     IO.pure(123).evalOn(executionContext)
 
     for {
-      _ <- IO(println(s"operation - ${ Thread.currentThread().getName }"))
-      //_ <- IO.shift(cs)
-      //_ <- contextShift.evalOn(executionContext)(IO(println(s"operation - ${Thread.currentThread().getName}")))
-      _ <- IO(println(s"operation - ${ Thread.currentThread().getName }"))
-      _ <- IO(println(s"operation - ${ Thread.currentThread().getName }"))
+      _ <- IO(println(s"operation - ${Thread.currentThread().getName}"))
+      // _ <- IO.shift(cs)
+      // _ <- contextShift.evalOn(executionContext)(IO(println(s"operation - ${Thread.currentThread().getName}")))
+      _ <- IO(println(s"operation - ${Thread.currentThread().getName}"))
+      _ <- IO(println(s"operation - ${Thread.currentThread().getName}"))
     } yield ExitCode.Success
 
   }
@@ -174,17 +175,16 @@ object Cats_ContextShift_Example1 extends IOApp {
 object Cats_ContextShift_Exercise1 extends IOApp {
 
   def readName(implicit sync: Sync[IO]): IO[String] = ???
-  def readAge(implicit sync: Sync[IO]): IO[String] = ???
+  def readAge(implicit sync: Sync[IO]): IO[String]  = ???
 
   override def run(args: List[String]): IO[ExitCode] = ???
 }
-
 
 object Cats_ContextShift_Example2 extends IOApp {
 
   def readName(implicit sync: Sync[IO]): IO[String] =
     sync.blocking {
-      println(s"operation - ${ Thread.currentThread().getName }")
+      println(s"operation - ${Thread.currentThread().getName}")
       println("Enter your name: ")
       scala.io.StdIn.readLine()
     }
@@ -192,7 +192,7 @@ object Cats_ContextShift_Example2 extends IOApp {
   def run(args: List[String]): IO[ExitCode] = {
     for {
       n <- readName
-      _ <- IO(println(s"operation - ${ Thread.currentThread().getName }"))
+      _ <- IO(println(s"operation - ${Thread.currentThread().getName}"))
       _ <- IO(println(s"Hello, $n!"))
     } yield ExitCode.Success
   }
@@ -202,7 +202,7 @@ object Cats_ContextShift_Example2 extends IOApp {
 object Cats_ContextShift_Exercise2 extends IOApp {
 
   def printInfo(v: Int, operationName: String): IO[Unit] =
-    IO(println(s"value - $v, operation name - $operationName, ${ Thread.currentThread().getName }"))
+    IO(println(s"value - $v, operation name - $operationName, ${Thread.currentThread().getName}"))
 
   // recursive increment up to 1024, call printInfo at each step.
   def recursiveF(v: Int, operationName: String): IO[Int] = ???
@@ -239,7 +239,7 @@ object Cats_Fiber_Example1 extends IOApp {
 object Cats_Fiber_Exercise1 extends IOApp {
 
   def readIndex(implicit sync: Sync[IO]): IO[Int] = ???
-  def getDataFromDB(index: Int): IO[Int] =
+  def getDataFromDB(index: Int): IO[Int]          =
     IO.sleep(5.second) *> IO.pure(index * 2)
 
   override def run(args: List[String]): IO[ExitCode] = {
@@ -247,7 +247,6 @@ object Cats_Fiber_Exercise1 extends IOApp {
   }
 
 }
-
 
 /*
   Additional assignment:

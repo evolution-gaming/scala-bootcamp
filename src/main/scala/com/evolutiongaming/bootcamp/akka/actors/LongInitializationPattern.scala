@@ -35,8 +35,8 @@ object LongInitializationPattern extends App {
     }
 
     // normal processing
-    private def initialized: Receive = {
-      case LongInit.CommonRequest(x) => println(s"received $x")
+    private def initialized: Receive = { case LongInit.CommonRequest(x) =>
+      println(s"received $x")
     }
 
     override def receive: Receive = notInitialized
@@ -44,13 +44,12 @@ object LongInitializationPattern extends App {
 
   object LongInit {
     sealed trait In
-    case object InitialState extends In
+    case object InitialState                  extends In
     final case class CommonRequest(x: String) extends In
   }
 
-
   val evoActorSystem: ActorSystem = ActorSystem("evo-actor-system")
-  val ref = evoActorSystem.actorOf(Props[LongInit]())
+  val ref                         = evoActorSystem.actorOf(Props[LongInit]())
 
   ref ! LongInit.CommonRequest("a")
   ref ! LongInit.CommonRequest("b")

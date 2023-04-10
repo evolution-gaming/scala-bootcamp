@@ -5,9 +5,7 @@ import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers._
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 
-class FunctionsSpec
-  extends AnyFlatSpec
-    with ScalaCheckDrivenPropertyChecks {
+class FunctionsSpec extends AnyFlatSpec with ScalaCheckDrivenPropertyChecks {
 
   "isEven" should "work correctly" in {
     forAll { n: Int =>

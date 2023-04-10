@@ -20,17 +20,18 @@ object Exceptions {
 
   {
     1 divide 2 match { // good referential transparency
-      case Left(x) => Left(x)
-      case Right(x) => x divide 3 match {
-        case Left(x) => Left(x)
-        case Right(x) => x divide 4 match {
-          case Left(x) => Left(x)
-          case Right(x) => x divide 5
+      case Left(x)  => Left(x)
+      case Right(x) =>
+        x divide 3 match {
+          case Left(x)  => Left(x)
+          case Right(x) =>
+            x divide 4 match {
+              case Left(x)  => Left(x)
+              case Right(x) => x divide 5
+            }
         }
-      }
     }
   }
-
 
   type Error2 = String
   // looks like imperative BUT has pure error handling

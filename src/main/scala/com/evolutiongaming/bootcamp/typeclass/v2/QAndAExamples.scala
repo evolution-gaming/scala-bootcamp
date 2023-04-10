@@ -80,9 +80,9 @@ object QAndAExamples {
 
   // 5.1. Implement Applicative for Option, Either
   new Applicative[Either[String, *]] {
-    override def pure[A](x: A): Either[String, A] = Right(x)
+    override def pure[A](x: A): Either[String, A]                                                    = Right(x)
     override def product[A, B](fa: Either[String, A], fb: Either[String, B]): Either[String, (A, B)] = ???
-    override def fmap[A, B](fa: Either[String, A])(f: A => B): Either[String, B] = ???
+    override def fmap[A, B](fa: Either[String, A])(f: A => B): Either[String, B]                     = ???
   }
 
   // 5.2. Implement `traverse` for all Applicatives instead of Option

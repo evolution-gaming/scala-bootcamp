@@ -2,13 +2,13 @@ package com.evolutiongaming.bootcamp.functions
 
 object FunctionsDescoped {
   //
-  var count = 0
-  def id(): Int = {
+  var count                           = 0
+  def id(): Int                       = {
     val newId = count
     count += 1
     newId
   }
-  def idPure(/* ??? */): (Int, Int) = ???
+  def idPure( /* ??? */ ): (Int, Int) = ???
 
   // Implement `identity` which returns its input unchanged. Do not use scala.Predef.identity
   def identity[A](x: A): A = ???
@@ -24,7 +24,7 @@ object FunctionsDescoped {
   val result1: Boolean = f1.isDefinedAt(List("false", "true"))
 
   val f2: PartialFunction[List[String], Boolean] = {
-    case Nil => false
+    case Nil            => false
     // head :: 2nd :: tail
     case _ :: _ :: tail => f1(tail)
   }
@@ -40,7 +40,7 @@ object FunctionsDescoped {
   // Compose - `g` will be applied to input param
   // def compose[A](g: A => T1): A => R = { x => apply(g(x)) }
 
-  val double: Int => Int = (x: Int) => 2 * x
+  val double: Int => Int       = (x: Int) => 2 * x
   val addString: Int => String = (a: Int) => "new value " + a
 
   addString.compose(double)
@@ -53,15 +53,12 @@ object FunctionsDescoped {
   List(1, 2, 3).map(_ + 2).map(_.toString)
   List(1, 2, 3).map(((x: Int) => x + 2).andThen(x => x.toString))
 
-
   // Exercise. Implement `andThen` and `compose` which pipes the result of one function to the input of another function
   def compose[A, B, C](f: B => C, g: A => B): A => C = ???
 
   def andThen[A, B, C](f: A => B, g: B => C): A => C = ???
 
-
   // --
-
 
   // Final task.
   // Case classes are Scala's preferred way to define complex data
@@ -85,11 +82,11 @@ object FunctionsDescoped {
   // JSON is a recursive data structure
   sealed trait Json
 
-  case class JObject(/* ??? */) extends Json
+  case class JObject( /* ??? */ ) extends Json
 
-  case class JArray(/* ??? */) extends Json
+  case class JArray( /* ??? */ ) extends Json
 
-  case class JString(/* ??? */) extends Json
+  case class JString( /* ??? */ ) extends Json
 
   case class JNumber(value: BigDecimal) extends Json
 
@@ -99,10 +96,8 @@ object FunctionsDescoped {
 
   // --
 
-
-
   // Task 1. Represent `rawJson` string via defined classes
-  val data: Json = JObject(/* ??? */)
+  val data: Json = JObject( /* ??? */ )
 
   // Task 2. Implement a function `asString` to print given Json data as a json string
 
@@ -124,7 +119,7 @@ object FunctionsDescoped {
   val pingPongPFImpl: PartialFunction[String, String] = new PartialFunction[String, String] {
     override def isDefinedAt(x: String): Boolean = x match {
       case "ping" => true
-      case _ => false
+      case _      => false
     }
 
     override def apply(v: String): String = v match {
@@ -136,7 +131,7 @@ object FunctionsDescoped {
   val eithers: Seq[Either[String, Double]] = List("123", "456", "789o")
     .map(x => x.toDoubleOption.toRight(s"Failed to parse $x"))
 
-  val errors: Seq[String] = eithers.collect {
-    case Left(x) => x
+  val errors: Seq[String] = eithers.collect { case Left(x) =>
+    x
   }
 }

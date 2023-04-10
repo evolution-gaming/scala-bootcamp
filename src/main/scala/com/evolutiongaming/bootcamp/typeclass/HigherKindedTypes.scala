@@ -205,7 +205,7 @@ object HigherKindedTypes {
 
   sealed trait Maybe[+_] // it's equal to `Maybe[+A]`
   object Maybe {
-    case object Empty extends Maybe[Nothing]
+    case object Empty                 extends Maybe[Nothing]
     case class Something[A](value: A) extends Maybe[A]
 
     val empty: Maybe[Nothing]            = Empty

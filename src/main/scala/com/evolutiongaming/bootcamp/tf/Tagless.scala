@@ -9,16 +9,16 @@ object Tagless extends IOApp {
 
   sealed trait Expression[A]
 
-  final case class Bool(b: Boolean) extends Expression[Boolean]
+  final case class Bool(b: Boolean)                                          extends Expression[Boolean]
   final case class Or(left: Expression[Boolean], right: Expression[Boolean]) extends Expression[Boolean]
   // final case class And(left: Expression[Boolean], right: Expression[Boolean]) extends Expression[Boolean]
 
-  final case class Integer(x: Int) extends Expression[Int]
-  final case class Negate(x: Expression[Int]) extends Expression[Int]
+  final case class Integer(x: Int)                                    extends Expression[Int]
+  final case class Negate(x: Expression[Int])                         extends Expression[Int]
   final case class Add(left: Expression[Int], right: Expression[Int]) extends Expression[Int]
 
   // 8 + -3 + 4
-  val expressionI: Expression[Int] =
+  val expressionI: Expression[Int]     =
     Add(Integer(8), Add(Negate(Integer(3)), Integer(4)))
   val expressionB: Expression[Boolean] = Or(Bool(false), Bool(true))
   // val expressionBad: Expression[Boolean] = Or(Integer(false), Bool(3))
@@ -62,8 +62,8 @@ object Tagless extends IOApp {
   final case class Expr[A](a: A) extends AnyVal
 
   val intInterpreter = new ExpressionArith[Expr] {
-    override def const(x: Int): Expr[Int] = Expr(x)
-    override def negate(x: Expr[Int]): Expr[Int] = Expr(-x.a)
+    override def const(x: Int): Expr[Int]                          = Expr(x)
+    override def negate(x: Expr[Int]): Expr[Int]                   = Expr(-x.a)
     override def add(left: Expr[Int], right: Expr[Int]): Expr[Int] =
       Expr(left.a + right.a)
   }
@@ -71,8 +71,8 @@ object Tagless extends IOApp {
   final case class ExprShow[A](s: String) extends AnyVal
 
   val intShowInterpreter = new ExpressionArith[ExprShow] {
-    override def const(x: Int): ExprShow[Int] = ExprShow(s"$x")
-    override def negate(x: ExprShow[Int]): ExprShow[Int] = ExprShow(s"-${x.s}")
+    override def const(x: Int): ExprShow[Int]                                  = ExprShow(s"$x")
+    override def negate(x: ExprShow[Int]): ExprShow[Int]                       = ExprShow(s"-${x.s}")
     override def add(left: ExprShow[Int], right: ExprShow[Int]): ExprShow[Int] =
       ExprShow(s"${left.s} + ${right.s}")
   }
@@ -90,10 +90,10 @@ object Tagless extends IOApp {
   }
 
   val boolInterpreter = new ExpressionBool[Expr] {
-    override def bool(x: Boolean): Expr[Boolean] = Expr(x)
+    override def bool(x: Boolean): Expr[Boolean]                              = Expr(x)
     override def or(left: Expr[Boolean], right: Expr[Boolean]): Expr[Boolean] =
       Expr(
-        left.a || right.a,
+        left.a || right.a
       )
   }
 
@@ -104,7 +104,7 @@ object Tagless extends IOApp {
   override def run(args: List[String]): IO[ExitCode] =
     for {
       _ <- IO.delay(
-        println(("initial:", evaluate(expressionB), show(expressionB), evaluate(expressionI), show(expressionI))),
+        println(("initial:", evaluate(expressionB), show(expressionB), evaluate(expressionI), show(expressionI)))
       )
       _ <- IO.delay(
         println(
@@ -112,16 +112,16 @@ object Tagless extends IOApp {
             "final arithmetic:",
             expressionA(intInterpreter),
             expressionA(intShowInterpreter),
-          ),
-        ),
+          )
+        )
       )
       _ <- IO.delay(
         println(
           (
             "final boolean:",
             expressionB(boolInterpreter),
-          ),
-        ),
+          )
+        )
       )
     } yield ExitCode.Success
 }

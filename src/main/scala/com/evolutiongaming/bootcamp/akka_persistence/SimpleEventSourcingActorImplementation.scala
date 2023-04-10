@@ -13,18 +13,20 @@ class SimpleEventSourcingActorImplementation extends Actor {
     case entity: Subscribe =>
       state.update(
         entity.channel,
-        state.getOrElse(entity.channel, List.empty) :+ entity.subscriber
+        state.getOrElse(entity.channel, List.empty) :+ entity.subscriber,
       )
 
     case entity: Unsubscribe =>
       state.update(
         entity.channel,
-        state.getOrElse(entity.channel, List.empty)
-          .filterNot(_ == entity.subscriber)
+        state
+          .getOrElse(entity.channel, List.empty)
+          .filterNot(_ == entity.subscriber),
       )
 
     case event: Event =>
-      state.get(event.entity.getClass)
+      state
+        .get(event.entity.getClass)
         .foreach(_.foreach(_ ! event.entity))
   }
 
@@ -32,7 +34,7 @@ class SimpleEventSourcingActorImplementation extends Actor {
 
 object SimpleEventSourcingActorImplementation {
   sealed trait Command
-  case class Event(entity: Any) extends Command
-  case class Subscribe(subscriber: ActorRef, channel: Class[_]) extends Command
+  case class Event(entity: Any)                                   extends Command
+  case class Subscribe(subscriber: ActorRef, channel: Class[_])   extends Command
   case class Unsubscribe(subscriber: ActorRef, channel: Class[_]) extends Command
 }

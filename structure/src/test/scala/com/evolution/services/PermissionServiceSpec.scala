@@ -7,7 +7,7 @@ import org.scalatest.wordspec.AnyWordSpec
 
 class PermissionServiceSpec extends AnyWordSpec with Matchers {
   private val repositoryStub = new UserRepository
-  private val service = new PermissionService(repositoryStub)
+  private val service        = new PermissionService(repositoryStub)
   "PermissionService" should {
     "add permission" in {
       service.addPermission(Permission(PermissionName("Test"))) shouldBe ()

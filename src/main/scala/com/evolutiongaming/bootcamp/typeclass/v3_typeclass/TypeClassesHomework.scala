@@ -1,7 +1,6 @@
 package com.evolutiongaming.bootcamp.typeclass.v3_typeclass
 
-/**
-  * Try to accomplish as many tasks as you can
+/** Try to accomplish as many tasks as you can
   */
 object TypeClassesHomework {
 
@@ -68,7 +67,7 @@ object TypeClassesHomework {
 
     sealed trait Tree[A]
     object Tree {
-      final case class Leaf[A](value: A) extends Tree[A]
+      final case class Leaf[A](value: A)                        extends Tree[A]
       final case class Branch[A](left: Tree[A], right: Tree[A]) extends Tree[A]
     }
 

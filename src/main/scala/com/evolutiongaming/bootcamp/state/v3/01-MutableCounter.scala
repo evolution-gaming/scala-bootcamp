@@ -23,8 +23,8 @@ object MutableCounter extends App {
     }
   }
 
-  val x = mutableCounter.get
-  val y = x + x
+  val x  = mutableCounter.get
+  val y  = x + x
   mutableCounter.increment
   val y1 = mutableCounter.get + mutableCounter.get
 
@@ -48,12 +48,12 @@ object ImmutableCounter extends App {
     override def get: Long = initial
   }
 
-  val counter = makeCounter(0)
+  val counter  = makeCounter(0)
   val counter1 = counter.increment
-  val x = counter1.get
-  val y = x + x
+  val x        = counter1.get
+  val y        = x + x
   counter1.increment
-  val y1 = counter1.get + counter1.get
+  val y1       = counter1.get + counter1.get
 
   println(s"y=$y, y1=$y1")
 
@@ -167,8 +167,8 @@ object CounterConcurrencyDemo extends IOApp.Simple {
   override def run: IO[Unit] =
     for {
       counter <- IOCounter.safeCounter
-      _ <- List.fill(1000)(0).parTraverse(_ => counter.increment)
-      result <- counter.get
-      _ <- IO.println(s"result: $result")
+      _       <- List.fill(1000)(0).parTraverse(_ => counter.increment)
+      result  <- counter.get
+      _       <- IO.println(s"result: $result")
     } yield ()
 }

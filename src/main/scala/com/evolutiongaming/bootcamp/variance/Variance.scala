@@ -14,8 +14,6 @@ object Variance {
 
   case object Orange extends Fruit
 
-
-
   // By default classes are invariant in Scala, i.e. subtyping relation of container's type parameters
   // does not affect subtyping of the container
   final case class InvariantBox[A](values: List[A]) {
@@ -25,8 +23,6 @@ object Variance {
   var apples1: InvariantBox[Apple] = InvariantBox(List(RedApple, GreenApple))
   apples1 = apples1.add(RedApple)
 //  val fruits1: InvariantBox[Fruit] = apples1
-
-
 
   // Covariance is a direct mapping of subtyping relation, i.e. if A extends B then F[A] extends F[B] as well
   final case class CovariantBox[+A](values: List[A]) {
@@ -58,17 +54,13 @@ object Variance {
   // Apple extends Fruit -> Function[Fruit, *] extends Function[Apple, *]
   val showApple: FunctionOfSomeArg[Apple] = showFruit
 
-
-
   // The last is polyvariance which is a special case of invariance for higher kinds that
   // takes the relation from its parameter dynamically
   final case class BoxOfBoxes[A](value: A)
 
 //  val boxOfFruits1:  BoxOfBoxes[InvariantBox[Fruit]] = BoxOfBoxes(InvariantBox[Apple](List(RedApple, GreenApple)))
-  val boxOfFruits2:  BoxOfBoxes[CovariantBox[Fruit]] = BoxOfBoxes(CovariantBox[Apple](List(RedApple, GreenApple)))
-  val boxOfFuntions: BoxOfBoxes[Apple => String]     = BoxOfBoxes(showFruit)
-
-
+  val boxOfFruits2: BoxOfBoxes[CovariantBox[Fruit]] = BoxOfBoxes(CovariantBox[Apple](List(RedApple, GreenApple)))
+  val boxOfFuntions: BoxOfBoxes[Apple => String]    = BoxOfBoxes(showFruit)
 
   // Also you can set variance restrictions on nested type parameters
   final case class BoxOfBoxes2[F[_]](value: F[_])
@@ -76,7 +68,6 @@ object Variance {
 //  BoxOfBoxes2(InvariantBox(List(RedApple)))
 //  BoxOfBoxes2(CovariantBox(List(RedApple)))
   BoxOfBoxes2[-* => String](showFruit)
-
 
   def test[F[_]: Applicative](n: Int): OptionT[F, Int] = {
     import cats.syntax.applicative._

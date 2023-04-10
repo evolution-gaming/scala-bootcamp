@@ -47,9 +47,9 @@ object p5_Monad {
   trait GiftCard
   trait Gift
 
-  def findUser(name: String): Option[User] = ???
+  def findUser(name: String): Option[User]       = ???
   def findGiftCard(user: User): Option[GiftCard] = ???
-  def pickGift(card: GiftCard): Option[Gift] = ???
+  def pickGift(card: GiftCard): Option[Gift]     = ???
 
   lazy val maybeGift1: Option[Gift] =
     findUser("Bob").flatMap(findGiftCard).flatMap(pickGift)
@@ -121,7 +121,7 @@ object p5_Monad {
 
   final case class Player(name: String, age: Int)
 
-  val bob: Player = Player("Bob", 32)
+  val bob: Player   = Player("Bob", 32)
   val alice: Player = Player("Alice", 23)
 
   def minAge[F[_]: Monad](fa: F[Player], fb: F[Player]): F[Int] = {

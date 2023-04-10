@@ -5,7 +5,6 @@ import scala.language.implicitConversions
 object Manual {
   //  https://scalac.io/typeclasses-in-scala/
 
-
   // trait with functionality
   // an instance
   // use an instance
@@ -51,7 +50,6 @@ object Manual {
       .map(_.reduce(_ |+| _)) //  using syntax here
   }
 
-
   // apply
   // syntax anyval
   // instance method
@@ -59,7 +57,6 @@ object Manual {
   // instances out of companion
 
 }
-
 
 object Generated {
   import simulacrum._

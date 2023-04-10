@@ -13,14 +13,14 @@ class p8_MonadTransformersSpec extends AsyncWordSpec with AsyncIOSpec with Match
   final case class Gift(name: String)
   final case class GiftCard(id: String)
 
-  val user: User = User("Bob")
-  val gift: Gift = Gift("Laptop")
+  val user: User         = User("Bob")
+  val gift: Gift         = Gift("Laptop")
   val giftCard: GiftCard = GiftCard("12345")
 
   trait Repository {
-    def fetchUser(): IO[Option[User]] = IO.pure(user.some)
+    def fetchUser(): IO[Option[User]]                           = IO.pure(user.some)
     def fetchGiftCard(user: User): IO[Either[String, GiftCard]] = IO.pure(giftCard.asRight)
-    def pickGift(giftCard: GiftCard): IO[Gift] = IO(gift)
+    def pickGift(giftCard: GiftCard): IO[Gift]                  = IO(gift)
   }
 
   class GiftFetcher(repository: Repository) {
@@ -29,14 +29,14 @@ class p8_MonadTransformersSpec extends AsyncWordSpec with AsyncIOSpec with Match
 
   "GiftFetcher" should {
     "find gift" in {
-      val repository = new Repository {}
+      val repository  = new Repository {}
       val giftFetcher = new GiftFetcher(repository)
 
       giftFetcher.giftT().value.asserting(_ shouldBe gift.asRight)
     }
 
     "not find user" in {
-      val repository = new Repository {
+      val repository  = new Repository {
         override def fetchUser(): IO[Option[User]] = IO.pure(None)
       }
       val giftFetcher = new GiftFetcher(repository)
@@ -45,7 +45,7 @@ class p8_MonadTransformersSpec extends AsyncWordSpec with AsyncIOSpec with Match
     }
 
     "not find gift card" in {
-      val repository = new Repository {
+      val repository  = new Repository {
         override def fetchGiftCard(user: User): IO[Either[String, GiftCard]] = IO.pure("Gift card not found".asLeft)
       }
       val giftFetcher = new GiftFetcher(repository)
@@ -54,7 +54,7 @@ class p8_MonadTransformersSpec extends AsyncWordSpec with AsyncIOSpec with Match
     }
 
     "find gift gift" in {
-      val repository = new Repository {
+      val repository  = new Repository {
         override def pickGift(giftCard: GiftCard): IO[Gift] = IO(throw new RuntimeException("Database error"))
       }
       val giftFetcher = new GiftFetcher(repository)

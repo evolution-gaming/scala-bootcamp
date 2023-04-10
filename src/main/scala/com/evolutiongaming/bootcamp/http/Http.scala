@@ -163,7 +163,7 @@ object HttpServer extends IOApp {
     HttpRoutes.of[IO] {
 
       // curl "localhost:9001/params/2020-11-10"
-      case GET -> Root / "params" / LocalDateVar(localDate) =>
+      case GET -> Root / "params" / LocalDateVar(localDate)      =>
         Ok(s"Matched path param: $localDate")
 
       // curl "localhost:9001/params?date=2020-11-10"
@@ -187,7 +187,7 @@ object HttpServer extends IOApp {
 
     // curl "localhost:9001/headers" -H "Request-Header: Request header value"
     case req @ GET -> Root / "headers" =>
-      Ok(s"Received headers: ${ req.headers }", Header.Raw(CIString("Response-Header"), "Response header value"))
+      Ok(s"Received headers: ${req.headers}", Header.Raw(CIString("Response-Header"), "Response header value"))
 
     // Exercise 2. Implement HTTP endpoint that attempts to read the value of the cookie named "counter". If
     // present and contains an integer value, it should add 1 to the value and request the client to update
@@ -212,7 +212,7 @@ object HttpServer extends IOApp {
       // curl -XPOST "localhost:9001/json" -d '{"name": "John", "age": 18}' -H "Content-Type: application/json"
       case req @ POST -> Root / "json" =>
         req.as[User].flatMap { user =>
-          val greeting = Greeting(text = s"Hello, ${ user.name }!", timestamp = Instant.now())
+          val greeting = Greeting(text = s"Hello, ${user.name}!", timestamp = Instant.now())
           Ok(greeting)
         }
     }
@@ -223,13 +223,13 @@ object HttpServer extends IOApp {
   // It is possible to define custom entity decoders for HTTP request bodies.
   private val entityRoutes = {
 
-    implicit  val userDecoder: EntityDecoder[IO, User] = EntityDecoder
+    implicit val userDecoder: EntityDecoder[IO, User] = EntityDecoder
       .decodeBy(MediaType.text.plain) { m: Media[IO] =>
         val NameRegex = """\((.*),(\d{1,3})\)""".r
         EitherT {
           m.as[String].map {
             case NameRegex(name, age) => User(name, age.toInt).asRight
-            case s => InvalidMessageBodyFailure(s"Invalid value: $s").asLeft
+            case s                    => InvalidMessageBodyFailure(s"Invalid value: $s").asLeft
           }
         }
       }
@@ -238,7 +238,7 @@ object HttpServer extends IOApp {
 
       // curl -XPOST 'localhost:9001/entity' -d '(John,18)'
       case req @ POST -> Root / "entity" =>
-        req.as[User].flatMap(user => Ok(s"Hello, ${ user.name }!"))
+        req.as[User].flatMap(user => Ok(s"Hello, ${user.name}!"))
     }
   }
 
@@ -291,77 +291,88 @@ object HttpClient extends IOApp {
   private def printLine(string: String = ""): IO[Unit] = IO(println(string))
 
   def run(args: List[String]): IO[ExitCode] =
-    BlazeClientBuilder[IO].resource.use { client =>
-      for {
-        _ <- printLine(string = "Executing simple GET and POST requests:")
-        _ <- client.expect[String](uri / "hello" / "world") >>= printLine
-        _ <- client.expect[String](Method.POST("world", uri / "hello")) >>= printLine
-        _ <- printLine()
+    BlazeClientBuilder[IO].resource
+      .use { client =>
+        for {
+          _ <- printLine(string = "Executing simple GET and POST requests:")
+          _ <- client.expect[String](uri / "hello" / "world") >>= printLine
+          _ <- client.expect[String](Method.POST("world", uri / "hello")) >>= printLine
+          _ <- printLine()
 
-        _ <- printLine(string = "Executing requests with path and query parameters:")
-        _ <- client.expect[String](uri / "params" / "2020-11-10") >>= printLine
-        _ <- client.expect[String]((uri / "params").withQueryParam(key = "date", value = "2020-11-10")) >>= printLine
+          _ <- printLine(string = "Executing requests with path and query parameters:")
+          _ <- client.expect[String](uri / "params" / "2020-11-10") >>= printLine
+          _ <- client.expect[String]((uri / "params").withQueryParam(key = "date", value = "2020-11-10")) >>= printLine
 
-        // Exercise 4. Call HTTP endpoint, implemented in scope of Exercise 1, and print the response body.
-        // curl "localhost:9001/params/validate?timestamp=2020-11-04T14:19:54.736Z"
-        _ <- printLine()
+          // Exercise 4. Call HTTP endpoint, implemented in scope of Exercise 1, and print the response body.
+          // curl "localhost:9001/params/validate?timestamp=2020-11-04T14:19:54.736Z"
+          _ <- printLine()
 
-        _ <- for {
-          _ <- printLine(string = "Executing request with headers and cookies:")
-          request = Method.GET(uri / "headers", Headers(Header.Raw(CIString("Request-Header"), "Request header value")))
+          _ <- for {
+            _        <- printLine(string = "Executing request with headers and cookies:")
+            request   = Method.GET(
+              uri / "headers",
+              Headers(Header.Raw(CIString("Request-Header"), "Request header value")),
+            )
 
-          // `client.run()` provides more flexibility than `client.expect()`, since the entire response
-          // becomes available for consumption and processing as `Resource[IO, Response[IO]]`.
-          response <- client.run(request).use { response =>
-            response.bodyText.compile.string.map { bodyString =>
-              s"""Response body is:
-              |$bodyString
-              |Response headers are:
-              |${response.headers}""".stripMargin
+            // `client.run()` provides more flexibility than `client.expect()`, since the entire response
+            // becomes available for consumption and processing as `Resource[IO, Response[IO]]`.
+            response <- client.run(request).use { response =>
+              response.bodyText.compile.string.map { bodyString =>
+                s"""Response body is:
+                   |$bodyString
+                   |Response headers are:
+                   |${response.headers}""".stripMargin
+              }
             }
+            _        <- printLine(response)
+          } yield ()
+
+          // Exercise 5. Call HTTP endpoint, implemented in scope of Exercise 2, and print the response cookie.
+          // curl -v "localhost:9001/cookies" -b "counter=9"
+          _ <- printLine()
+
+          _ <- printLine(string = "Executing request with JSON entities:")
+          _ <- {
+            import io.circe.generic.auto._
+            import org.http4s.circe.CirceEntityCodec._
+
+            // User JSON encoder can also be declared explicitly instead of importing from `CirceEntityCodec`:
+            // implicit val helloEncoder = org.http4s.circe.jsonEncoderOf[IO, Hello]
+
+            client
+              .expect[Greeting](Method.POST(User("John", 18), uri / "json"))
+              .flatMap(greeting => printLine(greeting.toString))
           }
-          _ <- printLine(response)
+          _ <- printLine()
+
+          _ <- printLine(string = "Executing request with custom encoded entities:")
+          _ <- {
+            implicit val encoder: EntityEncoder[IO, User] = EntityEncoder
+              .stringEncoder[IO]
+              .contramap { user: User =>
+                s"(${user.name},${user.age})"
+              }
+
+            client.expect[String](Method.POST(User("John", 18), uri / "entity")) >>= printLine
+          }
+          _ <- printLine()
+
+          _          <- printLine(string = "Executing multipart requests:")
+          multiparts <- Multiparts.forSync[IO]
+          file        = getClass.getResource("/text.txt")
+          multipart  <- multiparts.multipart(
+            Vector(
+              Part.formData("character", "n"),
+              Part.fileData("file", file, `Content-Type`(MediaType.text.plain)),
+            )
+          )
+          _          <- client.expect[String](
+            Method.POST(multipart, uri / "multipart").withHeaders(multipart.headers)
+          ) >>= printLine
+          _          <- printLine()
         } yield ()
-
-        // Exercise 5. Call HTTP endpoint, implemented in scope of Exercise 2, and print the response cookie.
-        // curl -v "localhost:9001/cookies" -b "counter=9"
-        _ <- printLine()
-
-        _ <- printLine(string = "Executing request with JSON entities:")
-        _ <- {
-          import io.circe.generic.auto._
-          import org.http4s.circe.CirceEntityCodec._
-
-          // User JSON encoder can also be declared explicitly instead of importing from `CirceEntityCodec`:
-          // implicit val helloEncoder = org.http4s.circe.jsonEncoderOf[IO, Hello]
-
-          client.expect[Greeting](Method.POST(User("John", 18), uri / "json"))
-            .flatMap(greeting => printLine(greeting.toString))
-        }
-        _ <- printLine()
-
-        _ <- printLine(string = "Executing request with custom encoded entities:")
-        _ <- {
-          implicit val encoder: EntityEncoder[IO, User] = EntityEncoder.stringEncoder[IO]
-            .contramap { user: User =>
-              s"(${user.name},${user.age})"
-            }
-
-          client.expect[String](Method.POST(User("John", 18), uri / "entity")) >>= printLine
-        }
-        _ <- printLine()
-
-        _ <- printLine(string = "Executing multipart requests:")
-        multiparts <- Multiparts.forSync[IO]
-        file = getClass.getResource("/text.txt")
-        multipart <- multiparts.multipart(Vector(
-          Part.formData("character", "n"),
-          Part.fileData("file", file, `Content-Type`(MediaType.text.plain))
-        ))
-        _ <- client.expect[String](Method.POST(multipart, uri / "multipart").withHeaders(multipart.headers)) >>= printLine
-        _ <- printLine()
-      } yield ()
-    }.as(ExitCode.Success)
+      }
+      .as(ExitCode.Success)
 }
 
 // Attributions and useful links:

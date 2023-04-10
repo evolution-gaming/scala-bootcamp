@@ -16,7 +16,7 @@ object DataStructures {
   val mutableList = scala.collection.mutable.ListBuffer(1, 2, 3)
   mutableList.update(1, -1)
 
-  val immutableList1 = scala.collection.immutable.List(1, 2, 3)
+  val immutableList1       = scala.collection.immutable.List(1, 2, 3)
   val updatedImmutableList = immutableList1.updated(1, -1)
 
   val doTheyHaveEqualContents1 = mutableList == updatedImmutableList // true
@@ -43,13 +43,13 @@ object DataStructures {
   val emptyList2 = List()
   val emptyList3 = List.empty
 
-  val prepend4 = 4 :: immutableList2 // 4 :: 1 :: 2 :: 3 :: Nil
-  val prepend42 = 5 :: immutableList2 // 5 :: 1 :: 2 :: 3 :: Nil
+  val prepend4   = 4 :: immutableList2 // 4 :: 1 :: 2 :: 3 :: Nil
+  val prepend42  = 5 :: immutableList2 // 5 :: 1 :: 2 :: 3 :: Nil
   val tailOfList = immutableList2.tail // 2 :: 3 :: Nil
 
   val joinLists = immutableList2 ::: List(8, 9) // 1 :: 2 :: 3 :: 8 :: 9 :: Nil
 
-  val headOfList1 = Try(emptyList1.head)// what will happen here?!
+  val headOfList1 = Try(emptyList1.head) // what will happen here?!
   val headOfList2 = emptyList1.headOption // None
   val headOfList3 = immutableList2.headOption // Some(1)
 
@@ -97,11 +97,11 @@ object DataStructures {
 
   val vegetablePrices = Map(
     "tomatoes" -> 4,
-    "peppers" -> 5,
-    "olives" -> 17,
+    "peppers"  -> 5,
+    "olives"   -> 17,
   )
 
-  val moreVegetablePrices = vegetablePrices + ("pumpkins" -> 3)
+  val moreVegetablePrices  = vegetablePrices + ("pumpkins" -> 3)
   val lessVegetableWeights = vegetableWeights - "pumpkins"
 
   val questionableMap = vegetableWeights ++ vegetablePrices
@@ -109,13 +109,13 @@ object DataStructures {
   // Question. Why should `questionableMap` be considered questionable?
 
   val vegetableAmounts = Map(
-    "tomatoes" -> 17,
-    "peppers" -> 234,
-    "olives" -> 32,
+    "tomatoes"  -> 17,
+    "peppers"   -> 234,
+    "olives"    -> 32,
     "cucumbers" -> 323,
   )
 
-  val tomatoAmount: Int = vegetableAmounts("tomatoes")
+  val tomatoAmount: Int            = vegetableAmounts("tomatoes")
   val tomatoAmountOpt: Option[Int] = vegetableAmounts.get("tomatoes")
   val carrotAmountWithDefault: Int = vegetableAmounts.getOrElse("carrots", 0)
 
@@ -135,9 +135,9 @@ object DataStructures {
   }
 
   // Ranges and Sequences
-  val inclusiveRange: Seq[Int] = 2 to 4    // 2, 3, 4, or <=
+  val inclusiveRange: Seq[Int] = 2 to 4 // 2, 3, 4, or <=
   val exclusiveRange: Seq[Int] = 2 until 4 // 2, 3, or <
-  val withStep: Seq[Int] = 2 to 40 by 7    // 2, 9, 16, 23, 30, 37
+  val withStep: Seq[Int]       = 2 to 40 by 7 // 2, 9, 16, 23, 30, 37
 
   // Seq, IndexedSeq and LinearSeq traits are implemented by many collections and contain various useful
   // methods. See https://docs.scala-lang.org/overviews/collections/seqs.html in case you are interested

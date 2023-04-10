@@ -4,5 +4,5 @@ import com.evolutiongaming.bootcamp.cats_effects.actors.Actor_3
 
 case class Message(
   msg: String,
-  replyTo: Actor_3[Int]
+  replyTo: Actor_3[Int],
 )

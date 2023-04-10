@@ -7,7 +7,7 @@ import org.scalatest.matchers.should.Matchers
 class p2_MonoidSpec extends AnyFlatSpec with Matchers {
   "Int monoid" should "be correctly implemented" in {
     implicit val intMonoid = p2_Monoid.intMonoid
-    val empty = p2_Monoid.intMonoid.empty
+    val empty              = p2_Monoid.intMonoid.empty
 
     3 |+| 3 shouldBe 9
     2 |+| (3 |+| 3) shouldBe (2 |+| 3) |+| 3
@@ -16,7 +16,7 @@ class p2_MonoidSpec extends AnyFlatSpec with Matchers {
 
   "String monoid" should "be correctly implemented" in {
     implicit val stringMonoid = p2_Monoid.stringMonoid
-    val empty = p2_Monoid.stringMonoid.empty
+    val empty                 = p2_Monoid.stringMonoid.empty
 
     "hello " |+| "world" shouldBe "hello world"
     "a" |+| ("b" |+| "c") shouldBe ("a" |+| "b") |+| "c"
@@ -25,7 +25,7 @@ class p2_MonoidSpec extends AnyFlatSpec with Matchers {
 
   "Boolean monoid" should "be correctly implemented" in {
     implicit val boolMonoid = p2_Monoid.boolMonoid
-    val empty = p2_Monoid.boolMonoid.empty
+    val empty               = p2_Monoid.boolMonoid.empty
 
     true |+| true shouldBe true
     true |+| false shouldBe false

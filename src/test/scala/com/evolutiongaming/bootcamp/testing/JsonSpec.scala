@@ -6,7 +6,6 @@ import org.scalatest.matchers.should.Matchers
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import org.scalacheck.Test.Parameters
 
-
 class JsonSpec extends AnyFlatSpec with ScalaCheckDrivenPropertyChecks with Matchers {
   import Json._
 
@@ -16,8 +15,6 @@ class JsonSpec extends AnyFlatSpec with ScalaCheckDrivenPropertyChecks with Matc
     ???
 
   "parse" should "invert print" in {
-    forAll(jsonGen) { _ =>
-
-    }
+    forAll(jsonGen) { _ => }
   }
 }

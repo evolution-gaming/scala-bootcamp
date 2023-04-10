@@ -5,8 +5,8 @@ import doobie.util.transactor
 // ╚═══════════════════════════════════════╝
 
 def someFunction[F[_]](
-    ints: F[Int],
-    strings: F[String]
+  ints: F[Int],
+  strings: F[String],
 ): F[(Int, String)] = null.asInstanceOf[F[(Int, String)]]
 
 someFunction(Vector(1), Vector("asd"))
@@ -32,8 +32,8 @@ val vecMapper = new Mapper[Vector] {
 
 val vecZipper = new Zipper[Vector] {
   def zip[A, B](
-      fa: Vector[A],
-      fb: Vector[B]
+    fa: Vector[A],
+    fb: Vector[B],
   ): Vector[(A, B)] = fa.zip(fb)
 }
 
@@ -49,8 +49,8 @@ val optionMapper = new Mapper[Option] {
 
 val optionZipper = new Zipper[Option] {
   def zip[A, B](
-      fa: Option[A],
-      fb: Option[B]
+    fa: Option[A],
+    fb: Option[B],
   ): Option[(A, B)] = fa.zip(fb)
 }
 
@@ -70,8 +70,8 @@ val resultMapper = new Mapper[Result] {
 // scala 3 : new Zipper[[a] =>> Either[String, a]] {
 val resultZipper = new Zipper[Result] {
   def zip[A, B](
-      fa: Either[String, A],
-      fb: Either[String, B]
+    fa: Either[String, A],
+    fb: Either[String, B],
   ): Either[String, (A, B)] =
     for (a <- fa; b <- fb) yield (a, b)
 }
@@ -83,14 +83,14 @@ val resultSingle = new Single[Result] {
 // --------- Either[E, *] ---------
 def eitherMapper[E] = new Mapper[Either[E, *]] {
   def map[B, C](
-      fa: Either[E, B]
+    fa: Either[E, B]
   )(f: B => C): Either[E, C] = fa.map(f)
 }
 
 def eitherZipper[E] = new Zipper[Either[E, *]] {
   def zip[B, C](
-      fa: Either[E, B],
-      fb: Either[E, C]
+    fa: Either[E, B],
+    fb: Either[E, C],
   ): Either[E, (B, C)] =
     for (a <- fa; b <- fb) yield (a, b)
 }
@@ -102,7 +102,7 @@ def eitherSingle[E] = new Single[Either[E, *]] {
 // --------- Traverse ----------
 
 def collect[F[_], A](
-    as: Vector[F[A]]
+  as: Vector[F[A]]
 )(mapper: Mapper[F], zipper: Zipper[F], single: Single[F]): F[Vector[A]] =
   as.foldLeft(single.single(Vector.empty[A])) { (acc: F[Vector[A]], fa: F[A]) =>
     val zipped: F[(Vector[A], A)] = zipper.zip(acc, fa)
@@ -112,18 +112,18 @@ def collect[F[_], A](
 collect[Result, String](Vector(Right("a"), Right("b"), Right("c")))(
   resultMapper,
   resultZipper,
-  resultSingle
+  resultSingle,
 )
 
 // ------- More Kinds ---------
 def hkt1[
-    K3[_, _, _, _],
-    K4[a[b[c]]],
-    K1[+_],
-    K2[-_],
-    K5[_ >: String <: AnyRef],
-    K6[+F[x] <: Seq[x], +G[x] <: Seq[_]],
-    K7[+A[x, +y <: String, z >: Int] <: Either[x, y]],
-    K8[A <: B, B],
-    K9[X[x] <: Y[x], Y[+x]]
+  K3[_, _, _, _],
+  K4[a[b[c]]],
+  K1[+_],
+  K2[-_],
+  K5[_ >: String <: AnyRef],
+  K6[+F[x] <: Seq[x], +G[x] <: Seq[_]],
+  K7[+A[x, +y <: String, z >: Int] <: Either[x, y]],
+  K8[A <: B, B],
+  K9[X[x] <: Y[x], Y[+x]],
 ] = ()

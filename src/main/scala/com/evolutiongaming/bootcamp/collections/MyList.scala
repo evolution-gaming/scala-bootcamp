@@ -31,8 +31,8 @@ object MyList extends SeqFactory[MyList] {
   case object Nil extends MyList[Nothing]
 
   final case class Cons[+A](
-      override val head: A,
-      override val tail: MyList[A]
+    override val head: A,
+    override val tail: MyList[A],
   ) extends MyList[A]
 
   def from[A](source: IterableOnce[A]): MyList[A] =
@@ -41,12 +41,12 @@ object MyList extends SeqFactory[MyList] {
   def empty[A] = Nil
 
   def newBuilder[A]: Builder[A, MyList[A]] = new ReusableBuilder[A, MyList[A]] {
-    private var elems: MyList[A] = Nil
+    private var elems: MyList[A]   = Nil
     def addOne(elem: A): this.type = {
       elems = Cons(elem, elems)
       this
     }
-    def clear(): Unit = elems = Nil
-    def result(): MyList[A] = elems.reverse
+    def clear(): Unit              = elems = Nil
+    def result(): MyList[A]        = elems.reverse
   }
 }

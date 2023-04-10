@@ -14,16 +14,16 @@ object OptionMonad extends Monad[Option] {
 
   override def flatMap[A, B](fa: Option[A])(f: A => Option[B]) = fa match {
     case Some(a) => f(a)
-    case None => None
+    case None    => None
   }
 
   // This is a special method for stack-safety, we'll get to it later
   @scala.annotation.tailrec
   override def tailRecM[A, B](a: A)(f: A => Option[Either[A, B]]): Option[B] = {
     f(a) match {
-      case Some(Left(a)) => tailRecM(a)(f)
+      case Some(Left(a))  => tailRecM(a)(f)
       case Some(Right(b)) => Some(b)
-      case None => None
+      case None           => None
     }
   }
 }
@@ -41,9 +41,9 @@ trait User
 trait GiftCard
 trait Gift
 
-def findUser(name: String): Option[User] = ???
+def findUser(name: String): Option[User]       = ???
 def findGiftCard(user: User): Option[GiftCard] = ???
-def pickGift(card: GiftCard): Option[Gift] = ???
+def pickGift(card: GiftCard): Option[Gift]     = ???
 
 // You can just flatMap those together
 def gift1(name: String): Option[Gift] =
@@ -52,9 +52,9 @@ def gift1(name: String): Option[Gift] =
 // Or you can use for-comprehensions
 def gift2(name: String): Option[Gift] = {
   for {
-    user <- findUser(name)
+    user     <- findUser(name)
     giftCard <- findGiftCard(user)
-    gift <- pickGift(giftCard)
+    gift     <- pickGift(giftCard)
   } yield gift
 }
 
@@ -70,7 +70,7 @@ def gift2Alt(name: String): Option[Gift] = {
 
 // This forbids some behaviors, e.g. error accumulation in Validated:
 case class User(name: String, age: Int)
-val bob = User("Bob", 32)
+val bob   = User("Bob", 32)
 val alice = User("Alice", 23)
 
 def minAge[F[_]: Monad](fa: F[User], fb: F[User]): F[Int] = {
@@ -86,7 +86,6 @@ minAge(bob.rightNel[String], alice.rightNel[String])
 minAge(bob.rightNel[String], "ERROR".leftNel[User])
 minAge("ERROR".leftNel[User], "ALSO ERROR".leftNel[User])
 
-
 // Other operations
 
 // There's >>, behaves like *>, but takes right argument by-name
@@ -101,9 +100,9 @@ ioOne.unsafeRunSync()
 // You can flatMap recursively, useful for IO
 
 // Execute something repeatedly
-val spamOnce = IO(println("SPAM"))
+val spamOnce              = IO(println("SPAM"))
 def spamForever: IO[Unit] = spamOnce.flatMap(_ => spamForever)
-val spamForeverValue = spamForever
+val spamForeverValue      = spamForever
 
 // There's a combinator for that
 spamOnce.foreverM
@@ -120,4 +119,3 @@ def repeatEachSecond(action: IO[Unit])(implicit timer: Timer[IO]): IO[Unit] = {
 
 // Those operations are technically stack-safe, but not valid for @tailrec
 // That's the reason for tailRecM
-

@@ -34,16 +34,13 @@ object Hometask extends App {
     implicit val comonad: Comonad[Matrix] = ???
   }
 
-
-
-
   type RGB   = (Int, Int, Int)
   type Image = Matrix[RGB]
 
   private def toRGB(rgb: Int): (Int, Int, Int) = {
-    val red   = (rgb >> 16) & 0x000000FF
-    val green = (rgb >> 8) & 0x000000FF
-    val blue  = rgb & 0x000000FF
+    val red   = (rgb >> 16) & 0x000000ff
+    val green = (rgb >> 8) & 0x000000ff
+    val blue  = rgb & 0x000000ff
 
     (red, green, blue)
   }
@@ -70,9 +67,9 @@ object Hometask extends App {
   private def smooth(radius: Int)(image: Image): RGB = {
     val points    = (-radius / 2 until radius / 2).toList
     val (r, g, b) = (points, points).mapN { case (x, y) =>
-      image.get(image.focus.x + x, image.focus.y + y).getOrElse((0xFF, 0xFF, 0xFF))
+      image.get(image.focus.x + x, image.focus.y + y).getOrElse((0xff, 0xff, 0xff))
     }.combineAll
-    val sqr = radius * radius
+    val sqr       = radius * radius
     (r / sqr, g / sqr, b / sqr)
   }
 

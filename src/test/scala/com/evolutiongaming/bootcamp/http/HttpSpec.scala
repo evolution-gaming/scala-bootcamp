@@ -11,17 +11,18 @@ import org.http4s.multipart.{Multipart, Part}
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.should.Matchers
 
-class HttpSpec
-  extends AnyFreeSpec
-    with Matchers {
+class HttpSpec extends AnyFreeSpec with Matchers {
   import cats.effect.unsafe.implicits.global
 
   "HttpService should" - {
 
     "validate timestamp" in {
       val validResponseIO = httpApp.run(
-        Request(method = Method.GET, uri = uri"/params/validate"
-          .withQueryParam(key = "timestamp", value = "2020-11-04T14:19:54.736Z"))
+        Request(
+          method = Method.GET,
+          uri = uri"/params/validate"
+            .withQueryParam(key = "timestamp", value = "2020-11-04T14:19:54.736Z"),
+        )
       )
       check[String](
         actualResponseIO = validResponseIO,
@@ -30,8 +31,11 @@ class HttpSpec
       )
 
       val invalidResponseIO = httpApp.run(
-        Request(method = Method.GET, uri = uri"/params/validate"
-          .withQueryParam(key = "timestamp", value = "2020-40-04T14:19:54.736Z"))
+        Request(
+          method = Method.GET,
+          uri = uri"/params/validate"
+            .withQueryParam(key = "timestamp", value = "2020-40-04T14:19:54.736Z"),
+        )
       )
       check[String](
         actualResponseIO = invalidResponseIO,
@@ -65,15 +69,17 @@ class HttpSpec
     "count character occurrences" in {
 
       def multipartRequestWith(characterValue: String): Request[IO] = {
-        val multipart = Multipart[IO](Vector(
-          Part.formData(name = "character", value = characterValue),
-          Part.fileData(
-            name = "file",
-            filename = "test.txt",
-            entityBody = Stream.emits(os = "Some test text here...".map(_.toByte)),
-            headers = `Content-Type`(MediaType.text.plain),
-          ),
-        ))
+        val multipart     = Multipart[IO](
+          Vector(
+            Part.formData(name = "character", value = characterValue),
+            Part.fileData(
+              name = "file",
+              filename = "test.txt",
+              entityBody = Stream.emits(os = "Some test text here...".map(_.toByte)),
+              headers = `Content-Type`(MediaType.text.plain),
+            ),
+          )
+        )
         val multipartBody = EntityEncoder[IO, Multipart[IO]].toEntity(multipart).body
         Request(
           method = Method.POST,
@@ -109,15 +115,15 @@ class HttpSpec
     expectedBody: Option[A],
     expectedResponseCookie: Option[ResponseCookie] = None,
   )(implicit
-    decoder: EntityDecoder[IO, A],
+    decoder: EntityDecoder[IO, A]
   ): Unit = (for {
     actualResponse <- actualResponseIO
-    _ <- IO(actualResponse.status shouldBe expectedStatus)
-    _ <- expectedBody match {
+    _              <- IO(actualResponse.status shouldBe expectedStatus)
+    _              <- expectedBody match {
       case None       => actualResponse.body.compile.toVector.map(_ shouldBe empty)
       case Some(body) => actualResponse.as[A].map(_ shouldBe body)
     }
-    _ <- expectedResponseCookie match {
+    _              <- expectedResponseCookie match {
       case None                 => IO.unit
       case Some(responseCookie) => IO(actualResponse.cookies should contain(responseCookie))
     }

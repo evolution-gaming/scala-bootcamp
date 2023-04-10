@@ -11,13 +11,13 @@ object EffectExercises extends IOApp {
   override def run(args: List[String]): IO[ExitCode] = {
     object Exercise_1 {
       def readResourceFile(
-                            fileName: String
-                          ): String =
+        fileName: String
+      ): String =
         Source
           .fromResource(fileName)
           .mkString
 
-      var counter = 0
+      var counter        = 0
       def increment: Int = {
         counter += 1
         counter
@@ -28,7 +28,7 @@ object EffectExercises extends IOApp {
     }
 
     object Exercise_2 {
-      val treasure = "Treasure".some.some.some
+      val treasure                                                        = "Treasure".some.some.some
       def showMeYourPower(entity: Option[Option[Option[String]]]): String = ???
 
       println(showMeYourPower(treasure))
@@ -36,24 +36,21 @@ object EffectExercises extends IOApp {
 
     object Exercise_3 {
       def putStrlLn(value: String): IO[Unit] = ???
-      def readLn: IO[String] = ???
+      def readLn: IO[String]                 = ???
     }
 
     object Exercise_4 {
       def BOOM: IO[Unit] = IO.raiseError(new RuntimeException("I'm DarkSide, Try to stop me!!!"))
       def cameSuperManAndSaveUs[S, R](entity: IO[S]): IO[R] = ???
       case class Citizen(name: String, thankYouPhrase: String)
-      def getCivilians: IO[List[Citizen]] = ???
+      def getCivilians: IO[List[Citizen]]                   = ???
 
       for {
         civilians <- getCivilians
-        _ <- cameSuperManAndSaveUs[Unit, Unit](BOOM)
-        _ <- IO(
+        _         <- cameSuperManAndSaveUs[Unit, Unit](BOOM)
+        _         <- IO(
           civilians
-            .foreach(
-              citizen =>
-                println(citizen.thankYouPhrase)
-            )
+            .foreach(citizen => println(citizen.thankYouPhrase))
         )
       } yield ()
     }
@@ -68,12 +65,12 @@ object EffectExercises extends IOApp {
         })
 
       // IO.cancelable()
-      val executionContext: ExecutionContext = ???
+      val executionContext: ExecutionContext                        = ???
       def calmDownMan(executionContext: ExecutionContext): IO[Unit] = ???
 
       for {
         fiber <- calmDownMan(executionContext).start
-        _ <- fiber.cancel
+        _     <- fiber.cancel
       } yield ()
     }
 
@@ -88,8 +85,8 @@ object EffectExercises extends IOApp {
       for {
         fiber1 <- fib(300).start.evalOn(fixedThreadPool)
         fiber2 <- fib(300).start.evalOn(fixedThreadPool)
-        _ <- fiber1.join
-        _ <- fiber2.join
+        _      <- fiber1.join
+        _      <- fiber2.join
       } yield ()
     }
 

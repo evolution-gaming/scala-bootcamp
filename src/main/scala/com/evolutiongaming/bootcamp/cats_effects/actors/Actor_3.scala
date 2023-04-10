@@ -11,7 +11,9 @@ trait Actor_3[In] {
   def sendMessage(
     entity: In
   ): IO[Unit] =
-    semaphore.permit.surround(
-      handleMessage(entity)
-    ).start *> IO.unit
+    semaphore.permit
+      .surround(
+        handleMessage(entity)
+      )
+      .start *> IO.unit
 }

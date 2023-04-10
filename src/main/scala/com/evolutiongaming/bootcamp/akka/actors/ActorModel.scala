@@ -24,9 +24,9 @@ object ActorModel extends App {
     // need to define only 1 method - describes behavior
     // type Receive = PartialFunction[Any, Unit]
     override def receive: Receive = {
-      case Hi             =>
+      case Hi                  =>
         println("hi there")
-      case Email(subject) =>
+      case Email(subject)      =>
         emailCounter += 1
         println(s"I got the email: $subject.")
 
@@ -35,7 +35,7 @@ object ActorModel extends App {
         // sender: reference to the last message sender
         sender() ! EmailCount(emailCounter) // ~ sender.tell(EmailCount(emailCounter), self)
 
-      case other          =>
+      case other =>
         println(s"unexpected: $other")
     }
   }
@@ -56,14 +56,13 @@ object ActorModel extends App {
 
     // untyped actor can receive Any message but it's better to have sealed messages family
     sealed trait In
-    case object Hi extends In
+    case object Hi                          extends In
     final case class Email(subject: String) extends In
-    case object HowManyEmailsYouGot extends In
+    case object HowManyEmailsYouGot         extends In
 
     sealed trait Out
     final case class EmailCount(x: Int) extends Out
   }
-
 
   // ~ActorApp
   final class EvoMainActor extends Actor {
@@ -79,7 +78,7 @@ object ActorModel extends App {
     // 3. send message to our actorRef
     // - tell or ! sends a one-way asynchronous specified message (fire-and-forget semantics)
     // - all messages go to actor mailbox, then processed one-by-one
-    evoActorRef ! EvoActor.Hi                  // implicitly pass sender
+    evoActorRef ! EvoActor.Hi // implicitly pass sender
     evoActorRef ! EvoActor.Email("free pizza") // sender = self
 
     // another way to specify msg and sender explicitly
@@ -91,17 +90,16 @@ object ActorModel extends App {
 
     // code above ^ will be executed during EvoMainActor start
 
-    override def receive: Receive = {
-      case EvoActor.EmailCount(x) =>
-        println(s"my child received $x emails, now plz die")
-        evoActorRef ! PoisonPill
-        context.stop(self)
+    override def receive: Receive = { case EvoActor.EmailCount(x) =>
+      println(s"my child received $x emails, now plz die")
+      evoActorRef ! PoisonPill
+      context.stop(self)
     }
   }
 
   // 4. create actor system (basically we need a name and config)
   val evoActorSystem: ActorSystem = ActorSystem("evo-actor-system")
-  val evoMainRef: ActorRef = evoActorSystem.actorOf(Props[EvoMainActor](), "main")
+  val evoMainRef: ActorRef        = evoActorSystem.actorOf(Props[EvoMainActor](), "main")
 
   // 5. stop your system
   // evoActorSystem.terminate()

@@ -35,7 +35,7 @@ import cats.syntax.validated._
 
 val eithers = List(
   1.rightNel[String],
-  2.rightNel[String]
+  2.rightNel[String],
 )
 
 eithers.traverse(_.map(_ + 1))
@@ -46,14 +46,13 @@ eithers.sequence
 List(
   1.validNel[String],
   "nope".invalidNel[Int],
-  "error".invalidNel[Int]
+  "error".invalidNel[Int],
 ).sequence
 
 // Traverse can be interpreted in a more general sense:
 // It allows to exchange two nested types: F[G[_]] => G[F[_]]
 // "Oh, All the things you'll traverse" by Luka Jacobowitz @ ScalaDays 2018
 // https://www.youtube.com/watch?v=yEYPf44rS2U
-
 
 // Bonus topic: Parallel
 // Either and Validated are equivalent in structure, the difference is in typeclasses
@@ -71,7 +70,7 @@ Parallel[EitherNel[String, *]]
 val eitherNels = List(
   1.rightNel[String],
   "nope".leftNel[String],
-  "error".leftNel[String]
+  "error".leftNel[String],
 )
 
 eitherNels.sequence

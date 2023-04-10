@@ -29,7 +29,7 @@ MockitoScalaSession(strictness = Strictness.StrictStubs).run {
   m.bar(1) returns 42
   m.bar(2) returns 77
 
-  val _ = m.bar(1)
+  val _   = m.bar(1)
   val bar = m.bar(2)
 
   m.bar(*) wasCalled atLeastOnce

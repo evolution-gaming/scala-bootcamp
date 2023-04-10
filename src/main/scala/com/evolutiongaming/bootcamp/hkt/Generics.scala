@@ -12,7 +12,6 @@ object Generics {
 
     def fromList[A](elements: List[A]): Option[Triple[A]] = ??? // exercise 2 : implement
 
-
     sealed trait Index
 
     case object First extends Index
@@ -21,7 +20,6 @@ object Generics {
 
     case object Third extends Index
   }
-
 
   trait Walker[A, M, R] { // exercise 4 : fill in correct variance annotations
     def init: M
@@ -32,7 +30,6 @@ object Generics {
 
     def contramap[B](f: B => A): Walker[B, M, R] = ??? // exercice 5 implement
   }
-
 
   trait Collection[+A] {
     //    def walk(walker: Walker[A, M, R]): R
@@ -48,7 +45,6 @@ object Generics {
 
 }
 
-
 object Subkinding {
 
   trait Animal
@@ -58,77 +54,86 @@ object Subkinding {
   class Cat extends Animal
 
   type >:>[+A, -B] = <:<[B, A]
-  type ???[A, B] = DummyImplicit
+  type ???[A, B]   = DummyImplicit
 
   // sub or super 1
-  implicitly[ {
-    type T[+_]
-  } ??? {
-    type T[_]
-  }]
+  implicitly[{
+      type T[+_]
+    } ??? {
+      type T[_]
+    }
+  ]
 
   // sub or super 2
-  implicitly[ {
-    type T[_]
-  } ??? {
-    type T[-_]
-  }]
+  implicitly[{
+      type T[_]
+    } ??? {
+      type T[-_]
+    }
+  ]
 
   // sub or super 3
-  implicitly[ {
-    type T[_, _]
-  } ??? {
-    type T[-_, +_]
-  }]
-
+  implicitly[{
+      type T[_, _]
+    } ??? {
+      type T[-_, +_]
+    }
+  ]
 
   // sub or super 4
-  implicitly[ {
-    type T[_[_]]
-  } ??? {
-    type T[_]
-  }]
+  implicitly[{
+      type T[_[_]]
+    } ??? {
+      type T[_]
+    }
+  ]
 
   // sub or super 5
-  implicitly[ {
-    type T[_[_]]
-  } ??? {
-    type T[_[-_]]
-  }]
+  implicitly[{
+      type T[_[_]]
+    } ??? {
+      type T[_[-_]]
+    }
+  ]
 
   // sub or super 6
-  implicitly[ {
-    type T[_[+_]]
-  } ??? {
-    type T[_[-_]]
-  }]
+  implicitly[{
+      type T[_[+_]]
+    } ??? {
+      type T[_[-_]]
+    }
+  ]
 
   // sub or super 7
-  implicitly[ {
-    type T[_[_[+_]]]
-  } ??? {
-    type T[_[_[_]]]
-  }]
+  implicitly[{
+      type T[_[_[+_]]]
+    } ??? {
+      type T[_[_[_]]]
+    }
+  ]
 
   // sub or super 8
-  implicitly[ {
-    type T[_ >: Dog <: Animal]
-  } ??? {
-    type T[_]
-  }]
+  implicitly[{
+      type T[_ >: Dog <: Animal]
+    } ??? {
+      type T[_]
+    }
+  ]
 
   // sub or super 9
-  implicitly[ {
-    type T[_[_ >: Dog <: Animal]]
-  } ??? {
-    type T[_[_]]
-  }]
+  implicitly[{
+      type T[_[_ >: Dog <: Animal]]
+    } ??? {
+      type T[_[_]]
+    }
+  ]
 
   // sub or super 10
-  implicitly[ {
-    type T[_[x] <: Iterable[_]]
-  } ??? {
-    type T[_[_]]
-  }]
+  implicitly[{
+      type T[_[x] <: Iterable[_]]
+    } ??? {
+      type T[_[_]]
+    }
+  ]
 
 }

@@ -8,8 +8,8 @@ class SimpleActor extends Actor {
 
 object SimpleActor {
   sealed trait Command
-  case object ShowState extends Command
-  case object Restart extends Command
+  case object ShowState       extends Command
+  case object Restart         extends Command
   case class Add(entity: Int) extends Command
 
   case class State(

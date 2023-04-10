@@ -29,7 +29,7 @@ object SemaphoreDemo extends IOApp.Simple {
   override def run: IO[Unit] =
     for {
       resource <- PreciousResource.create(3)
-      _ <- List.range(0, 10).map(_.toString).parTraverse(resource.use)
+      _        <- List.range(0, 10).map(_.toString).parTraverse(resource.use)
     } yield ()
 }
 
@@ -54,7 +54,7 @@ object RateLimiterDemo extends IOApp.Simple {
   override def run: IO[Unit] =
     for {
       rateLimiter <- RateLimiter.create(3)
-      _ <- List
+      _           <- List
         .range(0, 10)
         .map(_.toString)
         .map(createWorker)

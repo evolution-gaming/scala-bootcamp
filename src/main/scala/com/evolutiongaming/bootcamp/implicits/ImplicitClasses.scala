@@ -72,10 +72,10 @@ object ImplicitClasses {
   // If you are C developer, you would, probably add prefixes to the methods
   // like this to not pollute a namespace:
   object EvolutionUtils1 {
-    def int_pow(base: Int, exponent: Int): Int = ???
-    def int_concat(a: Int, b: Int): Int = ???
+    def int_pow(base: Int, exponent: Int): Int            = ???
+    def int_concat(a: Int, b: Int): Int                   = ???
     def string_toInstant(string: String): Option[Instant] = ???
-    def list_int_mean(list: List[Int]): Int = ???
+    def list_int_mean(list: List[Int]): Int               = ???
   }
 
   // Then we can call the methods like this:
@@ -103,7 +103,7 @@ object ImplicitClasses {
   object EvolutionUtils2 {
     object IntUtils {
       def pow(base: Int, exponent: Int): Int = ???
-      def concat(a: Int, b: Int): Int = ???
+      def concat(a: Int, b: Int): Int        = ???
     }
     object StringUtils {
       def toInstant(string: String): Option[Instant] = ???
@@ -145,7 +145,7 @@ object ImplicitClasses {
 
     case class RichInt(a: Int) {
       def pow(exponent: Int): Int = ???
-      def concat(b: Int): Int = ???
+      def concat(b: Int): Int     = ???
     }
     case class RichString(a: String) {
       def toInstant: Option[Instant] = ???
@@ -198,7 +198,7 @@ object ImplicitClasses {
 
     implicit class RichInt(a: Int) {
       def pow(exponent: Int): Int = ???
-      def concat(b: Int): Int = ???
+      def concat(b: Int): Int     = ???
     }
     implicit class RichString(a: String) {
       def toInstant: Option[Instant] = ???
@@ -255,4 +255,3 @@ object ImplicitClasses {
 // also the ways to minimize the discoverability issues arising from the new
 // added methods. This discussion is out of scope of this lecture and will
 // be touched more heavily during a typeclass lecture instead.
-

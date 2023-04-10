@@ -21,7 +21,7 @@ trait ToDos[F[_]] {
 
 object ToDos {
 
-  def of[F[_] : Sync : Files : Console]: ToDos[F] =
+  def of[F[_]: Sync: Files: Console]: ToDos[F] =
     new ToDos[F] {
       val path: Path = Path("todos/todos.txt")
 
@@ -36,8 +36,8 @@ object ToDos {
           }
           .compile
           .toList
-          .onError {
-            case t => Console[F].printStackTrace(t)
+          .onError { case t =>
+            Console[F].printStackTrace(t)
           }
 
       override def create(txt: String): F[ToDo] =
@@ -54,8 +54,8 @@ object ToDos {
               .flatTap { _ =>
                 Console[F].println(s"Todo created: $todo")
               }
-              .onError {
-                case t => Console[F].printStackTrace(t)
+              .onError { case t =>
+                Console[F].printStackTrace(t)
               }
           }
     }

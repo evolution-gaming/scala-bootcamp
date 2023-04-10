@@ -29,9 +29,9 @@ class p2_Monoid_CombineAllSpec extends AnyWordSpec with Matchers {
         random
           .shuffle {
             for {
-              kind <- Vector("it_broke", "works_for_me", "out_of_magic_smoke")
+              kind   <- Vector("it_broke", "works_for_me", "out_of_magic_smoke")
               client <- Vector("important", "maybe_important")
-              amount = random.between(2, 20)
+              amount  = random.between(2, 20)
 
               problem <- Vector.fill(amount)(Problem(kind, client))
             } yield problem

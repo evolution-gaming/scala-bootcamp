@@ -35,7 +35,7 @@ object ToDos {
   private val insert: Command[ToDo] =
     sql"INSERT INTO todos(id, text) values($todo)".command
 
-  def of[F[_] : Async : Network : Console : UUIDGen]: Resource[F, ToDos[F]] =
+  def of[F[_]: Async: Network: Console: UUIDGen]: Resource[F, ToDos[F]] =
     for {
       conf <- Resource.eval(ConfigSource.default.at("db").loadF[F, DbConfig]())
       _    <- Resource.eval(Console[F].println(s"DB config: $conf"))
@@ -52,8 +52,8 @@ object ToDos {
           .use { sess =>
             sess.execute(select)
           }
-          .onError {
-            case t => Console[F].printStackTrace(t)
+          .onError { case t =>
+            Console[F].printStackTrace(t)
           }
 
       override def create(text: String): F[ToDo] =
@@ -66,8 +66,8 @@ object ToDos {
               }
             }
           }
-          .onError {
-            case t => Console[F].printStackTrace(t)
+          .onError { case t =>
+            Console[F].printStackTrace(t)
           }
     }
 

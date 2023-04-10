@@ -15,9 +15,9 @@ object ImplicitParameters extends App {
 }
 
 object LuckService {
-  def greet(name: String): Unit = println(s"Hello $name")
+  def greet(name: String): Unit       = println(s"Hello $name")
   def predictLuck(name: String): Unit = println(s"Your luck is ${Random.nextInt(11)} today, $name")
-  def bye(name: String): Unit = println(s"See you $name")
+  def bye(name: String): Unit         = println(s"See you $name")
 }
 
 object ImplicitParamTask {

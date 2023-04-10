@@ -9,7 +9,7 @@ import org.scalatest.matchers.should.Matchers._
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 
 class AlgebraicDataTypesSpec
-  extends AnyFlatSpec
+    extends AnyFlatSpec
     with OptionValues
     with EitherValues
     with ScalaCheckDrivenPropertyChecks {
@@ -76,11 +76,11 @@ class AlgebraicDataTypesSpec
     override def processPayment(amount: BigDecimal, accountNumber: AccountNumber): PaymentStatus =
       PaymentStatus(s"Sent $amount to account number ${accountNumber.value}")
   }
-  private class TestCreditCardService extends CreditCardService {
+  private class TestCreditCardService  extends CreditCardService {
     override def processPayment(amount: BigDecimal, creditCard: CreditCard): PaymentStatus =
       PaymentStatus(s"Sent $amount to card number ${creditCard.cardNumber.value}")
   }
-  private class TestCashService extends CashService {
+  private class TestCashService        extends CashService {
     override def processPayment(amount: BigDecimal): PaymentStatus =
       PaymentStatus(s"Sent $amount in cash")
   }

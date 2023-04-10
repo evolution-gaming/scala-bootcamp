@@ -10,8 +10,6 @@ class RomanSpec extends AnyFlatSpec with ScalaCheckDrivenPropertyChecks with Mat
   implicit val params = Parameters.default.withMinSuccessfulTests(1000)
 
   "decimal" should "invert roman" in {
-    forAll(Gen.choose(1, 1000000)) { _ =>
-
-    }
+    forAll(Gen.choose(1, 1000000)) { _ => }
   }
 }

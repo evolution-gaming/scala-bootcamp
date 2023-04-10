@@ -40,6 +40,6 @@ object ControlStructuresHomework1 {
     passedTests: Int,
     yearsOfExperience: Int,
     hasEducation: Boolean,
-    starsOnGithub: Int
+    starsOnGithub: Int,
   ): Boolean = ???
 }

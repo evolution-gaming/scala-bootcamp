@@ -31,6 +31,6 @@ object MyList {
     Cons(head, rec(other))
   }
 
-  case object Nil extends MyList[Nothing]
+  case object Nil                                    extends MyList[Nothing]
   final case class Cons[A](head: A, tail: MyList[A]) extends MyList[A]
 }

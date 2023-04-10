@@ -6,8 +6,8 @@ object DbCommon {
 
   val authorOdersky: UUID = UUID.randomUUID()
   val authorRowling: UUID = UUID.randomUUID()
-  val bookScala: UUID = UUID.randomUUID()
-  val bookHPStone: UUID = UUID.randomUUID()
+  val bookScala: UUID     = UUID.randomUUID()
+  val bookHPStone: UUID   = UUID.randomUUID()
   val bookHPSecrets: UUID = UUID.randomUUID()
 
   val createTableAuthorsSql: String =

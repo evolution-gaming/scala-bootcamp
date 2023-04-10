@@ -45,20 +45,20 @@ object p8_MonadTransformers {
   trait Gift
   trait GiftCard
 
-  def fetchUser(): IO[Option[User]] = IO(???)
+  def fetchUser(): IO[Option[User]]                   = IO(???)
   def fetchGiftCard(user: User): IO[Option[GiftCard]] = IO(???)
   // Let's assume GiftCard always has a gift
-  def pickGift(giftCard: GiftCard): IO[Gift] = IO(???)
+  def pickGift(giftCard: GiftCard): IO[Gift]          = IO(???)
 
   // Let's try getting a gift without transformers
   def gift(): IO[Option[Gift]] = {
     for {
-      userOpt <- fetchUser()
+      userOpt     <- fetchUser()
       giftCardOpt <- userOpt match {
         case Some(user) => fetchGiftCard(user)
         case None       => none[GiftCard].pure[IO]
       }
-      gift <- giftCardOpt match {
+      gift        <- giftCardOpt match {
         case Some(giftCard) => pickGift(giftCard).map(_.some)
         case None           => none[Gift].pure[IO]
       }
@@ -68,9 +68,9 @@ object p8_MonadTransformers {
   // With OptionT
   def giftT(): OptionT[IO, Gift] = {
     for {
-      user <- OptionT(fetchUser())
+      user     <- OptionT(fetchUser())
       giftCard <- OptionT(fetchGiftCard(user))
-      gift <- OptionT.liftF(pickGift(giftCard))
+      gift     <- OptionT.liftF(pickGift(giftCard))
     } yield gift
   }
 

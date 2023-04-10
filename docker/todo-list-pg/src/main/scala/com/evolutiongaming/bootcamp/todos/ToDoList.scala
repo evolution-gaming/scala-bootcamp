@@ -11,13 +11,13 @@ import org.http4s.{HttpApp, HttpRoutes}
 object ToDoList extends IOApp.Simple with Http4sDsl[IO] with CirceEntityEncoder {
 
   def routes(todos: ToDos[IO]): HttpRoutes[IO] = HttpRoutes.of[IO] {
-    case GET -> Root =>
+    case GET -> Root        =>
       todos.listAll.flatMap(Ok(_))
-    case req@POST -> Root =>
+    case req @ POST -> Root =>
       for {
         text <- req.bodyText.compile.string
         todo <- todos.create(text)
-        res <- Created(todo)
+        res  <- Created(todo)
       } yield res
   }
 

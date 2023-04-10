@@ -25,7 +25,7 @@ object Functor {
   implicit val listFunctor = new Functor[List] {
     override def map[A, B](fa: List[A])(f: A => B): List[B] = fa match {
       case Cons(head, tail) => Cons(f(head), map(tail)(f))
-      case Nil => Nil
+      case Nil              => Nil
     }
   }
 
@@ -34,7 +34,7 @@ object Functor {
 
 //  Cons(1, Nil).map(_.toString)
 
-  implicit def mapFunctor[K]: Functor[({type L[A] = Map[K, A]})#L] = {
+  implicit def mapFunctor[K]: Functor[({ type L[A] = Map[K, A] })#L] = {
     type OneHoleMap[T] = Map[K, T]
     new Functor[OneHoleMap] {
       override def map[A, B](fa: OneHoleMap[A])(f: A => B): OneHoleMap[B] = {

@@ -23,7 +23,7 @@ object p2_Monoid_CombineAll {
   import java.time.Instant
 
   type ProblemKind = String
-  type Client = String
+  type Client      = String
 
   final case class Problem(kind: ProblemKind, client: Client)
 
@@ -34,22 +34,21 @@ object p2_Monoid_CombineAll {
   type AggregatedResult = Map[ProblemKind, (Int, Map[Client, Int])]
 
   def aggregateCombineAll(
-      log: Iterator[(Instant, Seq[Problem])]
+    log: Iterator[(Instant, Seq[Problem])]
   ): AggregatedResult = ??? // cats.Monoid.combineAll { ??? }
 
   // Without monoids, aggregating into that shape is already pretty cumbersome
   def aggregateManually(
-      log: Iterator[(Instant, Seq[Problem])]
+    log: Iterator[(Instant, Seq[Problem])]
   ): AggregatedResult = {
     log
       .flatMap(_._2)
-      .foldLeft(Map.empty[ProblemKind, (Int, Map[Client, Int])]) {
-        case (acc, Problem(kind, client)) =>
-          val (oldKindTotal, oldPerClient) = acc.getOrElse(kind, (0, Map.empty[Client, Int]))
-          val newKindTotal = oldKindTotal + 1
-          val oldProblemsForClient = oldPerClient.getOrElse(client, 0)
-          val newPerClient = oldPerClient.updated(client, oldProblemsForClient + 1)
-          acc.updated(kind, newKindTotal -> newPerClient)
+      .foldLeft(Map.empty[ProblemKind, (Int, Map[Client, Int])]) { case (acc, Problem(kind, client)) =>
+        val (oldKindTotal, oldPerClient) = acc.getOrElse(kind, (0, Map.empty[Client, Int]))
+        val newKindTotal                 = oldKindTotal + 1
+        val oldProblemsForClient         = oldPerClient.getOrElse(client, 0)
+        val newPerClient                 = oldPerClient.updated(client, oldProblemsForClient + 1)
+        acc.updated(kind, newKindTotal -> newPerClient)
       }
   }
 }

@@ -42,7 +42,7 @@ object PowerfulScala {
   //
   def energy(mass: String): String = {
     val speedOfLight = BigDecimal(299792458)
-    val energy = BigDecimal(mass) * speedOfLight.pow(2)
+    val energy       = BigDecimal(mass) * speedOfLight.pow(2)
     energy.toString
   }
 }
@@ -81,12 +81,12 @@ object RefinedScala {
   // There is a library allowing to check the properties of the types during
   // compilation, i.e you have the same good old types, but with limitations:
   case class DatabaseConfig(
-      host: String Refined IPv4,
-      timeoutMilliseconds: Int Refined NonNegative
+    host: String Refined IPv4,
+    timeoutMilliseconds: Int Refined NonNegative,
   )
 
   // You can do this:
-  val config = DatabaseConfig(host = "127.0.0.1", timeoutMilliseconds = 16)
+  val config           = DatabaseConfig(host = "127.0.0.1", timeoutMilliseconds = 16)
   val timeoutInSeconds = config.timeoutMilliseconds / 1000
 
   // But you cannot do any of these (try uncommenting them):
@@ -95,13 +95,13 @@ object RefinedScala {
 
   // It is also possible to perform validation at runtime using `refine` macros:
   // as you can see, it returns `Either` with the possible error case
-  val hostFromUserInput: String = ""
+  val hostFromUserInput: String                   = ""
   val host: Either[String, Refined[String, IPv4]] =
     refineV[IPv4](hostFromUserInput)
 
   // It is possible to pass values of more specific types as more general type
   val largerThanSix: Int Refined Greater[6] = 7
-  val posInt: Int Refined Positive = largerThanSix
+  val posInt: Int Refined Positive          = largerThanSix
 
   // Exercise 2
   //
@@ -117,9 +117,8 @@ class RefinedScalaSpec extends AnyFunSuite {
 
   test("wrong call does not compile") {
     RefinedScala.Document(
-      url =
-        "https://developer.mozilla.org/en-US/docs/Web/API/Document_Object_Model/Examples",
-      body = "<complete/>"
+      url = "https://developer.mozilla.org/en-US/docs/Web/API/Document_Object_Model/Examples",
+      body = "<complete/>",
     )
     assertTypeError("""RefinedScala.Document("wrong url","<incomplete")""")
   }
@@ -145,9 +144,9 @@ object ValueClasses {
 
   // example 1
   case class Account(
-      name: AccountName,
-      number: AccountNumber,
-      balance: BigDecimal
+    name: AccountName,
+    number: AccountNumber,
+    balance: BigDecimal,
   )
   case class AccountName private (value: String) extends AnyVal
 
@@ -176,7 +175,7 @@ object ValueClasses {
       else None
   }
 
-  val accountName = AccountName("John Doe")
+  val accountName   = AccountName("John Doe")
   val accountNumber = AccountNumber("123456789")
 
   // compiler will not let you compile this code
@@ -197,15 +196,15 @@ object ValueClasses {
     *   \- amount of money which should be paid out to the player
     */
   def calculateWin(
-      stake: BigDecimal,
-      winRate: BigDecimal
+    stake: BigDecimal,
+    winRate: BigDecimal,
   ): BigDecimal = stake * winRate
 
   // We can add smart constructor if needed.
   // There is single space for scaladoc, so it's easier to maintain documentation.
 
   /** Amount of money player bet. It's used for calculating win amount. */
-  case class Stake(value: BigDecimal) extends AnyVal
+  case class Stake(value: BigDecimal)   extends AnyVal
   case class WinRate(value: BigDecimal) extends AnyVal
 
   case class WinAmount(value: BigDecimal) extends AnyVal
@@ -217,8 +216,8 @@ object ValueClasses {
   // Now we can even omit scaladoc completely. If necessary, one can take a look at `Stake`, `WinRate` and `WinAmount` classes.
   // Isn't this more readable?
   def calculateWin2(
-      stake: Stake,
-      winRate: WinRate
+    stake: Stake,
+    winRate: WinRate,
   ): WinAmount = WinAmount(stake, winRate)
 
   // example 4
@@ -233,7 +232,7 @@ object ValueClasses {
   // sending money is really important, so we want to make sure we don't make any mistakes
   // what if we, by accident, pass the wrong parameters to the `transferMoney` function?
   val from: Account = ???
-  val to: Account = ???
+  val to: Account   = ???
 
   // Exercise
 
@@ -249,11 +248,11 @@ object ImpossibleState {
   // What is wrong with following class?
   // Can you find a potential risk?
   final case class Task0(
-      id: String,
-      isFinished: Boolean,
-      finishedAt: Option[Long],
-      progress: Double,
-      isCancelled: Boolean
+    id: String,
+    isFinished: Boolean,
+    finishedAt: Option[Long],
+    progress: Double,
+    isCancelled: Boolean,
   )
 
   // Exercise 3
@@ -390,8 +389,7 @@ class ParametricitySpec extends AnyFunSuite {
     def reverse(list: List[Int]) = list.reverse
     assert(Parametricity.reversed3(List.empty[Int], reverse) == Nil)
     assert(
-      Parametricity.reversed3(List(1, 2, 3, 4, 5), reverse) == List(5, 4, 3, 2,
-        1)
+      Parametricity.reversed3(List(1, 2, 3, 4, 5), reverse) == List(5, 4, 3, 2, 1)
     )
   }
 
@@ -445,7 +443,7 @@ object EffectTracking {
     def call(arg: String): Unit = {
       // ... many lines of code
       val currentTime = System.currentTimeMillis()
-      val msg = s"$currentTime $arg"
+      val msg         = s"$currentTime $arg"
       // ... many lines of code
 
       print(msg)
@@ -476,7 +474,7 @@ object EffectTracking {
   class Service(printing: Printing, clock: Clock) {
     def call(arg: String): Unit = {
       val currentTime = clock.currentTimeMillis()
-      val msg = s"$currentTime $arg"
+      val msg         = s"$currentTime $arg"
 
       printing.print(msg)
     }
@@ -497,7 +495,7 @@ object EffectTrackingSpec extends AnyFunSuite {
   // Run the tests like following:
   //
   // sbt:scala-bootcamp> testOnly *testing2.ParametricitySpec
-  // 
+  //
   test("Service.call prints out anything") {
     ???
   }

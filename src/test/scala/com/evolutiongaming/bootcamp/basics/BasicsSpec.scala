@@ -67,4 +67,3 @@ class BasicsSpec extends AnyFlatSpec with ScalaCheckDrivenPropertyChecks {
     allTupleBooleanBooleans.size shouldEqual 4
   }
 }
-

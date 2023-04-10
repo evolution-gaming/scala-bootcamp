@@ -1,4 +1,3 @@
-
 object Zamiatin extends App {
 
   println("""

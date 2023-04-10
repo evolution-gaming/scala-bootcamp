@@ -23,19 +23,18 @@ val leftError = "error".raiseError[Either[String, *], Int]
 // E.g. this is used in Circe, where decoders return Either[DecodingFailure, T]
 // DecodingFailure extends io.circe.Error, which is a sealed class extending Exception
 sealed abstract class InvalidTime extends Exception with NoStackTrace
-case class InvalidHour() extends InvalidTime
-case class InvalidMinute() extends InvalidTime
+case class InvalidHour()          extends InvalidTime
+case class InvalidMinute()        extends InvalidTime
 
 case class Time(hour: Int, minute: Int)
 object Time {
-  def of[F[_]](hour: Int, minute: Int)
-              (implicit F: ApplicativeError[F, NonEmptyList[InvalidTime]]): F[Time] = {
+  def of[F[_]](hour: Int, minute: Int)(implicit F: ApplicativeError[F, NonEmptyList[InvalidTime]]): F[Time] = {
     def checkRange(range: Range, value: Int, error: => InvalidTime): F[Int] = {
       if (range.contains(value)) value.pure
       else NonEmptyList.one(error).raiseError
     }
 
-    val validHour = checkRange(0 to 23, hour, InvalidHour())
+    val validHour   = checkRange(0 to 23, hour, InvalidHour())
     val validMinute = checkRange(0 to 59, minute, InvalidMinute())
 
     (validHour, validMinute).mapN(Time.apply)
@@ -81,6 +80,6 @@ val midnight = Time(0, 0)
 // recover takes a PartialFunction from error to value
 // There's handleError taking a total function
 // There's also recoverWith/handleErrorWith taking F[A] instead of A
-tryFailure.recover {
-  case _: InvalidTime => midnight
+tryFailure.recover { case _: InvalidTime =>
+  midnight
 }

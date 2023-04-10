@@ -8,7 +8,6 @@ import scala.jdk.CollectionConverters._
 import cats.effect.unsafe.implicits.global
 import scala.concurrent.ExecutionContext.Implicits.{global => ec}
 
-
 object RepositoryApp extends App {
   case class User(id: String)
 
@@ -32,7 +31,6 @@ object RepositoryApp extends App {
   }
 
   program
-
 
   // run IO
   // program.unsafeRunSync()

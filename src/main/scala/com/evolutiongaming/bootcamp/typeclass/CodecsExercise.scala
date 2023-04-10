@@ -2,10 +2,10 @@ package com.evolutiongaming.bootcamp.typeclass
 
 object CodecsExercise {
   sealed trait Json
-  final case object JsonNull extends Json
-  final case class JsonString(value: String) extends Json
-  final case class JsonInt(value: Int) extends Json
-  final case class JsonArray(value: List[Json]) extends Json
+  final case object JsonNull                            extends Json
+  final case class JsonString(value: String)            extends Json
+  final case class JsonInt(value: Int)                  extends Json
+  final case class JsonArray(value: List[Json])         extends Json
   final case class JsonObject(value: Map[String, Json]) extends Json
 
   // Encoder
@@ -48,7 +48,6 @@ object CodecsExercise {
   "Example".toJson
   JsonNull.as[String]
 
-
   final case class Person(name: String, age: Int)
 
   // Exercise 3. Implement Encoder and Decoder for Person.
@@ -62,13 +61,11 @@ object CodecsExercise {
   implicit def listEncoder[A: Encoder]: Encoder[List[A]] = ???
   implicit def listDecoder[A: Decoder]: Decoder[List[A]] = ???
 
-
   final case class EntityId(id: String) extends AnyVal
 
   // Exercise 5. Implement Encoder and Decoder for EntityId with any content.
   implicit val idEncoder: Encoder[EntityId] = ???
   implicit val idDecoder: Decoder[EntityId] = ???
-
 
   // Exercise 6. Describe Functor
   // 1. Typeclass itself: `trait Functor`
@@ -85,7 +82,7 @@ object CodecsExercise {
   // Exercise 9. Implement Contravariant for encoder: `implicit val encoderContravariant`
 
   // Functions Example
-  val foo1: String => Int = _.length
+  val foo1: String => Int     = _.length
   val foo2: Boolean => String = if (_) "100" else "1"
 
   // Exercise 10. Implement Functor and Contravariant for functions:

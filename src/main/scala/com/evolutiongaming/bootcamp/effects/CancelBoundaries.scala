@@ -30,43 +30,43 @@ import scala.util.control.NonFatal
  * https://typelevel.org/cats-effect/datatypes/io.html#concurrency-and-cancellation
  * https://typelevel.org/cats-effect/datatypes/io.html#iocancelboundary
  */
-object CancelBoundaries extends IOApp  {
+object CancelBoundaries extends IOApp {
 
   val nonCancelableProgram: IO[Unit] = {
-    //program has no context shift and no cancel boundary set, it's not cancellable
+    // program has no context shift and no cancel boundary set, it's not cancellable
     def nonCancellableTimes(rec: Int): IO[Unit] = for {
       _ <- putString(s"Running remaining iterations: ${rec}")
       _ <- IO.sleep(1.seconds).uncancelable
-      _ <- if(rec > 0) IO.defer(nonCancellableTimes(rec - 1)) else IO.unit
+      _ <- if (rec > 0) IO.defer(nonCancellableTimes(rec - 1)) else IO.unit
     } yield ()
 
     for {
-      _ <- putString("Starting nonCancelableProgram")
+      _   <- putString("Starting nonCancelableProgram")
       fib <- nonCancellableTimes(10).start
-      _ <- IO.sleep(5.seconds)
-      _ <- fib.cancel
-      _ <- putString("Cancelled nonCancelableProgram")
-      _ <- IO.sleep(5.seconds) //just to keep program alive, otherwise deamon thread will be terminated
-      _ <- putString("End nonCancelableProgram")
+      _   <- IO.sleep(5.seconds)
+      _   <- fib.cancel
+      _   <- putString("Cancelled nonCancelableProgram")
+      _   <- IO.sleep(5.seconds) // just to keep program alive, otherwise deamon thread will be terminated
+      _   <- putString("End nonCancelableProgram")
     } yield ()
   }
 
   val cancelableProgram: IO[Unit] = {
-    //on every iteration cancel boundary is set, program is cancellable
+    // on every iteration cancel boundary is set, program is cancellable
     def cancellableTimes(rec: Int): IO[Unit] = for {
       _ <- putString(s"Running remaining iterations: ${rec}")
       _ <- IO.sleep(1.seconds).uncancelable
-      _ <- if(rec > 0) IO.cede *> IO.defer(cancellableTimes(rec - 1)) else IO.unit
+      _ <- if (rec > 0) IO.cede *> IO.defer(cancellableTimes(rec - 1)) else IO.unit
     } yield ()
 
     for {
-      _ <- putString("Starting cancelableProgram")
+      _   <- putString("Starting cancelableProgram")
       fib <- cancellableTimes(10).start
-      _ <- IO.sleep(5.seconds)
-      _ <- fib.cancel
-      _ <- putString("Cancelled cancelableProgram")
-      _ <- IO.sleep(5.seconds) //just to keep program alive, otherwise deamon thread will be terminated
-      _ <- putString("End cancelableProgram")
+      _   <- IO.sleep(5.seconds)
+      _   <- fib.cancel
+      _   <- putString("Cancelled cancelableProgram")
+      _   <- IO.sleep(5.seconds) // just to keep program alive, otherwise deamon thread will be terminated
+      _   <- putString("End cancelableProgram")
     } yield ()
   }
 
@@ -87,22 +87,27 @@ object CancelBoundariesExercises extends IOApp {
     implicit class ioRetrySyntax[A](task: IO[A]) {
       def retry(id: String, maxRetries: Int, interval: FiniteDuration): IO[A] =
         task
-          .handleErrorWith {
-            case NonFatal(e) =>
-              putString(s"$id Retrying... retries left: $maxRetries") *> (if(maxRetries <= 0) IO.raiseError(e)
-              else delay(interval) *> IO.defer(task.retry(id, maxRetries-1, interval)))
+          .handleErrorWith { case NonFatal(e) =>
+            putString(s"$id Retrying... retries left: $maxRetries") *> (if (maxRetries <= 0) IO.raiseError(e)
+                                                                        else
+                                                                          delay(interval) *> IO.defer(
+                                                                            task.retry(id, maxRetries - 1, interval)
+                                                                          ))
           }
     }
 
-    val io = IO.delay(if(Random.nextBoolean()) throw new RuntimeException("kaboom!") else "SUCCESS!")
+    val io = IO.delay(if (Random.nextBoolean()) throw new RuntimeException("kaboom!") else "SUCCESS!")
     for {
-      fib <- (0 to 10).toList.map(id => io.retry(s"id:$id", 10, 5.second))
-        .parSequence.flatMap(ll => putString(ll.toString())).start
-      _ <- IO.sleep(5.seconds)
-      _ <- fib.cancel
-      _ <- putString("No more work after this point")
-      _ <- IO.sleep(30.seconds)
-      _ <- putString(s"End")
+      fib <- (0 to 10).toList
+        .map(id => io.retry(s"id:$id", 10, 5.second))
+        .parSequence
+        .flatMap(ll => putString(ll.toString()))
+        .start
+      _   <- IO.sleep(5.seconds)
+      _   <- fib.cancel
+      _   <- putString("No more work after this point")
+      _   <- IO.sleep(30.seconds)
+      _   <- putString(s"End")
     } yield ()
   }
 
@@ -115,11 +120,11 @@ object CancelBoundariesExercises extends IOApp {
       log *> IO.defer(cpuBoundCompute(value * multiplier, multiplier + 1))
     }
     for {
-      _ <- putString("Starting program")
+      _   <- putString("Starting program")
       fib <- cpuBoundCompute(1, 1).start
-      _ <- fib.cancel
-      _ <- putString("cpu bound cancelled")
-      _ <- IO.sleep(10.seconds)
+      _   <- fib.cancel
+      _   <- putString("cpu bound cancelled")
+      _   <- IO.sleep(10.seconds)
     } yield ()
   }
 

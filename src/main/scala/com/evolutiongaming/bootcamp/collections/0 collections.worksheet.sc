@@ -53,7 +53,7 @@ val it = List(1, 2, 3).iterator.map(_ + 1).map(_ + 1)
 it.toList
 
 var counter = 0
-val lview = List(1, 2, 3).view.map(_ + 1).map { x =>
+val lview   = List(1, 2, 3).view.map(_ + 1).map { x =>
   counter += 1
   x + 1
 }

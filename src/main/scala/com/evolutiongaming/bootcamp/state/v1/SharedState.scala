@@ -38,16 +38,24 @@ object SynchronizationCommon {
   def run(friends: Friends): Unit = {
     def myRunnable(name: String): Runnable = new Runnable {
       override def run(): Unit = {
-        println("Thread " + Thread.currentThread().getName +
-          s" friends size  ${friends.getSize}")
-        println("Thread " + Thread.currentThread().getName +
-          s" trying to add a friend $name")
+        println(
+          "Thread " + Thread.currentThread().getName +
+            s" friends size  ${friends.getSize}"
+        )
+        println(
+          "Thread " + Thread.currentThread().getName +
+            s" trying to add a friend $name"
+        )
         friends.put(name)
-        println("Thread " + Thread.currentThread().getName +
-          s" has friends size ${friends.getSize}")
+        println(
+          "Thread " + Thread.currentThread().getName +
+            s" has friends size ${friends.getSize}"
+        )
 
-        println("Thread " + Thread.currentThread().getName +
-          s" has friends list ${friends.getFriendsList}")
+        println(
+          "Thread " + Thread.currentThread().getName +
+            s" has friends list ${friends.getFriendsList}"
+        )
       }
     }
 
@@ -157,32 +165,32 @@ object ExerciseZero extends IOApp {
   override def run(args: List[String]): IO[ExitCode] = {
 
     val getTest = for {
-      ref <- IOAtomicRef.of(1)
+      ref     <- IOAtomicRef.of(1)
       content <- ref.get()
-      _ <- logger.info(s"get test content should be 1, content $content")
+      _       <- logger.info(s"get test content should be 1, content $content")
     } yield ()
 
     val setTest = for {
-      ref <- IOAtomicRef.of(1)
-      _ <- ref.set(42)
+      ref     <- IOAtomicRef.of(1)
+      _       <- ref.set(42)
       content <- ref.get()
-      _ <- logger.info(s"set test content should be 42, content $content")
+      _       <- logger.info(s"set test content should be 42, content $content")
     } yield ()
 
     val updateTest = for {
-      ref <- IOAtomicRef.of(1)
-      _ <- ref.update(_ + 1)
-      _ <- ref.update(_ + 1)
+      ref     <- IOAtomicRef.of(1)
+      _       <- ref.update(_ + 1)
+      _       <- ref.update(_ + 1)
       content <- ref.get()
-      _ <- logger.info(s"update test content should be 3, content $content")
+      _       <- logger.info(s"update test content should be 3, content $content")
     } yield ()
 
     val modifyTest = for {
-      ref <- IOAtomicRef.of(1)
+      ref           <- IOAtomicRef.of(1)
       contentReturn <- ref.modify(current => (current + 20, current))
-      contentState <- ref.get()
-      _ <- logger.info(s"modify test contentReturn should be 1, contentReturn $contentReturn")
-      _ <- logger.info(s"modify test contentState should be 21, contentState $contentState")
+      contentState  <- ref.get()
+      _             <- logger.info(s"modify test contentReturn should be 1, contentReturn $contentReturn")
+      _             <- logger.info(s"modify test contentState should be 21, contentState $contentState")
     } yield ()
 
     //    getTest *>
@@ -215,21 +223,20 @@ object GetSetExample extends IOApp {
       _ <- messagesRef.set(msg :: t)
     } yield ()
 
-
   val program: IO[Unit] = for {
     messages <- Ref[IO].of(List.empty[String])
-    _ <- List(report(messages, "one"), report(messages, "two")).parSequence.void
-    msgs <- messages.get
-    _ <- logger.info(s"messages after changes $msgs")
+    _        <- List(report(messages, "one"), report(messages, "two")).parSequence.void
+    msgs     <- messages.get
+    _        <- logger.info(s"messages after changes $msgs")
   } yield ()
 
   override def run(args: List[String]): IO[ExitCode] = program.as(ExitCode.Success)
 }
 
 /*
-* Why do we need modify ?
-* Because Ref#get could happen after another Ref#update. `update` and then `get` is not Atomic.
-*/
+ * Why do we need modify ?
+ * Because Ref#get could happen after another Ref#update. `update` and then `get` is not Atomic.
+ */
 object UpdateExample extends IOApp {
 
   import IosCommon.logger
@@ -238,17 +245,16 @@ object UpdateExample extends IOApp {
 
   def inc(counterRef: Ref[IO, Int]): IO[Unit] =
     for {
-      _ <- counterRef.update(_ + 1)
+      _       <- counterRef.update(_ + 1)
       counter <- counterRef.get
-      _ <- logger.info(s"counter value is $counter")
+      _       <- logger.info(s"counter value is $counter")
     } yield ()
-
 
   val program: IO[Unit] = for {
     counter <- Ref[IO].of(0)
-    _ <- List(inc(counter), inc(counter)).parSequence.void
-    v <- counter.get
-    _ <- logger.info(s"counter after updates $v")
+    _       <- List(inc(counter), inc(counter)).parSequence.void
+    v       <- counter.get
+    _       <- logger.info(s"counter after updates $v")
   } yield ()
 
   override def run(args: List[String]): IO[ExitCode] = program.as(ExitCode.Success)
@@ -256,7 +262,7 @@ object UpdateExample extends IOApp {
 
 /*
  * Ref#modify will allow you to perform update and return something in an atomic way.
-*/
+ */
 object ModifyExample extends IOApp {
 
   import IosCommon.logger
@@ -266,10 +272,10 @@ object ModifyExample extends IOApp {
   val counterRef: IO[Ref[IO, Int]] = Ref.of[IO, Int](0)
 
   val program: IO[Unit] = for {
-    counter <- counterRef
-    _ <- List.fill(10)(inc(counter)).parSequence.void
+    counter      <- counterRef
+    _            <- List.fill(10)(inc(counter)).parSequence.void
     counterAfter <- counter.get
-    _ <- logger.info(s"counter after update should be 10, $counterAfter")
+    _            <- logger.info(s"counter after update should be 10, $counterAfter")
   } yield ()
 
   override def run(args: List[String]): IO[ExitCode] = program.as(ExitCode.Success)
@@ -278,12 +284,12 @@ object ModifyExample extends IOApp {
 /*
  * Limitations of Ref is that we cannot have effectful updates on Ref
  * Try to think what will happen if we would try to implement following method ?
-*/
+ */
 object RefLimitation {
   import ExerciseZero.IOAtomicRef
-  trait EffectfullRef[A] extends IOAtomicRef[A]{
+  trait EffectfullRef[A] extends IOAtomicRef[A] {
     // ....
-    def modifyM[B](f: A => IO[(A,B)]): IO[B]
+    def modifyM[B](f: A => IO[(A, B)]): IO[B]
   }
 
   class EffectfullRefImpl[A](ar: AtomicReference[A]) extends EffectfullRef[A] {
@@ -329,17 +335,15 @@ object SemaphoreExample extends IOApp {
 
   def process1(sem: Semaphore[IO]): IO[Unit] =
     logger.info("start first process") >>
-      sem.permit.surround( someExpensiveTask) >>
+      sem.permit.surround(someExpensiveTask) >>
       logger.info("finish fist process") >>
       process1(sem)
 
-
   def process2(sem: Semaphore[IO]): IO[Unit] =
     logger.info("start second process") >>
-      sem.permit.surround( someExpensiveTask) >>
+      sem.permit.surround(someExpensiveTask) >>
       logger.info("finish second process") >>
       process2(sem)
-
 
   def run(args: List[String]): IO[ExitCode] =
     Semaphore[IO](1).flatMap { sem =>
@@ -365,7 +369,7 @@ object SerialRefExercise extends IOApp {
     def update(f: A => F[A]): F[Unit]
   }
 
-  def of[F[_] : Concurrent, A](value: A): F[SerialRef[F, A]] = {
+  def of[F[_]: Concurrent, A](value: A): F[SerialRef[F, A]] = {
     for {
       s <- Semaphore[F](1)
       r <- Ref[F].of(value)
@@ -383,13 +387,18 @@ object SerialRefExercise extends IOApp {
 
   override def run(args: List[String]): IO[ExitCode] = {
     def modifyHelperIO(ref: SerialRef[IO, Int], duration: FiniteDuration, i: Int, s: String): IO[String] =
-      logger.info(s"$s started") *> ref.modify(x => IO.sleep(duration) *> IO((x + i, s))).flatTap(s => logger.info(s"$s finished"))
+      logger.info(s"$s started") *> ref
+        .modify(x => IO.sleep(duration) *> IO((x + i, s)))
+        .flatTap(s => logger.info(s"$s finished"))
 
     for {
-      ref <- SerialRefExercise.of[IO, Int](1)
-      _ <- List(modifyHelperIO(ref, 3.second, 10, "first modify"), modifyHelperIO(ref, 5.second, 20, "second modify")).parSequence.void
+      ref   <- SerialRefExercise.of[IO, Int](1)
+      _     <- List(
+        modifyHelperIO(ref, 3.second, 10, "first modify"),
+        modifyHelperIO(ref, 5.second, 20, "second modify"),
+      ).parSequence.void
       value <- ref.get
-      _ <- logger.info(s"ref value should be 31, $value")
+      _     <- logger.info(s"ref value should be 31, $value")
     } yield (ExitCode.Success)
   }
 }
@@ -519,12 +528,11 @@ object RefsExerciseTwo extends IOApp {
 
     val successResult: IO[Unit] = for {
       mem <- memoize(successProgram)
-      x <- mem
-      _ <- IO(println(x))
-      y <- mem
-      _ <- IO(println(y))
+      x   <- mem
+      _   <- IO(println(x))
+      y   <- mem
+      _   <- IO(println(y))
     } yield ()
-
 
     val errorProgram = IO {
       println("Gonna Boom!");
@@ -539,10 +547,10 @@ object RefsExerciseTwo extends IOApp {
 
     val failedResult: IO[Unit] = (for {
       mem <- memoize(errorProgram)
-      x <- mem
-      _ <- IO(println(x))
-      y <- mem
-      _ <- IO(println(y))
+      x   <- mem
+      _   <- IO(println(x))
+      y   <- mem
+      _   <- IO(println(y))
     } yield ()).handleErrorWith(e => IO(println(e)))
 
     successResult *>
@@ -572,14 +580,8 @@ object RaceMVarExercise extends IOApp {
 
     for {
       index <- race(task(0, 3.seconds), task(1, 5.seconds))
-      _ <- logger.info(s"index should be 0, $index ")
+      _     <- logger.info(s"index should be 0, $index ")
     } yield ExitCode.Success
-
 
   }
 }
-
-
-
-
-

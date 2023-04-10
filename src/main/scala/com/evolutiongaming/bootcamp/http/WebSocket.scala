@@ -53,15 +53,15 @@ object WebSocketServer extends IOApp {
       // `I == O == WebSocketFrame`. So the pipe transforms incoming WebSocket messages from the client to
       // outgoing WebSocket messages to send to the client.
       val echoPipe: Pipe[IO, WebSocketFrame, WebSocketFrame] =
-        _.collect {
-          case WebSocketFrame.Text(message, _) => WebSocketFrame.Text(message)
+        _.collect { case WebSocketFrame.Text(message, _) =>
+          WebSocketFrame.Text(message)
         }
 
       for {
         // Unbounded queue to store WebSocket messages from the client, which are pending to be processed.
         // For production use bounded queue seems a better choice. Unbounded queue may result in out of
         // memory error, if the client is sending messages quicker than the server can process them.
-        queue <- Queue.unbounded[IO, WebSocketFrame]
+        queue    <- Queue.unbounded[IO, WebSocketFrame]
         response <- wsb.build(
           // Sink, where the incoming WebSocket messages from the client are pushed to.
           receive = _.evalMap(queue.offer),
@@ -104,7 +104,7 @@ object WebSocketServer extends IOApp {
   override def run(args: List[String]): IO[ExitCode] =
     for {
       chatTopic <- Topic[IO, String]
-      _ <- BlazeServerBuilder[IO]
+      _         <- BlazeServerBuilder[IO]
         .bindHttp(port = 9002, host = "localhost")
         .withHttpWebSocketApp(httpApp(chatTopic))
         .serve
@@ -123,15 +123,19 @@ object WebSocketClient extends IOApp {
   private def printLine(string: String = ""): IO[Unit] = IO(println(string))
 
   override def run(args: List[String]): IO[ExitCode] = {
-    val clientResource = Resource.eval(IO(HttpClient.newHttpClient()))
+    val clientResource = Resource
+      .eval(IO(HttpClient.newHttpClient()))
       .flatMap(JdkWSClient[IO](_).connectHighLevel(WSRequest(uri)))
 
     clientResource.use { client =>
       for {
         _ <- client.send(WSFrame.Text("Hello, world!"))
-        _ <- client.receiveStream.collectFirst {
-          case WSFrame.Text(s, _) => s
-        }.compile.string >>= printLine
+        _ <- client.receiveStream
+          .collectFirst { case WSFrame.Text(s, _) =>
+            s
+          }
+          .compile
+          .string >>= printLine
       } yield ExitCode.Success
     }
   }

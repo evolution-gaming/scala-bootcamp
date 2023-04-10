@@ -7,7 +7,7 @@ import cats.Functor
 object OptionFunctor extends Functor[Option] {
   override def map[A, B](fa: Option[A])(f: A => B) = fa match {
     case Some(value) => Some(f(value))
-    case None => None
+    case None        => None
   }
 }
 
@@ -30,9 +30,9 @@ def getUserAge[F[_]: Functor](user: F[User]): F[Int] = user.map(_.age)
 val bob = User("Bob", 32)
 
 val usersMap = Map(
-  "Bob" -> bob,
+  "Bob"   -> bob,
   "Alice" -> User("Alice", 23),
-  "Ann" -> User("Ann", 54)
+  "Ann"   -> User("Ann", 54),
 )
 // Maps (and most other collections) have a functor
 getUserAge(usersMap)
@@ -40,7 +40,7 @@ getUserAge(usersMap)
 // Either
 import cats.syntax.either._
 
-val rightBob = bob.asRight[String]
+val rightBob  = bob.asRight[String]
 val userError = "ERROR".asLeft[User]
 getUserAge(rightBob)
 getUserAge(userError)

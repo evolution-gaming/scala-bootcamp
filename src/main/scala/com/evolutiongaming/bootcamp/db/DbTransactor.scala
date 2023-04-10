@@ -36,7 +36,7 @@ object DbTransactor {
         url = dbUrl,
         user = dbUser,
         pass = dbPwd,
-        connectEC = ce // await connection on this EC
+        connectEC = ce, // await connection on this EC
       )
     } yield xa
 }

@@ -7,12 +7,12 @@ import com.evolutiongaming.bootcamp.cats_effects.actors.model.Message
 
 class SimpleActor(
   val semaphore: Semaphore[IO]
-)(
-  implicit timer: Temporal[IO],
+)(implicit
+  timer: Temporal[IO]
 ) extends Actor_3[Message] {
-  override protected def name: String = "SimpleActor"
-  override protected def handleMessage: Message => IO[Unit] = {
-    case Message(v, replyTo) => replyTo.sendMessage(v.length)
+  override protected def name: String                       = "SimpleActor"
+  override protected def handleMessage: Message => IO[Unit] = { case Message(v, replyTo) =>
+    replyTo.sendMessage(v.length)
   }
 }
 

@@ -57,8 +57,8 @@ object SideEffect extends App {
 object ReferentialTransparency extends App {
   // 1. functions 'reverse' and '++' are pure
   // 2. we can use substitution model to reason about composition of pure functions
-  val x = "hello".reverse
-  val y = x ++ x
+  val x  = "hello".reverse
+  val y  = x ++ x
   val y1 = "hello".reverse ++ "hello".reverse
 
   println(s"y=$y, y1=$y1")
@@ -69,7 +69,7 @@ object MutableSharedState extends App {
   val map = scala.collection.mutable.Map("foo" -> 5, "bar" -> 7)
   val foo = map("foo")
   val bar = map("bar")
-  val x = foo + bar
+  val x   = foo + bar
 
   map.addOne("foo" -> 6) // mutating shared state is a side effect
   val y = map("foo") + map("bar")
@@ -82,7 +82,7 @@ object ImmutableSharedState extends App {
   val map = scala.collection.immutable.Map("foo" -> 5, "bar" -> 7)
   val foo = map("foo")
   val bar = map("bar")
-  val x = foo + bar
+  val x   = foo + bar
 
   val map1 =
     map + ("foo" -> 6) // this returns a new reference instead of mutating existing one
@@ -98,13 +98,13 @@ object MutableLocalState extends App {
   // mutable local state is RT
   def immutableMap[A, B](list: List[A])(f: A => B): List[B] = list match {
     case head :: tail => f(head) +: immutableMap(tail)(f)
-    case Nil => Nil
+    case Nil          => Nil
   }
 
   // mutable local state can be RT from the 'outside'
   def mutableMap[A, B](list: List[A])(f: A => B): List[B] = {
     val res = new ArrayBuffer[B]()
-    for(l <- list)
+    for (l <- list)
       res.addOne(f(l))
     res.toList
   }

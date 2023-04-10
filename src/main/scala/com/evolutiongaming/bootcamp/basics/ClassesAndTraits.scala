@@ -8,7 +8,7 @@ object ClassesAndTraits {
   // variables, types, objects, traits, and classes which are collectively called members.
 
   class MutableUser(var login: String, var balance: Double) {
-    def addMoney(amount: Double): Unit = changeBalance(amount)
+    def addMoney(amount: Double): Unit  = changeBalance(amount)
     def takeMoney(amount: Double): Unit = changeBalance(-amount)
 
     private def changeBalance(amount: Double): Unit =

@@ -13,8 +13,8 @@ object GuaranteeApp extends IOApp {
   def withGuaranteeCase[A](io: IO[A]): IO[A] =
     io.guaranteeCase {
       case Outcome.Succeeded(fa) => IO.delay(println("Completed"))
-      case Outcome.Canceled() => IO.delay(println("Canceled"))
-      case Outcome.Errored(e) => IO.delay(println(s"Error: ${e.getMessage}"))
+      case Outcome.Canceled()    => IO.delay(println("Canceled"))
+      case Outcome.Errored(e)    => IO.delay(println(s"Error: ${e.getMessage}"))
     }
 
   def cancelledProgram: IO[Unit] =

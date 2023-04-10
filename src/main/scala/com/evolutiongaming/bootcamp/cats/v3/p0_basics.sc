@@ -28,7 +28,6 @@
   // https://impurepics.com/posts/2018-07-07-cats-imports-difficulty.html
 }
 
-
 // Convenience operations for Option
 
 import cats.syntax.option._
@@ -59,7 +58,6 @@ NonEmptyList.fromList(Nil)
 import cats.data.NonEmptySet
 
 NonEmptySet.of(1, 2, 2, 3)
-
 
 // Show
 
@@ -97,7 +95,6 @@ foo.show
 show"int: ${1}, str: ${"foo"}, foo: $foo"
 //  show"does not compile: $noShow"
 
-
 // Eq
 
 import cats.Eq
@@ -110,7 +107,7 @@ Eq[Int].neqv(1, 2)
 
 import cats.syntax.eq._
 
-val ok = 1 == 1
+val ok               = 1 == 1
 val technicallyFalse = 1 == "1" // compiles, but probably a bug
 
 1 === 1
@@ -121,7 +118,6 @@ val technicallyFalse = 1 == "1" // compiles, but probably a bug
 implicit val fooEq: Eq[Foo] = Eq.fromUniversalEquals
 
 Foo(1) =!= Foo(2)
-
 
 // Order
 

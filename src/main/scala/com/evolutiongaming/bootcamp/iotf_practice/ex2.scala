@@ -3,7 +3,7 @@ package com.evolutiongaming.bootcamp.iotf_practice
 object ex2 {
 
   sealed trait State
-  case object Open extends State
+  case object Open   extends State
   case object Closed extends State
 
   trait Metrics[F[_]] {
@@ -17,8 +17,8 @@ object ex2 {
      * Task: implement, should use provider
      */
     def make[F[_]](provider: PrometheusProvider[F]): Metrics[F] = new Metrics[F] {
-      def increase: F[Unit] = ???
-      def decrease: F[Unit] = ???
+      def increase: F[Unit]              = ???
+      def decrease: F[Unit]              = ???
       def gaugeTo(state: State): F[Unit] = ???
     }
   }

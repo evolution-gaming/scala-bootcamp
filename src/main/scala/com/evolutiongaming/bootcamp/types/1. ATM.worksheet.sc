@@ -22,7 +22,7 @@ def getInfos(keys: Long*)(getter: InfoGetter): Vector[String] = {
 getInfos(1, 2, 3)(new InfoGetter {
 
   override type Info = Long
-  override def getInfo(key: Long): Long = key * 2
+  override def getInfo(key: Long): Long      = key * 2
   override def printInfo(info: Long): String = info.toString
 })
 
@@ -92,7 +92,7 @@ trait Transformer[-A, +B] {
 }
 
 def transform[A, B](
-    as: Vector[A]
+  as: Vector[A]
 )(transformer: Transformer[A, B]): Vector[B] =
   as.scanLeft(transformer.init) { (state, a) =>
     transformer.transformOne(a, state)
@@ -157,7 +157,7 @@ trait Caching {
   def cached[A](key: Key[A])(f: Key[A] => A): A =
     cache.get(key) match {
       case Some(a) => a.asInstanceOf[A]
-      case None =>
+      case None    =>
         val a = f(key)
         cache += key -> a
         a
@@ -223,7 +223,7 @@ Fibonacci.fib(10)
  * └──────────┘
  */
 // format: on
-// opaque type aliases 
+// opaque type aliases
 
 // case class CliendId(s: String)
 object ClientId {
@@ -295,7 +295,6 @@ NonEmptyVector.fromVector(Vector(1, 2, 3))
  */
 // format: on
 
-
 class IntCache extends Caching {
   type Key[A] = Int
 }
@@ -303,7 +302,6 @@ class IntCache extends Caching {
 val k1: IntCache#Key[String] = 1
 
 // val x: Fibonacci.type#Key[A] = null
-
 
 type CachingKey[C <: Caching, A] = C#Key[A]
 

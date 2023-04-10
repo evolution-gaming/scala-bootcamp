@@ -12,7 +12,7 @@ import scala.util.control.NoStackTrace
 object CatsHomework {
   object MonoidUsage {
     type Client = String
-    type Kind = String
+    type Kind   = String
     // Problem id will be a random UUID
     case class Problem(kind: Kind, client: Client, id: UUID)
 
@@ -35,6 +35,7 @@ object CatsHomework {
   }
 
   object PolyValidation {
+
     /** Payment card
       *
       * @param number         Card number, must be 16 characters, only digits
@@ -45,20 +46,21 @@ object CatsHomework {
     case class PaymentCard(number: String, expirationDate: YearMonth, name: String, securityCode: String)
 
     sealed abstract class ValidationError extends Exception with NoStackTrace
-    case object InvalidNumber extends ValidationError
-    case object InvalidName extends ValidationError
-    case object InvalidSecurityCode extends ValidationError
+    case object InvalidNumber             extends ValidationError
+    case object InvalidName               extends ValidationError
+    case object InvalidSecurityCode       extends ValidationError
 
     // Task: Implement card validation that can be run in any ApplicativeError
     // This should be possible to run in both Validated and Either
-    def validate[F[_]](number: String, expirationDate: YearMonth, name: String, securityCode: String)
-                      (implicit F: ApplicativeError[F, NonEmptyList[ValidationError]]): F[PaymentCard] = ???
+    def validate[F[_]](number: String, expirationDate: YearMonth, name: String, securityCode: String)(implicit
+      F: ApplicativeError[F, NonEmptyList[ValidationError]]
+    ): F[PaymentCard] = ???
   }
 
   object MonadTransformers {
     // How about a small key-value database?
     // Keys and value will be strings
-    type Key = String
+    type Key   = String
     type Value = String
 
     // The database, polymorphic in effect type
@@ -76,31 +78,33 @@ object CatsHomework {
     }
 
     // Raw request to the database, can contain garbage data
-    case class RawRequest(op: String,
-                          key: Option[String] = None,
-                          value: Option[String] = None,
-                          previousValue: Option[String] = None)
+    case class RawRequest(
+      op: String,
+      key: Option[String] = None,
+      value: Option[String] = None,
+      previousValue: Option[String] = None,
+    )
     // Possible responses
     // Actual response type will be F[Option[Response]]
     sealed trait Response
     object Response {
       case class Found(value: Value) extends Response
-      case object Ok extends Response
+      case object Ok                 extends Response
     }
 
     // Parsed request, that can be executed directly on database
     sealed trait Request
     object Request {
       // Write a value, always returns Some(Ok)
-      case class Write(key: Key, value: Value) extends Request
+      case class Write(key: Key, value: Value)                             extends Request
       // Read a value, returns Some(Found(_)) if value is present, None otherwise
-      case class Read(key: Key) extends Request
+      case class Read(key: Key)                                            extends Request
       // Read value for key, compare with expected, set to newValue if they are equal.
       // Return Some(Ok) if write happened, None otherwise
       case class CompareAndSet(key: Key, expected: Value, newValue: Value) extends Request
       // Read value for key, treat it as another key, read and return value at that key
       // E.g. ReadUnref("a") from ["a" -> "b", "b" -> "c", "c" -> "not this"] should return Some(Found("c"))
-      case class ReadUnref(key: Key) extends Request
+      case class ReadUnref(key: Key)                                       extends Request
     }
 
     // Task: implement parsing RawRequest into Request.
@@ -108,11 +112,11 @@ object CatsHomework {
     // Hint: mapN will help here
     def parseRequest(raw: RawRequest): Option[Request] = {
       raw.op match {
-        case "write" => ???
-        case "read" => ???
-        case "cas" => ???
+        case "write"      => ???
+        case "read"       => ???
+        case "cas"        => ???
         case "read-unref" => ???
-        case _ => ???
+        case _            => ???
       }
     }
 

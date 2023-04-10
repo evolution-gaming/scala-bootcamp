@@ -50,7 +50,6 @@ object MonadTransformers {
     def getItems(orderId: OrderId): IO[Either[Error, List[Item]]] = ???
   }
 
-
   // implement
   class Service(repo: Repository) {
 
@@ -77,7 +76,7 @@ object Generic {
   }
 
   // implement
-  class Service[F[_] : Monad](repo: Repository[F]) {
+  class Service[F[_]: Monad](repo: Repository[F]) {
 
     def friendsOrders(userId: UserId): F[List[Item]] = ???
   }

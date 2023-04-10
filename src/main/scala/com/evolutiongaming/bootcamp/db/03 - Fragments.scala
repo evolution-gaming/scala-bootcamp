@@ -37,7 +37,7 @@ object FragmentsUsage extends IOApp {
 //              .map(_.foreach(println))
 //          _ <- updateYearOfBook(bookHPStone, Year.of(2003)).transact(xa)
     } yield ExitCode.Success
-}
+  }
 
   implicit val uuidMeta: Meta[UUID] = Meta[String].timap(UUID.fromString)(_.toString)
   implicit val yearMeta: Meta[Year] = Meta[Int].timap(Year.of)(_.getValue)
@@ -45,7 +45,7 @@ object FragmentsUsage extends IOApp {
   // setup, `const` doesn't escape SQL, there is an "injection" risk!
   val ddl1 = Fragment.const(createTableAuthorsSql)
   val ddl2 = Fragment.const(createTableBooksSql)
-  val dml = Fragment.const(populateDataSql)
+  val dml  = Fragment.const(populateDataSql)
 
   def setup(): ConnectionIO[Unit] =
     for {
