@@ -1,18 +1,15 @@
-import cats.effect.{ContextShift, IO, Resource, Timer}
+import cats.effect.std.Queue
+import cats.effect.unsafe.implicits.global
+import cats.effect.{IO, Resource}
 import cats.syntax.either._
 import cats.syntax.traverse._
-import fs2.concurrent.Queue
 import fs2.{Chunk, Stream}
 import io.circe.Json
 
 import java.time.Instant
 import java.time.temporal.ChronoUnit
-import scala.concurrent.ExecutionContext
 import scala.concurrent.duration.DurationInt
 import scala.util.Random
-
-implicit val timer: Timer[IO]     = IO.timer(ExecutionContext.parasitic)
-implicit val cs: ContextShift[IO] = IO.contextShift(ExecutionContext.global)
 
 // Poll a database, emit newly-inserted rows as stream
 case class DbRow(data: Int, lastAdded: Instant)
@@ -123,10 +120,11 @@ Stream(
 // There is a stream running in background, you want to insert elements there
 // Solution: use a queue
 val streamWithInput = for {
-  input <- Resource.eval(Queue.boundedNoneTerminated[IO, Int](10))
+  input <- Resource.eval(Queue.bounded[IO, Option[Int]](10))
 
   // Background stream
-  streamFiber <- input.dequeue // this is Stream[IO, Int]
+  streamFiber <- Stream
+    .fromQueueNoneTerminated(input) // this is Stream[IO, Int]
     .evalMap(value => IO(println(s"Received $value")))
     .onFinalize(IO(println("Terminating")))
     .compile
@@ -135,10 +133,10 @@ val streamWithInput = for {
 
   // Feed it some elements
   _           <- Resource.eval(
-    (1 to 5).toList.traverse(toInsert => input.enqueue1(Some(toInsert)))
+    (1 to 5).toList.traverse(toInsert => input.offer(Some(toInsert)))
   )
   // Stop the stream by sending None
-  _           <- Resource.eval(input.enqueue1(None))
+  _           <- Resource.eval(input.offer(None))
   // Await stream end, generally not necessary
   _           <- Resource.eval(streamFiber)
 } yield ()

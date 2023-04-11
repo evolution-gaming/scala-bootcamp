@@ -12,6 +12,7 @@ lazy val thisBuildSettings: Seq[Setting[_]] = inThisBuild(
     run / connectInput := true,
     run / outputStrategy := Some(StdoutOutput),
     addCompilerPlugin("org.typelevel" %% "kind-projector" % "0.13.2" cross CrossVersion.full),
+    addCompilerPlugin("com.olegpy" %% "better-monadic-for" % "0.3.1"),
   )
 )
 

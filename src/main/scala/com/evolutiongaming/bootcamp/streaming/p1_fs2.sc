@@ -1,12 +1,12 @@
-import cats.effect.{ContextShift, IO, Timer}
+import cats.effect.{IO, Temporal}
 import fs2._
+import cats.effect.unsafe.implicits.global
 
 import java.time.Instant
 import scala.concurrent.ExecutionContext
 import scala.concurrent.duration._
 
-implicit val timer: Timer[IO]     = IO.timer(ExecutionContext.parasitic)
-implicit val cs: ContextShift[IO] = IO.contextShift(ExecutionContext.global)
+implicit val temporal = Temporal[IO]
 
 // Let's start with ubiquitous word count example
 // Take a string, split it into words, count each word
@@ -93,22 +93,22 @@ val pureCount: Option[Map[String, Int]] = pureLines
 
 // Other F[_]'s can work; .compile requires at least Sync
 // E.g. monix Task can work well
-{
-  import monix.eval.Task
-  import monix.execution.Scheduler
-
-  val monixLines: Stream[Task, String]       = Stream.eval(Task(inputStr))
-  val monixWordCount: Task[Map[String, Int]] = monixLines
-    .through(fs2.text.lines)
-    .through(toWords)
-    .map(_.toLowerCase())
-    .scanMap(word => Map(word -> 1))
-    .compile
-    .lastOrError
-
-  implicit val scheduler: Scheduler = Scheduler(ExecutionContext.parasitic)
-  monixWordCount.runSyncUnsafe()
-}
+//{
+//  import monix.eval.Task
+//  import monix.execution.Scheduler
+//
+//  val monixLines: Stream[Task, String]       = Stream.eval(Task(inputStr))
+//  val monixWordCount: Task[Map[String, Int]] = monixLines
+//    .through(fs2.text.lines)
+//    .through(toWords)
+//    .map(_.toLowerCase())
+//    .scanMap(word => Map(word -> 1))
+//    .compile
+//    .lastOrError
+//
+//  implicit val scheduler: Scheduler = Scheduler(ExecutionContext.parasitic)
+//  monixWordCount.runSyncUnsafe()
+//}
 
 // Internally fs2 actually elements in batches, represented with fs2.Chunk
 // Per-element operators like map/filter work on chunks transparently
@@ -314,28 +314,28 @@ dynamicStream.parJoinUnbounded.compile.toList.unsafeRunSync()
 // there is parJoin(Int), which limits how much streams are open at once
 dynamicStream.parJoin(2).compile.toList.unsafeRunSync()
 
-// broadcast
-val broadcastWords: Stream[IO, Stream[IO, String]] = words.broadcast
-
-words
-  .take(4)
-  .broadcast
-  .take(3) // 3 streams, each sees all elements from upstream
-  .map(_.map(_.toUpperCase()))
-  .parJoinUnbounded
-  .compile
-  .toList
-  .unsafeRunSync()
-
-// balance
-words
-  .balance(1)
-  .take(3) // 3 load-balanced streams
-  .map(_.map(_.toUpperCase()))
-  .parJoinUnbounded
-  .compile
-  .toList
-  .unsafeRunSync()
+//// broadcast
+//val broadcastWords: Stream[IO, Stream[IO, String]] = words.broadcast
+//
+//words
+//  .take(4)
+//  .broadcast
+//  .take(3) // 3 streams, each sees all elements from upstream
+//  .map(_.map(_.toUpperCase()))
+//  .parJoinUnbounded
+//  .compile
+//  .toList
+//  .unsafeRunSync()
+//
+//// balance
+//words
+//  .balance(1)
+//  .take(3) // 3 load-balanced streams
+//  .map(_.map(_.toUpperCase()))
+//  .parJoinUnbounded
+//  .compile
+//  .toList
+//  .unsafeRunSync()
 
 // Split stream, process branches differently
 val ints = Stream.range(1, 5).covary[IO].debug()
