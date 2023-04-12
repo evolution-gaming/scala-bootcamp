@@ -1,9 +1,8 @@
+import cats.effect.unsafe.implicits.global
 import cats.effect.{IO, Temporal}
 import fs2._
-import cats.effect.unsafe.implicits.global
 
 import java.time.Instant
-import scala.concurrent.ExecutionContext
 import scala.concurrent.duration._
 
 implicit val temporal = Temporal[IO]
@@ -91,24 +90,25 @@ val pureCount: Option[Map[String, Int]] = pureLines
   .compile
   .last
 
-// Other F[_]'s can work; .compile requires at least Sync
-// E.g. monix Task can work well
-//{
-//  import monix.eval.Task
-//  import monix.execution.Scheduler
-//
-//  val monixLines: Stream[Task, String]       = Stream.eval(Task(inputStr))
-//  val monixWordCount: Task[Map[String, Int]] = monixLines
-//    .through(fs2.text.lines)
-//    .through(toWords)
-//    .map(_.toLowerCase())
-//    .scanMap(word => Map(word -> 1))
-//    .compile
-//    .lastOrError
-//
-//  implicit val scheduler: Scheduler = Scheduler(ExecutionContext.parasitic)
-//  monixWordCount.runSyncUnsafe()
-//}
+// Other F[_]'s can work
+// Let's try ZIO
+{
+  import zio.stream.interop.fs2z._
+  import zio.{Runtime, Task, UIO, ZIO, Unsafe}
+
+  val zioLines: Stream[UIO, String]                = Stream.eval(ZIO.succeed(inputStr))
+  val zioWordCount: Task[Option[Map[String, Int]]] = zioLines
+    .through(fs2.text.lines)
+    .through(toWords)
+    .map(_.toLowerCase())
+    .scanMap(word => Map(word -> 1))
+    .toZStream()
+    .runLast
+
+  Unsafe.unsafe { implicit unsafe =>
+    Runtime.default.unsafe.run(zioWordCount)
+  }
+}
 
 // Internally fs2 actually elements in batches, represented with fs2.Chunk
 // Per-element operators like map/filter work on chunks transparently
@@ -127,16 +127,6 @@ Stream.chunk(Chunk(1, 2, 3))
 Stream
   .eval(IO {
     println("Side-effect!")
-    42
-  })
-  .compile
-  .toVector
-  .unsafeRunSync()
-
-// Note: no elements, only side-effect
-Stream
-  .eval_(IO {
-    println("Side-effect, with empty stream")
     42
   })
   .compile
@@ -207,8 +197,7 @@ words
   .drain
   .unsafeRunSync()
 
-// Or operate directly on stream on chunks
-import cats.syntax.traverse._
+// Or operate directly on stream of chunks
 
 words.chunks // Stream[F, Chunk[T]]
   .evalMap(chunk => chunk.traverse(word => IO(word.toLowerCase)))
@@ -269,14 +258,6 @@ words.compile.to(Chunk)
 
 words.compile.fold(Vector.empty[String])(_.appended(_))
 words.compile.foldChunks("!")(_ + _.map(_.take(1)))
-
-// Common case: do a side-effect at the end of stream
-// E.g. insert each element into database
-def insertIntoDatabase[T](value: T): IO[Unit] = IO.unit // omitted
-words
-  .evalMap(insertIntoDatabase)
-  .compile
-  .drain
 
 // Resource instead of bare F
 words.compile.resource.lastOrError

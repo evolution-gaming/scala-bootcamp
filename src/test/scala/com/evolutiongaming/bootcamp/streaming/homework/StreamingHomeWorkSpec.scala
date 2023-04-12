@@ -20,7 +20,7 @@ class StreamingHomeWorkSpec extends AnyWordSpec with Matchers {
     "Exercise 1" should {
       "met all guarantees and provide desired throughput" in {
         val commandsCount = 10
-        val commands      = List
+        val commands      = List // TODO use iterate
           .unfold(1) { current => if (current == commandsCount + 1) None else Some(current, current + 1) }
           .map(Command(_, Durations(load = 500.millis, validate = 5.millis, effect = 50.millis)))
 

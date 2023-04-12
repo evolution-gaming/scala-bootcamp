@@ -11,8 +11,8 @@ lazy val thisBuildSettings: Seq[Setting[_]] = inThisBuild(
     run / fork := true,
     run / connectInput := true,
     run / outputStrategy := Some(StdoutOutput),
-    addCompilerPlugin("org.typelevel" %% "kind-projector" % "0.13.2" cross CrossVersion.full),
-    addCompilerPlugin("com.olegpy" %% "better-monadic-for" % "0.3.1"),
+    addCompilerPlugin("org.typelevel" %% "kind-projector"     % "0.13.2" cross CrossVersion.full),
+    addCompilerPlugin("com.olegpy"    %% "better-monadic-for" % "0.3.1"),
   )
 )
 
@@ -89,7 +89,9 @@ lazy val root = project
       "org.slf4j"                 % "slf4j-nop"                     % "1.6.4",
       "com.typesafe.slick"       %% "slick-hikaricp"                % slickVersion,
       "com.lihaoyi"              %% "requests"                      % "0.6.5",
-      "dev.zio"                  %% "zio"                           % "2.0.0-M4",
+      "dev.zio"                  %% "zio"                           % "2.0.12",
+      "dev.zio"                  %% "zio-streams"                   % "2.0.12",
+      "dev.zio"                  %% "zio-interop-cats"              % "3.1.1.0",
       "io.github.timwspence"     %% "cats-stm"                      % "0.11.0",
     ),
   )
