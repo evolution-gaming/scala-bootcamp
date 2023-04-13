@@ -3,9 +3,10 @@ package com.evolutiongaming.bootcamp.http
 import cats.effect.std.Queue
 import cats.effect.{ExitCode, IO, IOApp, Resource}
 import cats.syntax.all._
+import com.comcast.ip4s._
 import fs2.concurrent.Topic
 import fs2.{Pipe, Stream}
-import org.http4s.blaze.server._
+import org.http4s.ember.server._
 import org.http4s.client.websocket.{WSFrame, WSRequest}
 import org.http4s.dsl.io._
 import org.http4s.implicits._
@@ -104,18 +105,17 @@ object WebSocketServer extends IOApp {
   override def run(args: List[String]): IO[ExitCode] =
     for {
       chatTopic <- Topic[IO, String]
-      _         <- BlazeServerBuilder[IO]
-        .bindHttp(port = 9002, host = "localhost")
+      _         <- EmberServerBuilder
+        .default[IO]
+        .withHost(ipv4"127.0.0.1")
+        .withPort(port"9001")
         .withHttpWebSocketApp(httpApp(chatTopic))
-        .serve
-        .compile
-        .drain
+        .build
+        .useForever
     } yield ExitCode.Success
 }
 
-// Http4s does not yet provide a full-fledged WebSocket client (contributions are welcome):
-// https://github.com/http4s/http4s/issues/330. However, there is a purely functional wrapper
-// for the built-in JDK 11+ HTTP client available.
+// Http4s provides a purely functional wrapper for the built-in JDK 11+ HTTP client.
 object WebSocketClient extends IOApp {
 
   private val uri = uri"ws://localhost:9002/echo"

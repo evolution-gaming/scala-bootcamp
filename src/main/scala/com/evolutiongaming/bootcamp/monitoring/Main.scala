@@ -1,9 +1,10 @@
 package com.evolutiongaming.bootcamp.monitoring
 
 import cats.effect.{ExitCode, IO, IOApp}
+import com.comcast.ip4s._
 import io.chrisdavenport.epimetheus._
 import io.chrisdavenport.epimetheus.http4s.EpimetheusOps
-import org.http4s.blaze.server.BlazeServerBuilder
+import org.http4s.ember.server.EmberServerBuilder
 import org.http4s.dsl.io._
 import org.http4s.implicits._
 import org.http4s.server.middleware.Metrics
@@ -70,12 +71,13 @@ object Main extends IOApp {
 
       meteredRoutes <- EpimetheusOps.server(collectorRegistry).map(metricOps => Metrics[IO](metricOps)(routes))
 
-      _ <- BlazeServerBuilder[IO]
-        .bindHttp(9000, "0.0.0.0")
+      _ <- EmberServerBuilder
+        .default[IO]
+        .withHost(ipv4"127.0.0.1")
+        .withPort(port"9000")
         .withHttpApp(meteredRoutes.orNotFound)
-        .serve
-        .compile
-        .drain
+        .build
+        .useForever
     } yield ExitCode.Success
   }
 }

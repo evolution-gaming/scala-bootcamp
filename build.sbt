@@ -16,7 +16,7 @@ lazy val thisBuildSettings: Seq[Setting[_]] = inThisBuild(
   )
 )
 
-val http4sVersion      = "0.23.16"
+val http4sVersion      = "0.23.18"
 val circeVersion       = "0.14.1"
 val playVersion        = "2.8.2"
 val doobieVersion      = "1.0.0-RC1"
@@ -47,10 +47,10 @@ lazy val root = project
       "org.typelevel"            %% "cats-core"                     % catsVersion,
       "org.typelevel"            %% "cats-effect"                   % catsEffect3Version,
       "org.http4s"               %% "http4s-dsl"                    % http4sVersion,
-      "org.http4s"               %% "http4s-blaze-server"           % "0.23.9",
-      "org.http4s"               %% "http4s-blaze-client"           % "0.23.13",
+      "org.http4s"               %% "http4s-ember-server"           % http4sVersion,
+      "org.http4s"               %% "http4s-ember-client"           % http4sVersion,
       "org.http4s"               %% "http4s-circe"                  % http4sVersion,
-      "org.http4s"               %% "http4s-jdk-http-client"        % "0.8.0",
+      "org.http4s"               %% "http4s-jdk-http-client"        % "0.9.0",
       "com.typesafe.akka"        %% "akka-http"                     % akkaHttpVersion,
       "de.heikoseeberger"        %% "akka-http-circe"               % akkaHttpCirceVersion,
       "com.typesafe.akka"        %% "akka-stream"                   % akkaVersion,

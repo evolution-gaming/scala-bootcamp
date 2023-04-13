@@ -3,10 +3,11 @@ package com.evolutiongaming.bootcamp.http
 import cats.data.{EitherT, Validated}
 import cats.effect.{ExitCode, IO, IOApp}
 import cats.syntax.all._
+import com.comcast.ip4s._
 import com.evolutiongaming.bootcamp.http.Protocol._
 import org.http4s._
-import org.http4s.blaze.client._
-import org.http4s.blaze.server._
+import org.http4s.ember.client._
+import org.http4s.ember.server._
 import org.http4s.client.dsl.io._
 import org.http4s.dsl.io._
 import org.http4s.headers._
@@ -273,13 +274,13 @@ object HttpServer extends IOApp {
   ).reduce(_ <+> _).orNotFound
 
   override def run(args: List[String]): IO[ExitCode] =
-    BlazeServerBuilder[IO]
-      .bindHttp(port = 9001, host = "localhost")
+    EmberServerBuilder
+      .default[IO]
+      .withHost(ipv4"127.0.0.1")
+      .withPort(port"9001")
       .withHttpApp(httpApp)
-      .serve
-      .compile
-      .drain
-      .as(ExitCode.Success)
+      .build
+      .useForever
 }
 
 object HttpClient extends IOApp {
@@ -291,7 +292,9 @@ object HttpClient extends IOApp {
   private def printLine(string: String = ""): IO[Unit] = IO(println(string))
 
   def run(args: List[String]): IO[ExitCode] =
-    BlazeClientBuilder[IO].resource
+    EmberClientBuilder
+      .default[IO]
+      .build
       .use { client =>
         for {
           _ <- printLine(string = "Executing simple GET and POST requests:")
