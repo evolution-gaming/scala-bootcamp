@@ -2,6 +2,8 @@
 
 == What are they
 
+Streams are more wide and general than you can think. If we look around, all processes in our life can be considered in terms of streams.
+
 [cols="h,2,2"]
 |===
 ||Single |Multiple
@@ -16,10 +18,9 @@
 |===
 // Table borrowed from Monix documentation
 
-* A kind of collection, with focus on not storing all elements at once
-* Support asynchronous transformations
-* Potentially and usually infinite
-* Handle backpressure
+* A kind of collection, with focus on not storing all elements at once, potentially and usually infinite
+* Supports asynchronous transformations
+* Handles backpressure
 
 == Backpressure
 
@@ -103,24 +104,41 @@ Producer does nothing until consumer explicitly requests data.
 * Generally easier to reason about
 
 == Libraries
+[IMPORTANT]
+====
+This table is not about comparing libraries, but providing general info instead
+====
 
-=== FS2
-* Pull-based
-* Runs on cats-effect `IO` or other IO monads
-* 99% Pure API
+[cols="h,1,1,1,1"]
+|===
+|Library|fs2|zio|akka-streams|monix (Observable)
 
-=== Monix
-* Push-based
-* `Future`-based internals, mostly pure user-facing API
-* Integrates with cats-effect
+|General info
+|Purely functional, integrates very well with cats-effect. Built on recursive Pull data type
+|Purely functional, is a part of ZIO ecosystem
+|Internally runs on akka actors and integrates very well with them
+|`Future`-based internals, mostly pure user-facing API. Implements ReactiveX in Scala. WARNING: It don't have CE3 compatible version hence can't be used in a project depending on CE3
 
-There's more to monix project:
+|Push vs Pull based
+|Pull
+|Pull
+|Push
+|Push (has an `Iterant`, analog on fs2's `Pull` which is Pull based)
 
-* `monix-eval` `Task` - alternate CE2-compatible IO monad
-* `monix-catnap` optimized concurrency utilities: queues, semaphores, etc. Tagless-final, usable with `cats.effect.IO`
+|Evaluated in
+|Supports arbitrary `F` implementing cats-effect type classes
+|Runs on ZIO
+|Only accepts `Future` for async transformation and produces `Future` once materialized
+|Supports arbitrary `F` implementing cats-effect type classes
+
+|Basic concepts
+|Source - `Stream[F, O]`, Pipe - `Pipe[F, O1, O2]`, Sink - `Stream[F, Unit]`, compiles into `F[A]` via `stream.compile.`
+|Source - `ZStream[R, E, O]`, Pipe - `ZPipeline[R, E, O1, O2]`, Sink - `ZSink[R, E, I, L, Z]`, compiles into `ZIO[R, E, Z]` via `stream.run(sink)`
+|Source - `Source[Out, Mat]`, Pipe - `Flow[In, Out, Mat]`, Sink - `Sink[In, Mat]`, materialises into `RunnableGraph[Mat3]` via `source.toMat(sink)((Mat, Mat2) => Mat3)`, `RunnableGraph` then ran with `graph.run()`
+|Source - `Observable[O]`, Pipe - `Observable[O1] => Observable[O2]`, Sink - `Consumer[O, R]`, compiles into a `Task[R]` or `F[R]` via `observer.consumeWith(consumer)`
+|===
 
 === Others
-* `akka-streams` - runs streams on akka actors
 * A number of java libraries: RxJava, Project Reactor, etc.
 
 === Interop
@@ -128,7 +146,7 @@ There's more to monix project:
 http://www.reactive-streams.org[Reactive Streams] - set of interfaces,
 specifically for interoperation between streaming libraries while preserving backpressure.
 
-All covered libraries implement that.
+All covered libraries allows us to implement systems following that.
 
 == Format
 
@@ -146,6 +164,7 @@ All covered libraries implement that.
 * *The one already in classpath*
 ** `http4s` uses FS2
 ** `akka-http` uses Akka Streams
+** `zio-http` uses zio-streams
 * Consider integrations with other systems, e.g. Kafka clients.
 
 
@@ -154,8 +173,9 @@ All covered libraries implement that.
 * All covered libraries have excellent scaladocs
 * Online documentation
 ** https://fs2.io/#/getstarted/install[FS2]
-** https://monix.io/docs/current/[Monix]
+** https://zio.dev/reference/stream/[ZIO]
 ** https://doc.akka.io/docs/akka/current/stream/index.html[Akka Streams]
+** https://monix.io/docs/current/[Monix]
 
 
 == Finite-state Machines

@@ -1,12 +1,11 @@
-import cats.effect.{ContextShift, IO, Timer}
+import cats.effect.unsafe.implicits.global
+import cats.effect.{IO, Temporal}
 import fs2._
 
 import java.time.Instant
-import scala.concurrent.ExecutionContext
 import scala.concurrent.duration._
 
-implicit val timer: Timer[IO]     = IO.timer(ExecutionContext.parasitic)
-implicit val cs: ContextShift[IO] = IO.contextShift(ExecutionContext.global)
+implicit val temporal = Temporal[IO]
 
 // Let's start with ubiquitous word count example
 // Take a string, split it into words, count each word
@@ -91,23 +90,24 @@ val pureCount: Option[Map[String, Int]] = pureLines
   .compile
   .last
 
-// Other F[_]'s can work; .compile requires at least Sync
-// E.g. monix Task can work well
+// Other F[_]'s can work
+// Let's try ZIO
 {
-  import monix.eval.Task
-  import monix.execution.Scheduler
+  import zio.stream.interop.fs2z._
+  import zio.{Runtime, Task, UIO, ZIO, Unsafe}
 
-  val monixLines: Stream[Task, String]       = Stream.eval(Task(inputStr))
-  val monixWordCount: Task[Map[String, Int]] = monixLines
+  val zioLines: Stream[UIO, String]                = Stream.eval(ZIO.succeed(inputStr))
+  val zioWordCount: Task[Option[Map[String, Int]]] = zioLines
     .through(fs2.text.lines)
     .through(toWords)
     .map(_.toLowerCase())
     .scanMap(word => Map(word -> 1))
-    .compile
-    .lastOrError
+    .toZStream()
+    .runLast
 
-  implicit val scheduler: Scheduler = Scheduler(ExecutionContext.parasitic)
-  monixWordCount.runSyncUnsafe()
+  Unsafe.unsafe { implicit unsafe =>
+    Runtime.default.unsafe.run(zioWordCount)
+  }
 }
 
 // Internally fs2 actually elements in batches, represented with fs2.Chunk
@@ -127,16 +127,6 @@ Stream.chunk(Chunk(1, 2, 3))
 Stream
   .eval(IO {
     println("Side-effect!")
-    42
-  })
-  .compile
-  .toVector
-  .unsafeRunSync()
-
-// Note: no elements, only side-effect
-Stream
-  .eval_(IO {
-    println("Side-effect, with empty stream")
     42
   })
   .compile
@@ -207,8 +197,7 @@ words
   .drain
   .unsafeRunSync()
 
-// Or operate directly on stream on chunks
-import cats.syntax.traverse._
+// Or operate directly on stream of chunks
 
 words.chunks // Stream[F, Chunk[T]]
   .evalMap(chunk => chunk.traverse(word => IO(word.toLowerCase)))
@@ -270,14 +259,6 @@ words.compile.to(Chunk)
 words.compile.fold(Vector.empty[String])(_.appended(_))
 words.compile.foldChunks("!")(_ + _.map(_.take(1)))
 
-// Common case: do a side-effect at the end of stream
-// E.g. insert each element into database
-def insertIntoDatabase[T](value: T): IO[Unit] = IO.unit // omitted
-words
-  .evalMap(insertIntoDatabase)
-  .compile
-  .drain
-
 // Resource instead of bare F
 words.compile.resource.lastOrError
 
@@ -315,27 +296,6 @@ dynamicStream.parJoinUnbounded.compile.toList.unsafeRunSync()
 dynamicStream.parJoin(2).compile.toList.unsafeRunSync()
 
 // broadcast
-val broadcastWords: Stream[IO, Stream[IO, String]] = words.broadcast
-
-words
-  .take(4)
-  .broadcast
-  .take(3) // 3 streams, each sees all elements from upstream
-  .map(_.map(_.toUpperCase()))
-  .parJoinUnbounded
-  .compile
-  .toList
-  .unsafeRunSync()
-
-// balance
-words
-  .balance(1)
-  .take(3) // 3 load-balanced streams
-  .map(_.map(_.toUpperCase()))
-  .parJoinUnbounded
-  .compile
-  .toList
-  .unsafeRunSync()
 
 // Split stream, process branches differently
 val ints = Stream.range(1, 5).covary[IO].debug()
@@ -349,3 +309,10 @@ ints.broadcastThrough(oddsPipe, evensPipe).compile.toList.unsafeRunSync()
 // For comparison, without broadcast
 // Note how debug() on ints is evaluated twice
 Stream(ints.through(oddsPipe), ints.through(evensPipe)).parJoinUnbounded.compile.toList.unsafeRunSync()
+
+/* Explore MORE
+ * - throttling/debouncing
+ * - resource handling
+ * - errors handling
+ * - interruption
+ * on https://fs2.io/#/guide */

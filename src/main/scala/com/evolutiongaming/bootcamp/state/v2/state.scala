@@ -6,7 +6,7 @@ import cats.effect.std.{Queue, Semaphore}
 import cats.implicits.toTraverseOps
 import cats.instances.list._
 import cats.syntax.parallel._
-import zio.ZIO
+import zio.{Unsafe, ZIO}
 import zio.stm.{STM, TRef}
 
 import java.util.concurrent.ConcurrentHashMap
@@ -553,10 +553,10 @@ object STMDemo extends App {
     _     <- ZIO.collectAllPar(ZIO.replicate(10000)(transfer(alice, bob, 1).either))
     ab    <- alice.get.commit
     bb    <- bob.get.commit
-    _     <- zio.IO(println(s"Alice: $ab, Bob: $bb"))
+    _     <- ZIO.succeed(println(s"Alice: $ab, Bob: $bb"))
   } yield ()
 
-  zio.Runtime.default.unsafeRun(program)
+  Unsafe.unsafe { implicit unsafe => zio.Runtime.default.unsafe.run(program) }
 }
 
 /** Transactional data structures:
