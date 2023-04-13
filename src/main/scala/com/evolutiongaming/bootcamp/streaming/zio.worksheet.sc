@@ -1,11 +1,9 @@
-import cats.Traverse.ops.toAllTraverseOps
-import cats.implicits.toTraverseOps
 import zio.stream.{UStream, ZPipeline, ZSink, ZStream}
 import zio.{Chunk, Runtime, UIO, Unsafe, ZIO, durationInt}
 
 import java.time.Instant
 
-implicit class ZIOOps[A](val zio: UIO[A]) extends AnyVal {
+implicit class ZIOOps[A](val zio: UIO[A]) {
   def unsafeRun(): A = Unsafe.unsafe { implicit unsafe =>
     Runtime.default.unsafe.run(zio).getOrThrow()
   }
@@ -64,14 +62,14 @@ lines
 // Pipeline processes elements as they arrive, it doesn't store everything in memory
 // Repeat input a bunch of times
 def repeatN[A](stream: UStream[A], n: Int): UStream[A] = if (n > 1) stream ++ repeatN(stream, n - 1) else stream
-repeatN(lines, 100_000)
-  .via(toWords)
-  .map(_.toLowerCase)
-  .scan(Map.empty[String, Int]) { case (acc, word) =>
-    acc.updated(word, acc.getOrElse(word, 0) + 1)
-  }
-  .runLast
-  .unsafeRun()
+//repeatN(lines, 100_000)
+//  .via(toWords)
+//  .map(_.toLowerCase)
+//  .scan(Map.empty[String, Int]) { case (acc, word) =>
+//    acc.updated(word, acc.getOrElse(word, 0) + 1)
+//  }
+//  .runLast
+//  .unsafeRun()
 
 // Internally ZStream also elements in batches, represented with zio.Chunk
 // Per-element operators like map/filter work on chunks transparently
@@ -163,3 +161,75 @@ words.run(ZSink.collectAllToSetN(3))
 words.run(ZSink.collectAllToMap[String, String](identity)(_ + _))
 
 // Non-linear pipelines
+// Merge two streams of same element type
+ZStream
+  .range(0, 5)
+  .merge(ZStream.range(5, 20))
+  .runCollect
+  .unsafeRun()
+// Note: result ends when BOTH streams end
+// Use mergeHaltLeft/mergeHaltRight if you want to end stream earlier
+
+// mergeHaltL(tick stream) can be used to introduce time into FSMs
+words
+  .map(Right(_))
+  .mergeHaltLeft(ZStream.tick(1.second).map(Left(_)))
+  .scan(()) {
+    case (acc, Right(data)) => acc // Do actions on new data
+    case (acc, Left(_))     => acc // Do actions on tick
+  }
+
+// flattenPar merges a stream of streams
+val dynamicStream: UStream[UStream[Int]] = ZStream.fromIterable(
+  Seq(
+    ZStream.range(0, 5),
+    ZStream.range(10, 15),
+    ZStream.range(20, 25),
+  )
+)
+dynamicStream.flattenParUnbounded().runCollect.unsafeRun()
+// flattenParUnbounded will try to read all streams at once
+// there is flattenPar(Int), which limits how much streams are open at once
+// outputBuffer is used to automatically prefetch elements
+dynamicStream.flattenPar(2).runCollect.unsafeRun()
+
+// broadcast
+val broadcastWords = words.take(4).broadcast(3, 3)
+
+ZIO
+  .scoped {
+    broadcastWords.flatMap { streams =>
+      ZStream.fromChunk(streams.map(_.map(_.toUpperCase()))).flattenParUnbounded().runCollect
+    }
+  }
+  .unsafeRun()
+
+// Split stream, process branches differently
+val ints = ZStream.range(1, 5).debug
+
+// Each branch selects elements it wants and does further processing
+val oddsPipe: ZPipeline[Any, Nothing, Int, String]  =
+  ZPipeline.fromFunction(_.filter(_ % 2 != 0).map(odd => s"Odd: $odd"))
+val evensPipe: ZPipeline[Any, Nothing, Int, String] =
+  ZPipeline.fromFunction(_.filter(_ % 2 == 0).map(odd => s"Even: $odd"))
+
+ZIO
+  .scoped {
+    ints.broadcast(2, 3).flatMap {
+      case Chunk(first, second) =>
+        ZStream.fromIterable(Seq(first.via(oddsPipe), second.via(evensPipe))).flattenParUnbounded().runCollect
+      case other                => ZIO.dieMessage(s"expected Chunk with 2 elements, got $other")
+    }
+  }
+  .unsafeRun()
+
+// For comparison, without broadcast
+// Note how debug() on ints is evaluated twice
+ZStream(ints.via(oddsPipe), ints.via(evensPipe)).flattenParUnbounded().runCollect.unsafeRun()
+
+/* Explore MORE
+ * - throttling/debouncing
+ * - resource handling
+ * - errors handling
+ * - interruption
+ * on https://zio.dev/reference/stream/ */

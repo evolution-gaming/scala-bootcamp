@@ -295,28 +295,7 @@ dynamicStream.parJoinUnbounded.compile.toList.unsafeRunSync()
 // there is parJoin(Int), which limits how much streams are open at once
 dynamicStream.parJoin(2).compile.toList.unsafeRunSync()
 
-//// broadcast
-//val broadcastWords: Stream[IO, Stream[IO, String]] = words.broadcast
-//
-//words
-//  .take(4)
-//  .broadcast
-//  .take(3) // 3 streams, each sees all elements from upstream
-//  .map(_.map(_.toUpperCase()))
-//  .parJoinUnbounded
-//  .compile
-//  .toList
-//  .unsafeRunSync()
-//
-//// balance
-//words
-//  .balance(1)
-//  .take(3) // 3 load-balanced streams
-//  .map(_.map(_.toUpperCase()))
-//  .parJoinUnbounded
-//  .compile
-//  .toList
-//  .unsafeRunSync()
+// broadcast
 
 // Split stream, process branches differently
 val ints = Stream.range(1, 5).covary[IO].debug()
@@ -330,3 +309,10 @@ ints.broadcastThrough(oddsPipe, evensPipe).compile.toList.unsafeRunSync()
 // For comparison, without broadcast
 // Note how debug() on ints is evaluated twice
 Stream(ints.through(oddsPipe), ints.through(evensPipe)).parJoinUnbounded.compile.toList.unsafeRunSync()
+
+/* Explore MORE
+ * - throttling/debouncing
+ * - resource handling
+ * - errors handling
+ * - interruption
+ * on https://fs2.io/#/guide */

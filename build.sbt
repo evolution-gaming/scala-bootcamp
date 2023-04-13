@@ -91,7 +91,7 @@ lazy val root = project
       "com.lihaoyi"              %% "requests"                      % "0.6.5",
       "dev.zio"                  %% "zio"                           % "2.0.12",
       "dev.zio"                  %% "zio-streams"                   % "2.0.12",
-      "dev.zio"                  %% "zio-interop-cats"              % "3.1.1.0",
+      "dev.zio"                  %% "zio-interop-cats"              % "23.0.0.4",
       "io.github.timwspence"     %% "cats-stm"                      % "0.11.0",
     ),
   )
