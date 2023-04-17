@@ -13,6 +13,7 @@ import org.http4s.dsl.io._
 import org.http4s.headers._
 import org.http4s.implicits._
 import org.http4s.multipart.{Multipart, Multiparts, Part}
+import org.http4s.server.middleware.ErrorHandling
 import org.typelevel.ci.CIString
 
 import java.time.{Instant, LocalDate}
@@ -264,14 +265,16 @@ object HttpServer extends IOApp {
       }
   }
 
-  private[http] val httpApp = Seq(
-    helloRoutes,
-    paramsRoutes,
-    headersRoutes,
-    jsonRoutes,
-    entityRoutes,
-    multipartRoutes,
-  ).reduce(_ <+> _).orNotFound
+  private[http] val httpApp = ErrorHandling {
+    Seq(
+      helloRoutes,
+      paramsRoutes,
+      headersRoutes,
+      jsonRoutes,
+      entityRoutes,
+      multipartRoutes,
+    ).reduce(_ <+> _)
+  }.orNotFound
 
   override def run(args: List[String]): IO[ExitCode] =
     EmberServerBuilder
