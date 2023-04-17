@@ -3,8 +3,6 @@ import cats.effect.IO
 import scala.concurrent.ExecutionContext
 import scala.concurrent.duration._
 
-implicit val timer = IO.timer(ExecutionContext.global)
-
 // fs2.Stream[F[_], O] emits 0..∞ values of type O in the effect F
 
 // Finite streams
@@ -25,7 +23,6 @@ Stream.unfold(1)(s => Some((s, s + 2)))
 // To convert them to list you have to `compile` them first, i.e. compose all effects into one.
 
 Stream.eval(IO(println("hello")))
-Stream.random[IO].take(10).compile
 Stream.awakeEvery[IO](1.second)
 
 // fs2.Pipe[F[_], I, O] is a type synonym for `Stream[F, I] => Stream[F, O]`
