@@ -340,7 +340,7 @@ object HttpClient extends IOApp {
             import org.http4s.circe.CirceEntityCodec._
 
             // User JSON encoder can also be declared explicitly instead of importing from `CirceEntityCodec`:
-            // implicit val helloEncoder = org.http4s.circe.jsonEncoderOf[IO, Hello]
+            // implicit val helloEncoder = org.http4s.circe.jsonEncoderOf[IO, User]
 
             client
               .expect[Greeting](Method.POST(User("John", 18), uri / "json"))

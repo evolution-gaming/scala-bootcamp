@@ -108,7 +108,7 @@ object WebSocketServer extends IOApp {
       _         <- EmberServerBuilder
         .default[IO]
         .withHost(ipv4"127.0.0.1")
-        .withPort(port"9001")
+        .withPort(port"9002")
         .withHttpWebSocketApp(httpApp(chatTopic))
         .build
         .useForever
