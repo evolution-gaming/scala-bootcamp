@@ -1,7 +1,7 @@
 package com.evolutiongaming.bootcamp.http
 
 import cats.data.{EitherT, Validated}
-import cats.effect.{ExitCode, IO, IOApp}
+import cats.effect.{Clock, ExitCode, IO, IOApp}
 import cats.syntax.all._
 import com.comcast.ip4s._
 import com.evolutiongaming.bootcamp.http.Protocol._
@@ -213,10 +213,12 @@ object HttpServer extends IOApp {
 
       // curl -XPOST "localhost:9001/json" -d '{"name": "John", "age": 18}' -H "Content-Type: application/json"
       case req @ POST -> Root / "json" =>
-        req.as[User].flatMap { user =>
-          val greeting = Greeting(text = s"Hello, ${user.name}!", timestamp = Instant.now())
-          Ok(greeting)
-        }
+        for {
+          user      <- req.as[User]
+          timestamp <- Clock[IO].realTimeInstant
+          greeting   = Greeting(s"Hello, ${user.name}!", timestamp)
+          response  <- Ok(greeting)
+        } yield response
     }
   }
 
