@@ -1,11 +1,11 @@
 package com.evolutiongaming.bootcamp.http
 
 import cats.effect.std.Queue
-import cats.effect.{ExitCode, IO, IOApp, Resource}
+import cats.effect.{Clock, ExitCode, IO, IOApp, Resource}
 import cats.syntax.all._
 import com.comcast.ip4s._
 import fs2.concurrent.Topic
-import fs2.{Pipe, Stream}
+import fs2.{Pipe, Pull, Stream}
 import org.http4s.ember.server._
 import org.http4s.client.websocket.{WSFrame, WSRequest}
 import org.http4s.dsl.io._
@@ -16,6 +16,7 @@ import org.http4s.websocket.WebSocketFrame
 import org.http4s.{HttpRoutes, _}
 
 import java.net.http.HttpClient
+import scala.concurrent.duration._
 
 object WebSocketIntroduction {
 
@@ -56,7 +57,16 @@ object WebSocketServer extends IOApp {
       val echoPipe: Pipe[IO, WebSocketFrame, WebSocketFrame] =
         _.collect { case WebSocketFrame.Text(message, _) =>
           WebSocketFrame.Text(message)
-        }
+        }.evalMap {
+          case WebSocketFrame.Text(message, _) if message.trim == "time" =>
+            Clock[IO].realTimeInstant.map(i => WebSocketFrame.Text(i.toString))
+          case other                                                     =>
+            other.pure[IO]
+        }.merge(
+          Stream
+            .awakeEvery[IO](5.seconds)
+            .map(d => WebSocketFrame.Text(s"Connected for $d"))
+        )
 
       for {
         // Unbounded queue to store WebSocket messages from the client, which are pending to be processed.
@@ -87,11 +97,18 @@ object WebSocketServer extends IOApp {
     case GET -> Root / "chat" =>
       wsb.build(
         // Sink, where the incoming WebSocket messages from the client are pushed to.
-        receive = chatTopic.publish.compose[Stream[IO, WebSocketFrame]](_.collect {
-          case WebSocketFrame.Text(message, _) => message
-        }),
+        receive = chatTopic.publish.compose[Stream[IO, WebSocketFrame]](
+          _.collect { case WebSocketFrame.Text(message, _) =>
+            message
+          }.pull.uncons1
+            .flatMap {
+              case Some((head, tail)) => tail.map(head.trim + ": " + _).pull.echo
+              case None               => Pull.done
+            }
+            .stream
+        ),
         // Outgoing stream of WebSocket messages to send to the client.
-        send = chatTopic.subscribe(maxQueued = 10).map(WebSocketFrame.Text(_)),
+        send = (Stream.emit("What is your name?") ++ chatTopic.subscribe(maxQueued = 10)).map(WebSocketFrame.Text(_)),
       )
 
     // Exercise 3. Change the chat route to use the first message from a client as its username and prepend

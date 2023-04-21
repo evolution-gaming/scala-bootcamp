@@ -1,6 +1,6 @@
 package com.evolutiongaming.bootcamp.http
 
-import cats.data.{EitherT, Validated}
+import cats.data.{EitherT, OptionT, Validated}
 import cats.effect.{Clock, ExitCode, IO, IOApp}
 import cats.syntax.all._
 import com.comcast.ip4s._
@@ -162,20 +162,33 @@ object HttpServer extends IOApp {
     }
     object LocalDateMatcher extends QueryParamDecoderMatcher[LocalDate](name = "date")
 
+    implicit val instantDecoder: QueryParamDecoder[Instant] = { param =>
+      Validated
+        .catchNonFatal(Instant.parse(param.value))
+        .leftMap(t => ParseFailure(s"Failed to decode LocalDate", t.getMessage))
+        .toValidatedNel
+    }
+    object TimestampMatcher extends ValidatingQueryParamDecoderMatcher[Instant](name = "timestamp")
+
     HttpRoutes.of[IO] {
 
       // curl "localhost:9001/params/2020-11-10"
-      case GET -> Root / "params" / LocalDateVar(localDate)      =>
+      case GET -> Root / "params" / LocalDateVar(localDate)                   =>
         Ok(s"Matched path param: $localDate")
 
       // curl "localhost:9001/params?date=2020-11-10"
-      case GET -> Root / "params" :? LocalDateMatcher(localDate) =>
+      case GET -> Root / "params" :? LocalDateMatcher(localDate)              =>
         Ok(s"Matched query param: $localDate")
 
       // Exercise 1. Implement HTTP endpoint that validates the provided timestamp in ISO-8601 format. If valid,
       // 200 OK status must be returned with "Timestamp is valid" string in the body. If not valid,
       // 400 Bad Request status must be returned with "Timestamp is invalid" string in the body.
       // curl "localhost:9001/params/validate?timestamp=2020-11-04T14:19:54.736Z"
+      case GET -> Root / "params" / "validate" :? TimestampMatcher(timestamp) =>
+        if (timestamp.isValid)
+          Ok(s"Timestamp is valid")
+        else
+          BadRequest(s"Timestamp is invalid")
     }
   }
 
@@ -195,6 +208,9 @@ object HttpServer extends IOApp {
     // present and contains an integer value, it should add 1 to the value and request the client to update
     // the cookie. Otherwise it should request the client to store "1" in the "counter" cookie.
     // curl -v "localhost:9001/cookies" -b "counter=9"
+    case req @ GET -> Root / "cookies" =>
+      val counter = req.cookies.find(_.name == "counter").flatMap(_.content.toIntOption).getOrElse(0)
+      Ok().map(_.addCookie(ResponseCookie("counter", (counter + 1).toString)))
   }
 
   // JSON ENTITIES
@@ -263,7 +279,23 @@ object HttpServer extends IOApp {
     // curl -XPOST "localhost:9001/multipart" -F "character=n" -F file=@text.txt
     case req @ POST -> Root / "multipart" =>
       req.as[Multipart[IO]].flatMap { multipart =>
-        ???
+        val result = for {
+          _     <- OptionT.when[IO, Unit](multipart.parts.size == 2)(())
+          c     <- OptionT(
+            multipart.parts
+              .find(_.name.contains("character"))
+              .traverse(_.as[String])
+          )
+            .subflatMap { s =>
+              Option.when(s.size == 1)(s.head)
+            }
+          count <- OptionT(
+            multipart.parts
+              .find(_.filename.contains("text.txt"))
+              .traverse(_.bodyText.map(_.count(_ == c)).foldMonoid.compile.lastOrError)
+          )
+        } yield count
+        result.foldF(BadRequest())(count => Ok(count.toString))
       }
   }
 
@@ -313,6 +345,9 @@ object HttpClient extends IOApp {
 
           // Exercise 4. Call HTTP endpoint, implemented in scope of Exercise 1, and print the response body.
           // curl "localhost:9001/params/validate?timestamp=2020-11-04T14:19:54.736Z"
+          _ <- client.expect[String](
+            (uri / "params" / "validate").withQueryParam("timestamp", "2020-11-04T14:19:54.736Z")
+          ) >>= printLine
           _ <- printLine()
 
           _ <- for {
@@ -337,6 +372,9 @@ object HttpClient extends IOApp {
 
           // Exercise 5. Call HTTP endpoint, implemented in scope of Exercise 2, and print the response cookie.
           // curl -v "localhost:9001/cookies" -b "counter=9"
+          _ <- client.expect[String](
+            Request[IO](uri = uri / "cookies").addCookie(RequestCookie("counter", "9"))
+          ) >>= printLine
           _ <- printLine()
 
           _ <- printLine(string = "Executing request with JSON entities:")
