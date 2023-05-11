@@ -1,4 +1,4 @@
-# Akka Actors fundamentals
+# Akka Actors and Other Akka Features
 
 ## Actor Model
 http://en.wikipedia.org/wiki/Actor_model
@@ -24,22 +24,21 @@ https://rockthejvm.com/
 
 ---
 
-### Plan:
-- ActorModel (akka hello world, actor trait, receive function)
-- ActorContext (behavior switch and creating actors)
-- MessageProcessing (state encapsulation, actor mailbox)
-- Lifecycle and Supervisors (actors hierarchy, error handling)
-- Dispatchers and LongInitializationPattern
+### Akka libraries and modules:
 
-### For self-learning
-- Broadcasting
-- EventStream
-- Routing
-- TestKit (inside homework)
+- Akka Actors
+- Akka Typed
+- Akka Cluster
+- Akka Streams
+- Akka HTTP
+- Akka Persistence
+- .. and more https://doc.akka.io/docs/akka/
 
 ---
 
-### Actors overview
+### Akka Actors overview
+
+#### Introduction to the actor model
 
 The Actor formalism was first published in 1973.
 Actor languages and communications patterns formulated in 1986.
@@ -49,4 +48,34 @@ Akka was created in 2009.
 
 The main goal is to simplify multi-threading programming:
 - effective resource utilization
-- avoid blocking, dead locks, synchronization of shared state
+- avoid blocking, deadlocks, synchronization of shared state
+
+Key Concepts:
+- Actors
+- Messages
+- Message passing
+
+Principles:
+- Encapsulation
+- Asynchrony
+- Location transparency
+- Failure handling
+
+#### Actors in Akka
+
+- [AkkaHelloWorld.scala](AkkaHelloWorld.scala)
+- [ActorContext101.scala](ActorContext101.scala)
+- [StatePatterns.scala](StatePatterns.scala)
+- [CommunicationPatterns.scala](CommunicationPatterns.scala)
+- [LongInitializationPattern.scala](LongInitializationPattern.scala)
+- [LifecycleAndSupervision.scala](LifecycleAndSupervision.scala)
+- [AkkaDispatchers.scala](AkkaDispatchers.scala)
+- [InteractingWithFutures.scala](InteractingWithFutures.scala)
+
+- [EventStream.scala](EventStream.scala)
+- [Routing.scala](Routing.scala)
+- [BankAccountExample.scala](BankAccountExample.scala)
+
+- [Exercise1.scala](Exercise1.scala)
+- [Exercise2.scala](Exercise2.scala)
+- [Exercise3.scala](Exercise3.scala)

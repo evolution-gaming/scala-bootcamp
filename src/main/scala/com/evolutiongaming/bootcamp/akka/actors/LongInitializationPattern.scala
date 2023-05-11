@@ -12,11 +12,12 @@ object LongInitializationPattern extends App {
 
     override def preStart(): Unit = {
       import akka.pattern.pipe
-      longRunningComputations pipeTo self
+      longRunningComputations pipeTo context.self
     }
 
     private def longRunningComputations: Future[LongInit.In] =
       Future {
+        println("start longRunningComputations")
         // some db- or external service call
         Thread.sleep(2000)
         LongInit.InitialState
@@ -54,4 +55,5 @@ object LongInitializationPattern extends App {
   ref ! LongInit.CommonRequest("a")
   ref ! LongInit.CommonRequest("b")
   ref ! LongInit.CommonRequest("c")
+  println("all messages are sent")
 }
