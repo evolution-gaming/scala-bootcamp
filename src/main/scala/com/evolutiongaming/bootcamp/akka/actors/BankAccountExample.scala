@@ -3,7 +3,7 @@ package com.evolutiongaming.bootcamp.akka.actors
 import akka.actor.{Actor, ActorRef, ActorSystem, Props}
 import akka.event.LoggingReceive
 
-object MessageProcessing extends App {
+object BankAccountExample extends App {
   // every actor knows its own address (via self from Actor trait)
   // only messages can be sent to known address (ActorRef)
   // creating actor return its address
@@ -101,14 +101,4 @@ object MessageProcessing extends App {
 
   val evoActorSystem: ActorSystem = ActorSystem("evo-actor-system")
   evoActorSystem.actorOf(Props[TransferMain](), "main")
-
-  // Actor collaboration
-  // messages delivery guarantees: at most once
-  // to make reliable - each transfer/deposit/withdraw should have unique id, store completed actions ids
-
-  // message ordering:
-  // - to the same destination order wil be preserved
-  //     if  A.tell(B, m1) and A.tell(B, m2)  :  B will receive m1, m2 in order (akka specific)
-  // - to the different destination: unknown (completely concurrently)
-  //     if  A.tell(B, m1) and A.tell(C, m1)  :  order undefined here
 }
