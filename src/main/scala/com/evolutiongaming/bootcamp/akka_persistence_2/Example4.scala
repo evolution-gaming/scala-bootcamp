@@ -34,12 +34,15 @@ object Example4 extends App {
 
     override def receiveRecover: Receive = {
       case SnapshotOffer(metadata, basketFromSnapshot: EmployeeBasket) =>
-        println(s"Snapshot $basketFromSnapshot")
+        println(s"Snapshot $basketFromSnapshot from event ${metadata.sequenceNr}")
         basket = basketFromSnapshot
 
       case event: BasketEvent =>
         println(s"Recovering $event")
         basket = behaviour.applyEvent(basket)(event)
+
+      case RecoveryCompleted =>
+        println("Recovered state " + basket)
     }
 
     override def receiveCommand: Receive = { case cmd: BasketCommand =>
@@ -56,8 +59,10 @@ object Example4 extends App {
       }
     }
 
-    // user id, we will see how to deal with it in future
-    override def persistenceId: String = self.path.name
+    // Note how the persistenceId is defined.
+    // The name of the actor is the entity identifier (utf-8 URL-encoded).
+    // You may define it another way, but it must be unique.
+    override def persistenceId: String = "Actor-11111111"
 
   }
 
