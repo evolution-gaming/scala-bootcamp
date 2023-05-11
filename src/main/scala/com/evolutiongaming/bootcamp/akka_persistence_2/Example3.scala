@@ -16,7 +16,7 @@ trait AggregateBehaviour[A, C, E, R] {
 // let's define our EmployeeBasket commands
 
 sealed trait BasketCommand
-final case class AddItem(enityId: String, item: String) extends BasketCommand
+final case class AddItem(entityId: String, item: String) extends BasketCommand
 
 // And events
 sealed trait BasketEvent
