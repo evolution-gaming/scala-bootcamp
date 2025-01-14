@@ -1,7 +1,7 @@
 lazy val thisBuildSettings: Seq[Setting[_]] = inThisBuild(
   Seq(
     version := "0.2",
-    scalaVersion := "2.13.10",
+    scalaVersion := "2.13.15",
     // From https://tpolecat.github.io/2017/04/25/scalac-flags.html
     scalacOptions ++= Seq(
       "-deprecation",
@@ -11,7 +11,7 @@ lazy val thisBuildSettings: Seq[Setting[_]] = inThisBuild(
     run / fork := true,
     run / connectInput := true,
     run / outputStrategy := Some(StdoutOutput),
-    addCompilerPlugin("org.typelevel" %% "kind-projector"     % "0.13.2" cross CrossVersion.full),
+    addCompilerPlugin("org.typelevel" %% "kind-projector"     % "0.13.3" cross CrossVersion.full),
     addCompilerPlugin("com.olegpy"    %% "better-monadic-for" % "0.3.1"),
   )
 )
