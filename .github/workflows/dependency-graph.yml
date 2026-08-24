@@ -1,0 +1,12 @@
+name: Dependency graph
+
+on:
+  push:
+    branches: [ master ]
+
+permissions:
+  contents: write
+
+jobs:
+  submit:
+    uses: evolution-gaming/scala-github-actions/.github/workflows/dependency-graph.yml@2a50f1819b6fef2657ba802fd62612b7fc8450f0 # v6.4.0
