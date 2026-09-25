@@ -1,5 +1,8 @@
 # Scala Bootcamp
 
+> [!IMPORTANT]
+> This repository is archived. The bootcamp is over and the materials are kept here read-only for reference. They are no longer maintained.
+
 This repository contains information on the [Evolution Gaming](https://eng.evolutiongaming.com/) Scala Bootcamp.
 
 ## Schedule
