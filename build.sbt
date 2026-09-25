@@ -1,7 +1,7 @@
 lazy val thisBuildSettings: Seq[Setting[_]] = inThisBuild(
   Seq(
     version := "0.2",
-    scalaVersion := "2.13.15",
+    scalaVersion := "2.13.18",
     // From https://tpolecat.github.io/2017/04/25/scalac-flags.html
     scalacOptions ++= Seq(
       "-deprecation",
@@ -11,12 +11,12 @@ lazy val thisBuildSettings: Seq[Setting[_]] = inThisBuild(
     run / fork := true,
     run / connectInput := true,
     run / outputStrategy := Some(StdoutOutput),
-    addCompilerPlugin("org.typelevel" %% "kind-projector"     % "0.13.3" cross CrossVersion.full),
+    addCompilerPlugin("org.typelevel" %% "kind-projector"     % "0.13.4" cross CrossVersion.full),
     addCompilerPlugin("com.olegpy"    %% "better-monadic-for" % "0.3.1"),
   )
 )
 
-val http4sVersion      = "0.23.18"
+val http4sVersion      = "0.23.37"
 val circeVersion       = "0.14.1"
 val playVersion        = "2.8.2"
 val doobieVersion      = "1.0.0-RC1"
@@ -34,7 +34,7 @@ val akkaHttpCirceVersion = "1.39.2"
 val log4CatsVersion = "2.5.0"
 
 val scalaTestVersion = "3.2.7.0"
-val h2Version        = "2.0.202"
+val h2Version        = "2.2.224"
 val slickVersion     = "3.3.3"
 val munitVersion     = "0.7.29"
 
@@ -55,7 +55,7 @@ lazy val root = project
       "de.heikoseeberger"        %% "akka-http-circe"               % akkaHttpCirceVersion,
       "com.typesafe.akka"        %% "akka-stream"                   % akkaVersion,
       "org.typelevel"            %% "log4cats-slf4j"                % log4CatsVersion,
-      "ch.qos.logback"            % "logback-classic"               % "1.2.3",
+      "ch.qos.logback"            % "logback-classic"               % "1.5.38",
       "org.typelevel"            %% "cats-effect-testing-scalatest" % "1.5.0"          % Test,
       "io.chrisdavenport"        %% "epimetheus-http4s"             % epimetheusVersion,
       "org.scalatestplus"        %% "scalacheck-1-15"               % scalaTestVersion % Test,
